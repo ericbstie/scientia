@@ -200,6 +200,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 - Given I enter an email that no account uses, When I confirm, Then I see "No Scientia account uses this email. Ask an administrator to create one." and the roster is unchanged.
 - Given I enter maya.okafor@scientia.test, When I confirm, Then I see "Maya Okafor is already in this course."
 - Given I enter admin@scientia.test, When I confirm, Then I see "Only student accounts can be added to a course." and the roster is unchanged.
+- Given I open HIS201 People and paste sofia.reyes@scientia.test, noah.berg@scientia.test, nobody@scientia.test and priya.nair@scientia.test (on separate lines or separated by commas), When I confirm, Then Sofia and Noah are added ("2 students added"), I see "nobody@scientia.test: No Scientia account uses this email. Ask an administrator to create one.", and nobody@scientia.test and priya.nair@scientia.test stay in the field to fix and add.
 
 ### US-36 Remove a student from a course
 

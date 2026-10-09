@@ -146,6 +146,26 @@ test.describe("Course layout and people", () => {
     await expect(due).toContainText("Field journal");
   });
 
+  test("@US-35 Ingrid adds several students at once and fixes the one that fails", async ({ page }) => {
+    await signIn(page, "ingrid");
+    await page.goto(`${await coursePath(page, "HIS201")}/people`);
+    await page.getByRole("button", { name: "Add student" }).first().click();
+    const dialog = page.getByRole("dialog", { name: "Add student" });
+    const field = dialog.getByLabel("Email");
+    await field.fill("sofia.reyes@scientia.test, noah.berg@scientia.test\nnobody@scientia.test\npriya.nair@scientia.test");
+    await dialog.getByRole("button", { name: "Add student" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "2 students added" })).toBeVisible();
+    await expect(dialog.locator(".error-text")).toHaveText("nobody@scientia.test: No Scientia account uses this email. Ask an administrator to create one.");
+    await expect(field).toHaveValue("nobody@scientia.test\npriya.nair@scientia.test");
+    await expect(page.getByRole("region", { name: "4 students" })).toContainText("Sofia Reyes");
+
+    await field.fill("priya.nair@scientia.test");
+    await dialog.getByRole("button", { name: "Add student" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole("status").filter({ hasText: "Priya Nair added" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "5 students" }).getByRole("listitem")).toHaveText([/Noah Berg/, /Liam Hansen/, /Priya Nair/, /Maya Okafor/, /Sofia Reyes/]);
+  });
+
   test("@US-36 Ingrid removes Sofia, who then loses access, and adds her back", async ({ page }) => {
     await signIn(page, "sofia");
     const bio = await coursePath(page, "BIO101");

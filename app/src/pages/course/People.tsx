@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useCourse, useDocTitle } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, Field, focusField, focusHeading, Loading, PageHeader, Section, useToast } from "../../ui";
+import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, focusField, focusHeading, Loading, PageHeader, Section, TextArea, useToast } from "../../ui";
 import { byLastName } from "../../lib/format";
 
 type Person = { user_id: string; full_name: string; email: string | null; role: "teacher" | "student" };
@@ -82,7 +82,7 @@ export function People() {
         </>
       )}
       <Dialog open={adding} onClose={() => setAdding(false)} title="Add student">
-        <AddForm onCancel={() => setAdding(false)} onDone={(name) => { setAdding(false); toast(`${name} added`); q.reload(); }} />
+        <AddForm onClose={() => setAdding(false)} onAdded={(who) => { toast(`${who} added`); q.reload(); }} />
       </Dialog>
       <Confirm
         open={!!removing}
@@ -98,35 +98,47 @@ export function People() {
   );
 }
 
-function AddForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name: string) => void }) {
+/** Adds one student, or several pasted from a list; stops at the first one that can't be added and keeps it and the rest in the field. */
+function AddForm({ onClose, onAdded }: { onClose: () => void; onAdded: (who: string) => void }) {
   const { course } = useCourse();
-  const [email, setEmail] = useState("");
+  const [emails, setEmails] = useState("");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!email.trim()) { setError("Enter an email address"); focusField("person-email"); return; }
+    const list = emails.split(/[\s,;]+/).filter(Boolean);
+    if (!list.length) { setError("Enter an email address"); focusField("person-email"); return; }
     setError(undefined);
     setBusy(true);
-    const { data: id, error: err } = await db().rpc("enrol_by_email", { c: course.id, address: email });
-    if (err) {
-      setError(/^(No Scientia|Only |.* is already)/.test(err.message) ? err.message : "Could not add the student. Check your connection and try again.");
-      focusField("person-email");
-      setBusy(false);
-      return;
+    const added: string[] = [];
+    let problem: string | undefined;
+    for (const address of list) {
+      const { data: id, error: err } = await db().rpc("enrol_by_email", { c: course.id, address });
+      if (err) {
+        const msg = /^(No Scientia|Only |.* is already)/.test(err.message) ? err.message : "Could not add the student. Check your connection and try again.";
+        problem = list.length > 1 ? `${address}: ${msg}` : msg;
+        break;
+      }
+      added.push(id as string);
     }
-    const { data } = await db().from("profiles").select("full_name").eq("id", id as string).maybeSingle();
+    if (added.length === 1) {
+      const { data } = await db().from("profiles").select("full_name").eq("id", added[0]).maybeSingle();
+      onAdded((data as { full_name: string } | null)?.full_name ?? "Student");
+    } else if (added.length) onAdded(`${added.length} students`);
     setBusy(false);
-    onDone((data as { full_name: string } | null)?.full_name ?? "Student");
+    if (!problem) return onClose();
+    setEmails(list.slice(added.length).join("\n"));
+    setError(problem);
+    focusField("person-email");
   }
 
   return (
     <form className="form" onSubmit={submit} noValidate>
-      <Field id="person-email" type="email" label="Email" required value={email} onChange={(e) => setEmail(e.target.value)} error={error} hint="The student needs an existing Scientia account." />
+      <TextArea id="person-email" label="Email" required rows={3} inputMode="email" value={emails} onChange={(e) => setEmails(e.target.value)} error={error} hint="One address, or several on separate lines. Each person needs an existing Scientia account." />
       <div className="actions">
         <Button variant="primary" type="submit" disabled={busy}>Add student</Button>
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={onClose}>Cancel</Button>
       </div>
     </form>
   );
