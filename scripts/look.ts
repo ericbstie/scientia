@@ -1,6 +1,8 @@
 // Browse Scientia the way a person would, for blind user tests (no code reading needed).
 // Each call starts fresh: optionally signs in, runs the steps in order, then prints
 // what is on screen as an accessibility outline (headings, links, buttons, fields, text).
+// A dialog that opens before the last step (a confirmation, say) is printed when it opens,
+// so a later step that clicks through it does not hide it.
 //
 //   bun run scripts/look.ts --as maya
 //   bun run scripts/look.ts --as maya --step 'click link "Introduction to Biology"' --step 'click link "Assignments"'
@@ -31,7 +33,7 @@ try {
     await page.getByRole("button", { name: "Sign in" }).click();
     await page.waitForURL((u) => !u.pathname.startsWith("/sign-in"), { timeout: 10000 });
   }
-  for (const step of steps) {
+  for (const [i, step] of steps.entries()) {
     let m: RegExpMatchArray | null;
     if ((m = step.match(/^goto (\S+)/))) await page.goto(base + m[1]);
     else if ((m = step.match(/^click (\w+) "(.+)"$/))) {
@@ -45,6 +47,8 @@ try {
     else throw new Error(`Unknown step: ${step}`);
     await page.waitForLoadState("networkidle").catch(() => {});
     await page.waitForTimeout(300);
+    const dialog = page.locator("dialog[open]").first();
+    if (i < steps.length - 1 && (await dialog.count())) console.log(`After "${step}" a dialog opened:\n${await dialog.ariaSnapshot()}\n`);
   }
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(400);
