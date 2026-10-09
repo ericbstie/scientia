@@ -17,6 +17,9 @@ measured yet are recorded as `null`, never guessed.
 | `bundle.js_kb_gz` | `dist/` after `mise run build` | Minimal UI should load fast | ↓ target ≤ 250 |
 | `ux.max_clicks_to_core_task` | `docs/design/ia.md` click budget table | Core tasks stay shallow | ↓ target ≤ 3 |
 | `copy.leaks` | Forbidden terms (other products, process words) in `app/src` strings | Copy says only what the user needs | ↓ target 0 |
+| `design.inline_styles` | `style={{` and `<style>` in `app/src/**/*.tsx` | One stylesheet is the source of truth for the look | ↓ target 0 |
+| `design.font_sizes` | Distinct `font-size` values in `styles.css` | A fixed type scale reads as one brand | ↓ target ≤ 5 |
+| `design.literal_colors` | Colour literals outside the `:root` token blocks and in `.tsx` | Colours come from tokens, so dark mode and rebranding stay one edit | ↓ target 0 |
 | `ux.blind_tasks_done_pct` | First-pass `\| Scenario \| Result \|` table in the newest `docs/process/reviews/m<n>-user-test.md` (Done / Partly / Failed) | A newcomer can finish the core tasks; e2e only proves the stories we wrote | ↑ target 100 |
 | `process.briefs_with_criteria_pct` | `docs/process/briefs/*.md` with an "Acceptance criteria" section | Briefs are contracts | ↑ target 100 |
 | `process.retro_changes` | Process files touched by the last retro commit | Retros lead to change | ↑ ≥ 1 |

@@ -97,6 +97,16 @@ for (const f of [...walk(p("app/src"), ".tsx"), ...walk(p("app/src"), ".ts"), p(
 }
 m["copy.leaks"] = leaks;
 
+// Design consistency (docs/design/ui-guidelines.md "Tokens"): the stylesheet is the only place a size or colour is defined.
+const sheet = (read(p("app/src/styles.css")) ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
+const pages = [...walk(p("app/src"), ".tsx")].map((f) => readFileSync(f, "utf8"));
+m["design.inline_styles"] = pages.reduce((n, code) => n + (code.match(/style=\{\{|<style[ >]/g) ?? []).length, 0);
+m["design.font_sizes"] = new Set([...sheet.matchAll(/font-size:\s*([^;}]+)/g)].map((x) => x[1]!.trim())).size;
+// Colour literals are allowed only where tokens are declared (the two :root blocks).
+const outsideTokens = sheet.replace(/:root\s*\{[^}]*\}/g, "");
+m["design.literal_colors"] =
+  (outsideTokens.match(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/gi) ?? []).length + pages.reduce((n, code) => n + (code.match(/#[0-9a-f]{6}\b|rgba?\(/gi) ?? []).length, 0);
+
 // Blind user tests: first-pass "| Scenario | Result | ... |" table of the newest
 // docs/process/reviews/m<n>-user-test.md. Result cells start with Done, Partly or Failed.
 const userTests = walk(p("docs/process/reviews"), "-user-test.md").sort(
