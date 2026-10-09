@@ -4,6 +4,7 @@ import { useCourse, useDocTitle } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, focusField, focusHeading, Loading, PageHeader, Section, TextArea, useToast } from "../../ui";
+import { enrolAll, enrolProblems, splitEmails, type EnrolProblem } from "../../lib/enrol";
 import { byLastName } from "../../lib/format";
 
 type Person = { user_id: string; full_name: string; email: string | null; role: "teacher" | "student" };
@@ -99,39 +100,48 @@ export function People() {
   );
 }
 
-/** Adds one student, or several pasted from a list; stops at the first one that can't be added and keeps it and the rest in the field. */
+/** Adds one student, or several pasted from a list. The whole list is checked first: if any
+ *  address can't be added, nothing is, every problem is listed, and the rest can be added on request. */
 function AddForm({ onClose, onAdded }: { onClose: () => void; onAdded: (who: string) => void }) {
   const { course } = useCourse();
   const [emails, setEmails] = useState("");
   const [error, setError] = useState<string>();
+  const [problems, setProblems] = useState<EnrolProblem[]>([]);
+  const [others, setOthers] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const failed = "Could not add the students. Check your connection and try again.";
+  const listed = (ps: EnrolProblem[]) => ps.map((p) => `${p.address}: ${p.problem}`).join(" ");
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const list = emails.split(/[\s,;]+/).filter(Boolean);
+    const list = splitEmails(emails);
+    setOthers([]);
     if (!list.length) { setError("Enter an email address"); focusField("person-email"); return; }
     setError(undefined);
     setBusy(true);
-    const added: string[] = [];
-    let problem: string | undefined;
-    for (const address of list) {
-      const { data: id, error: err } = await db().rpc("enrol_by_email", { c: course.id, address });
-      if (err) {
-        const msg = /^(No Scientia|Only |.* is already)/.test(err.message) ? err.message : "Could not add the student. Check your connection and try again.";
-        problem = list.length > 1 ? `${address}: ${msg}` : msg;
-        break;
+    try {
+      const found = await enrolProblems(course.id, list);
+      if (!found.length) {
+        onAdded(await enrolAll(course.id, list));
+        return onClose();
       }
-      added.push(id as string);
-    }
-    if (added.length === 1) {
-      const { data } = await db().from("profiles").select("full_name").eq("id", added[0]).maybeSingle();
-      onAdded((data as { full_name: string } | null)?.full_name ?? "Student");
-    } else if (added.length) onAdded(`${added.length} students`);
+      setProblems(found);
+      setOthers(list.filter((a) => !found.some((p) => p.address === a)));
+      setError(list.length === 1 ? found[0]!.problem : `Nothing was added. ${listed(found)}`);
+      focusField("person-email");
+    } catch { setError(failed); }
     setBusy(false);
-    if (!problem) return onClose();
-    setEmails(list.slice(added.length).join("\n"));
-    setError(problem);
-    focusField("person-email");
+  }
+
+  async function addOthers() {
+    setBusy(true);
+    try {
+      onAdded(await enrolAll(course.id, others));
+      setEmails(problems.map((p) => p.address).join("\n"));
+      setOthers([]);
+      setError(listed(problems));
+    } catch { setError(failed); }
+    setBusy(false);
   }
 
   return (
@@ -140,6 +150,7 @@ function AddForm({ onClose, onAdded }: { onClose: () => void; onAdded: (who: str
       {error?.includes("the Users page") && <p><Link to="/admin/users">Open Users</Link></p>}
       <div className="actions">
         <Button variant="primary" type="submit" disabled={busy}>Add student</Button>
+        {others.length > 0 && <Button disabled={busy} onClick={addOthers}>Add the other {others.length}</Button>}
         <Button onClick={onClose}>Cancel</Button>
       </div>
     </form>
