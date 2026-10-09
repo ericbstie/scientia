@@ -34,7 +34,7 @@ you look, one typeface, one mark. Nothing else carries the identity.
   Status colours (success, warning, danger) appear only in tags, alerts and delete actions,
   and always with words.
 - Typeface: Inter through `--ds-font-family`, using the system's `Heading` and `Paragraph`
-  sizes. Headings are semi-bold.
+  sizes. Heading weights are the system's.
 - Tone: plain and direct (see Writing). No exclamation marks, emoji, illustrations or
   decorative motion anywhere. We add no motion of our own; hover, focus and press are the
   component's.

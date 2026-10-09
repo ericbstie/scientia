@@ -39,7 +39,7 @@ If the logo is cropped out, these still identify it:
 - Neutral page and panels from the system's neutral scale, hairline borders for
   structure, shadow only on what floats (menus, dialogs, toasts). Dark is the same
   design in the system's dark scheme.
-- Inter, the system's type scale, semi-bold headings, tabular figures in tables.
+- Inter with the system's type scale and heading weights.
 - The page header: a "‹ Parent" link above, the title, at most one plain sentence, the
   actions on the right.
 - Words in status tags, never colour alone, from one shared vocabulary.
@@ -94,6 +94,11 @@ from a page that is blue only on its button.
 | What needs you | unread and queue counts as solid badges | `accent-base-default`, `accent-base-contrast-default` |
 | What you can open | links and the course cards on the Dashboard (cards in `data-color="accent"`) | `accent-text-default`, `accent-surface-tinted` |
 | Focus | the system's focus ring, never removed | system default |
+
+The top bar uses the same tokens in light and dark. In dark the system turns them pale
+blue with dark text, as it does for a primary button there. That is accepted: it keeps
+"solid blue" meaning one thing, passes contrast (about 8:1) and needs no colour of our
+own. If someone reports glare, change the theme's accent input, not the bar.
 
 What stays calm:
 
