@@ -20,12 +20,9 @@ const normAssignment = (a: any): Assignment => ({ ...a, points: Number(a.points)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normGrade = (g: any): Grade => ({ ...g, score: g.score == null ? null : Number(g.score) });
 
-/** The seed stores `files` as a JSON string inside jsonb; accept both shapes. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normSub(s: any): Submission {
-  let files = s.files;
-  if (typeof files === "string") { try { files = JSON.parse(files); } catch { files = []; } }
-  return { ...s, files: Array.isArray(files) ? files : [] };
+  return { ...s, files: Array.isArray(s.files) ? s.files : [] };
 }
 
 const rowsOf = <T,>(res: { data: T[] | null; error: { message: string } | null }): T[] => must(res) ?? [];

@@ -105,7 +105,7 @@ export function Modules() {
                         {i.kind === "page" ? (
                           <Link className="row-title" to={`${base}/pages/${i.id}`}>{i.title}</Link>
                         ) : i.kind === "link" ? (
-                          <a className="row-title" href={i.url ?? "#"} target="_blank" rel="noopener noreferrer">{i.title}</a>
+                          <a className="row-title" href={i.url && /^https?:\/\//i.test(i.url) ? i.url : undefined} target="_blank" rel="noopener noreferrer">{i.title}</a>
                         ) : q.data!.signed[i.file_path ?? ""] ? (
                           <a className="row-title" href={q.data!.signed[i.file_path!]} download={i.file_name ?? i.title}>{i.title}</a>
                         ) : (

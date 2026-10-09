@@ -90,10 +90,9 @@ async function loadMine(a: Assignment, userId: string): Promise<Mine> {
   const released = g?.released ? { score: g.score == null ? null : Number(g.score), feedback: g.feedback as string } : null;
   let graded = !!released;
   if (sub && !graded) {
-    // Students cannot read unreleased grades. Inserting a duplicate row fails either way, but the
-    // database checks "grading started" first, so its message tells us whether grading has begun.
-    const probe = await db().from("submissions").insert({ assignment_id: a.id, body: "" });
-    graded = /started grading/i.test(probe.error?.message ?? "");
+    // Students cannot read unreleased grades; this only says whether one exists.
+    const { data } = await db().rpc("grading_started", { a: a.id });
+    graded = data === true;
   }
   return { sub, released, graded };
 }

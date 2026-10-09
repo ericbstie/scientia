@@ -3,6 +3,11 @@
 import { SQL } from "bun";
 
 process.env.SERVICE_ROLE_KEY ??= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3OTE1MDQwMDAsImV4cCI6MjEwNjg2NDAwMH0.s0rb0ojBrHRW8_8NpndT3SYhtCuLRit_WIAzuflYCeg";
+const target = process.env.DATABASE_URL ?? "";
+if (target && !/@(127\.0\.0\.1|localhost)[:/]/.test(target)) {
+  console.error("reset.ts only runs against a local database (127.0.0.1/localhost). Refusing.");
+  process.exit(1);
+}
 const sql = new SQL(process.env.DATABASE_URL ?? "postgres://postgres:scientia-local-db-password@127.0.0.1:54322/postgres");
 const { seed } = await import("./seed.ts");
 await seed(sql);

@@ -17,11 +17,12 @@ async function requireAdmin(req: Request): Promise<string | null> {
   const me = await fetch(`${upstream["/auth/v1"]}/user`, { headers: { authorization: auth, apikey: anonKey } });
   if (!me.ok) return null;
   const { id } = (await me.json()) as { id: string };
-  const rows = await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}&select=is_admin`, {
+  if (!uuid.test(id)) return null;
+  const rows = await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}&select=is_admin,deactivated`, {
     headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
   });
-  const [row] = rows.ok ? ((await rows.json()) as { is_admin: boolean }[]) : [];
-  return row?.is_admin ? id : null;
+  const [row] = rows.ok ? ((await rows.json()) as { is_admin: boolean; deactivated: boolean }[]) : [];
+  return row?.is_admin && !row.deactivated ? id : null;
 }
 
 /** Admin: create a user account (email + temporary password). */
@@ -33,7 +34,7 @@ async function createUser(req: Request) {
   const res = await fetch(`${upstream["/auth/v1"]}/admin/users`, {
     method: "POST",
     headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { full_name, role } }),
+    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { full_name } }),
   });
   const body = (await res.json()) as { id?: string; msg?: string; message?: string; error_description?: string };
   if (!res.ok) {
@@ -41,12 +42,37 @@ async function createUser(req: Request) {
     if (res.status === 422 && /already/i.test(msg)) return Response.json({ error: "An account with this email already exists." }, { status: 409 });
     return Response.json({ error: msg || "Could not create the account. Try again." }, { status: res.status });
   }
+  // The role is set with the service key, never from signup metadata (ADR 0006).
+  await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${body.id}`, {
+    method: "PATCH",
+    headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
   return Response.json({ id: body.id }, { status: 201 });
 }
+
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Security headers for every response from this origin.
+const securityHeaders: Record<string, string> = {
+  "x-content-type-options": "nosniff",
+  "referrer-policy": "strict-origin-when-cross-origin",
+  "x-frame-options": "DENY",
+  "content-security-policy":
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+};
+const withHeaders = (res: Response, extra: Record<string, string> = {}) => {
+  const headers = new Headers(res.headers);
+  for (const [k, v] of Object.entries({ ...securityHeaders, ...extra })) headers.set(k, v);
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
+};
 
 function proxy(prefix: keyof typeof upstream) {
   return async (req: Request) => {
     const url = new URL(req.url);
+    // GoTrue admin routes need the service key; refuse anything else before it reaches GoTrue.
+    if (prefix === "/auth/v1" && url.pathname.startsWith("/auth/v1/admin") && req.headers.get("authorization") !== `Bearer ${serviceKey}`)
+      return Response.json({ error: "Not found" }, { status: 404 });
     const target = upstream[prefix] + url.pathname.slice(prefix.length) + url.search;
     const headers = new Headers(req.headers);
     headers.delete("host");
@@ -59,7 +85,9 @@ function proxy(prefix: keyof typeof upstream) {
       redirect: "manual",
       decompress: false,
     } as RequestInit);
-    return new Response(res.body, { status: res.status, statusText: res.statusText, headers: res.headers });
+    // Uploaded files are untrusted: never let them run as a page on this origin.
+    const extra: Record<string, string> = prefix === "/storage/v1" ? { "content-security-policy": "sandbox; default-src 'none'" } : {};
+    return withHeaders(res, extra);
   };
 }
 
@@ -68,6 +96,7 @@ async function updateUser(req: Request & { params: { id: string } }) {
   const adminId = await requireAdmin(req);
   if (!adminId) return Response.json({ error: "Only administrators can change accounts." }, { status: 403 });
   const id = req.params.id;
+  if (!uuid.test(id)) return Response.json({ error: "Unknown account." }, { status: 404 });
   const { deactivated, password } = (await req.json()) as { deactivated?: boolean; password?: string };
   if (deactivated !== undefined && id === adminId) return Response.json({ error: "You can't deactivate your own account." }, { status: 400 });
   if (password !== undefined && password.length < 8) return Response.json({ error: "The password must be at least 8 characters." }, { status: 400 });
@@ -106,3 +135,5 @@ const server = Bun.serve({
 });
 
 console.log(`Scientia on ${server.url}`);
+if (anonKey.endsWith("2NBkUj6pIlehmICc3ObpZY916qsoIzqcG17aKxiMS8o"))
+  console.warn("WARNING: using the public development JWT secret and keys. Set JWT_SECRET, ANON_KEY and SERVICE_ROLE_KEY before exposing Scientia to anyone (see .env.example).");

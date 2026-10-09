@@ -150,7 +150,7 @@ export async function seed(sql: SQL) {
 
     const lab1Due = new Date(dueDay(-7)).getTime();
     const sub = (a: string, p: Person, body: string, at: string, files: object[] = []) =>
-      tx`insert into public.submissions (assignment_id, student_id, body, files, submitted_at) values (${a}, ${u[p]}, ${body}, ${JSON.stringify(files)}::jsonb, ${at})`;
+      tx`insert into public.submissions (assignment_id, student_id, body, files, submitted_at) values (${a}, ${u[p]}, ${body}, (${JSON.stringify(files)}::text)::jsonb, ${at})`;
     const grade = (a: string, p: Person, score: number, feedback: string, released: boolean, at: string) =>
       tx`insert into public.grades (assignment_id, student_id, score, feedback, released, graded_by, graded_at) values (${a}, ${u[p]}, ${score}, ${feedback}, ${released}, ${u.ingrid}, ${at})`;
 
