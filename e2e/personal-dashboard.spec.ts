@@ -202,6 +202,9 @@ test.describe("Phone layout", () => {
       await expect(rows.nth(i)).toContainText(title);
     }
     await expect(rows.nth(0)).toContainText(fmtDue(dueAt(t0, 2)));
+    // The title keeps its width beside the date and status (it was once squeezed to 40 px).
+    const widths = await rows.locator(".row-title").evaluateAll((els) => els.map((e) => e.getBoundingClientRect().width));
+    expect(Math.min(...widths)).toBeGreaterThan(200);
   });
 
   test("@US-21 the course home and the worksheet page fit a phone", async ({ page }) => {

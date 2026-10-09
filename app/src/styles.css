@@ -317,6 +317,8 @@ thead th:first-child, tbody th[scope="row"] { position: sticky; left: 0; box-sha
 thead th:first-child { z-index: 2; }
 tbody th[scope="row"] { z-index: 1; }
 tbody tr:last-child > * { border-bottom: 0; }
+.sticky-total thead th:last-child, .sticky-total td:last-child { position: sticky; right: 0; box-shadow: -1px 0 0 var(--border); }
+.sticky-total td:last-child { background: var(--surface); font-weight: 550; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 table.fit th, table.fit td, .fit th, .fit td { white-space: normal; }
 td > a.fill { display: block; margin: calc(-1 * var(--s2)) calc(-1 * var(--s3)); padding: var(--s2) var(--s3); }

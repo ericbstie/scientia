@@ -71,7 +71,7 @@ export function Gradebook() {
         ) : (
           <>
             <div className="table-wrap">
-              <table>
+              <table className="sticky-total">
                 <caption className="visually-hidden">Gradebook for {course.title}</caption>
                 <thead>
                   <tr>
