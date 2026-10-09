@@ -19,3 +19,12 @@ Facts about the machines agents run on that cost time to rediscover.
 - **Parallel agents**: never share one stack. `scripts/slot.sh up <n>` starts an isolated
   stack plus a hot-reloading dev server; `eval "$(scripts/slot.sh env <n>)"` then
   `bunx playwright test <spec>` runs against it. `scripts/slot.sh down <n>` when done.
+  The dev server builds React in development mode and is about a fifth slower: for the
+  run `mise run metrics` reads, set `BASE_URL=http://localhost:310<n>` (the slot's
+  production build, rebuilt by `slot.sh up <n>`). Sandboxes also differ from each other
+  by up to a quarter, so compare `e2e.duration_s` between runs on the same machine.
+- **Patched dependency**: `patches/` marks `@digdir/designsystemet-react` side-effect
+  free. If `bundle.js_kb_gz` jumps by about 30 KB, check that
+  `node_modules/@digdir/designsystemet-react/package.json` has `"sideEffects": false`;
+  if not, delete `~/.bun/install/cache/@digdir/designsystemet-react@*_patch_hash=*` and
+  run `bun install` again (a cache entry written by `bun patch` can miss the change).
