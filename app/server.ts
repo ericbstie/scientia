@@ -72,7 +72,7 @@ function proxy(prefix: keyof typeof upstream) {
     const url = new URL(req.url);
     // GoTrue admin routes need the service key; refuse anything else before it reaches GoTrue.
     if (prefix === "/auth/v1" && url.pathname.startsWith("/auth/v1/admin") && req.headers.get("authorization") !== `Bearer ${serviceKey}`)
-      return Response.json({ error: "Not found" }, { status: 404 });
+      return withHeaders(Response.json({ error: "Not found" }, { status: 404 }));
     const target = upstream[prefix] + url.pathname.slice(prefix.length) + url.search;
     const headers = new Headers(req.headers);
     headers.delete("host");
@@ -123,10 +123,10 @@ const server = Bun.serve({
   port: Number(process.env.PORT ?? 3000),
   development: process.env.NODE_ENV !== "production",
   routes: {
-    "/healthz": new Response("ok"),
-    "/config.json": () => Response.json({ anonKey }, { headers: { "cache-control": "no-store" } }),
-    "/api/admin/users": { POST: createUser },
-    "/api/admin/users/:id": { PATCH: updateUser },
+    "/healthz": () => withHeaders(new Response("ok")),
+    "/config.json": () => withHeaders(Response.json({ anonKey }, { headers: { "cache-control": "no-store" } })),
+    "/api/admin/users": { POST: async (req) => withHeaders(await createUser(req)) },
+    "/api/admin/users/:id": { PATCH: async (req) => withHeaders(await updateUser(req)) },
     "/auth/v1/*": proxy("/auth/v1"),
     "/rest/v1/*": proxy("/rest/v1"),
     "/storage/v1/*": proxy("/storage/v1"),
