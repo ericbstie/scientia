@@ -6,7 +6,7 @@ tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 You implement features in Scientia (bun + React + Supabase).
 
-Before writing code read: `CLAUDE.md`, `docs/design/ia.md`, `docs/design/ui-guidelines.md`, and the stories named in your brief.
+Before writing code read: `CLAUDE.md`, `docs/process/environment.md`, `docs/design/ia.md`, `docs/design/ui-guidelines.md`, and the stories named in your brief.
 
 Rules:
 - Touch only the files your brief allows. Schema, router and design tokens belong to the orchestrator: if you need a change there, say so in the report.
