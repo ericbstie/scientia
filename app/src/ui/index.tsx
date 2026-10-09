@@ -8,8 +8,8 @@ export function Button({ variant, size, className = "", type = "button", ...rest
   return <button type={type} className={`btn ${variant ?? ""} ${size ?? ""} ${className}`} {...rest} />;
 }
 
-export function ButtonLink({ to, variant, size, children }: { to: string; variant?: "primary" | "ghost"; size?: "small"; children: ReactNode }) {
-  return <Link to={to} className={`btn ${variant ?? ""} ${size ?? ""}`}>{children}</Link>;
+export function ButtonLink({ to, variant, size, children, "aria-label": ariaLabel }: { to: string; variant?: "primary" | "ghost"; size?: "small"; children: ReactNode; "aria-label"?: string }) {
+  return <Link to={to} className={`btn ${variant ?? ""} ${size ?? ""}`} aria-label={ariaLabel}>{children}</Link>;
 }
 
 // After client-side navigation, move focus to the new page's h1 so screen readers announce it.
@@ -25,11 +25,39 @@ export function PageHeader({ title, eyebrow, subtitle, actions }: { title: React
     <header className="page-header">
       <div>
         {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        <h1 ref={h1} tabIndex={-1} style={{ outline: "none" }}>{title}</h1>
+        <h1 ref={h1} tabIndex={-1}>{title}</h1>
         {subtitle && <p className="subtitle">{subtitle}</p>}
       </div>
       {actions && <div className="actions">{actions}</div>}
     </header>
+  );
+}
+
+/** Sets the document title: "<page> · <course code> · Scientia", or "<page> · Scientia" outside a course. */
+export function useTitle(page: string | undefined, courseCode?: string) {
+  useEffect(() => {
+    if (page) document.title = [page, courseCode, "Scientia"].filter(Boolean).join(" · ");
+  }, [page, courseCode]);
+}
+
+/** Polite live announcement for list, filter and month changes ("Showing 3 users"). */
+export function Status({ children }: { children: ReactNode }) {
+  return <p className="visually-hidden" aria-live="polite" aria-atomic="true">{children}</p>;
+}
+
+/** Summary above a form with two or more errors; each entry links to its field. */
+export function ErrorSummary({ errors: all }: { errors: (false | undefined | "" | { id: string; message: string })[] }) {
+  const errors = all.filter((e): e is { id: string; message: string } => !!e);
+  if (errors.length < 2) return null;
+  return (
+    <div className="alert danger" role="alert">
+      <p style={{ margin: 0, fontWeight: 600 }}>There are {errors.length} problems with this form.</p>
+      <ul style={{ margin: "var(--s1) 0 0", paddingLeft: "var(--s5)" }}>
+        {errors.map((e) => (
+          <li key={e.id}><a href={`#${e.id}`} onClick={(ev) => { ev.preventDefault(); const el = document.getElementById(e.id); (el?.matches("fieldset") ? el.querySelector<HTMLElement>("input") : el)?.focus(); }}>{e.message}</a></li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -87,15 +115,29 @@ const describedBy = (id: string, hint?: string, error?: string) =>
 type FieldBase = { label: string; hint?: string; error?: string };
 // React 19: `ref` is a regular prop on function components.
 type WithRef<T> = { ref?: Ref<T> };
+
+/** Label with a visible "Required" marker beside it; the control itself carries the required state for assistive tech. */
+function FieldLabel({ id, label, required }: { id: string; label: string; required?: boolean }) {
+  if (!required) return <label htmlFor={id}>{label}</label>;
+  return <div className="label-row"><label htmlFor={id}>{label}</label><span className="req" aria-hidden="true">Required</span></div>;
+}
+function FieldNotes({ id, hint, error }: { id: string; hint?: string; error?: string }) {
+  return (
+    <>
+      {hint && <span className="hint" id={`${id}-hint`}>{hint}</span>}
+      {error && <span className="error-text" id={`${id}-error`}>{error}</span>}
+    </>
+  );
+}
+
 export function Field({ label, hint, error, id, ...rest }: FieldBase & WithRef<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
     <div className="field">
-      <label htmlFor={fid}>{label}</label>
+      <FieldLabel id={fid} label={label} required={rest.required} />
       <input id={fid} className="input" aria-describedby={describedBy(fid, hint, error)} aria-invalid={!!error || undefined} {...rest} />
-      {hint && <span className="hint" id={`${fid}-hint`}>{hint}</span>}
-      {error && <span className="error-text" id={`${fid}-error`} role="alert">{error}</span>}
+      <FieldNotes id={fid} hint={hint} error={error} />
     </div>
   );
 }
@@ -105,22 +147,21 @@ export function TextArea({ label, hint, error, id, ...rest }: FieldBase & WithRe
   const fid = id ?? auto;
   return (
     <div className="field">
-      <label htmlFor={fid}>{label}</label>
+      <FieldLabel id={fid} label={label} required={rest.required} />
       <textarea id={fid} className="textarea" aria-describedby={describedBy(fid, hint, error)} aria-invalid={!!error || undefined} {...rest} />
-      {hint && <span className="hint" id={`${fid}-hint`}>{hint}</span>}
-      {error && <span className="error-text" id={`${fid}-error`} role="alert">{error}</span>}
+      <FieldNotes id={fid} hint={hint} error={error} />
     </div>
   );
 }
 
-export function Select({ label, hint, id, children, ...rest }: FieldBase & WithRef<HTMLSelectElement> & SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ label, hint, error, id, children, ...rest }: FieldBase & WithRef<HTMLSelectElement> & SelectHTMLAttributes<HTMLSelectElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
     <div className="field">
-      <label htmlFor={fid}>{label}</label>
-      <select id={fid} className="select" {...rest}>{children}</select>
-      {hint && <span className="hint">{hint}</span>}
+      <FieldLabel id={fid} label={label} required={rest.required} />
+      <select id={fid} className="select" aria-describedby={describedBy(fid, hint, error)} aria-invalid={!!error || undefined} {...rest}>{children}</select>
+      <FieldNotes id={fid} hint={hint} error={error} />
     </div>
   );
 }
@@ -199,6 +240,7 @@ export function Confirm({ open, title, children, confirmLabel, onConfirm, onCanc
 
 /** Message pages rendered in place for access problems (ia.md "Access rules"). */
 export function NoAccess({ what = "this page" }: { what?: string }) {
+  useTitle("No access");
   return (
     <div className="content">
       <PageHeader title={what === "this page" ? "You don't have access" : `You don't have access to ${what}`} />
@@ -208,6 +250,7 @@ export function NoAccess({ what = "this page" }: { what?: string }) {
   );
 }
 export function NotFound() {
+  useTitle("Page not found");
   return (
     <div className="content">
       <PageHeader title="Page not found" />

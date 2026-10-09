@@ -64,7 +64,7 @@ function StudentHome() {
           )}
           <Section title="Next due">
             {q.data.next.length === 0 ? (
-              <p className="muted">Nothing due in this course.</p>
+              <Empty title="Nothing due in this course." />
             ) : (
               <ul className="list">
                 {q.data.next.map((a) => (
@@ -141,7 +141,7 @@ function TeacherHome() {
           </Section>
           <Section title="Assignments" action={<ButtonLink to={`${base}/assignments/new`}>New assignment</ButtonLink>}>
             {q.data.asgs.length === 0 ? (
-              <p className="muted">Nothing due in this course.</p>
+              <Empty title="Nothing due in this course." />
             ) : (
               <ul className="list">
                 {q.data.asgs.map((a) => (

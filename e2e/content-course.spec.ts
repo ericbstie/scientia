@@ -143,7 +143,7 @@ test.describe("Course layout and people", () => {
       await dialog.getByLabel("Email").fill(email);
       await dialog.getByRole("button", { name: "Add student" }).click();
       const field = dialog.getByLabel("Email");
-      await expect(dialog.getByRole("alert")).toHaveText(message);
+      await expect(dialog.locator(".error-text")).toHaveText(message);
       await expect(field).toHaveAttribute("aria-describedby", /error/);
     }
     await dialog.getByRole("button", { name: "Cancel" }).click();

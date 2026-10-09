@@ -114,9 +114,9 @@ test.describe("Creating and changing assignments", () => {
     await page.getByRole("checkbox", { name: "File upload" }).uncheck();
     await page.getByRole("checkbox", { name: "Text entry" }).uncheck();
     await page.getByRole("button", { name: "Save and publish" }).click();
-    await expect(page.getByText("Enter a title", { exact: true })).toBeVisible();
-    await expect(page.getByText("Enter points greater than 0", { exact: true })).toBeVisible();
-    await expect(page.getByText("Choose at least one way to submit", { exact: true })).toBeVisible();
+    await expect(page.locator(".error-text", { hasText: "Enter a title" })).toBeVisible();
+    await expect(page.locator(".error-text", { hasText: "Enter points greater than 0" })).toBeVisible();
+    await expect(page.locator(".error-text", { hasText: "Choose at least one way to submit" })).toBeVisible();
     await expect(page.getByLabel("Title")).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByLabel("Points")).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByRole("group", { name: "Accepts" })).toHaveAttribute("aria-describedby", /error/);

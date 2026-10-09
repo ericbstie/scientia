@@ -120,7 +120,7 @@ export function ThreadView() {
                   )}
                 </div>
                 {teacher && p.kind === "reply" && !p.removed && (
-                  <div className="row-side"><Button size="small" variant="danger" className="ghost" onClick={() => setRemovingPost(p)}>Delete</Button></div>
+                  <div className="row-side"><Button size="small" variant="danger" className="ghost" aria-label={`Delete reply by ${p.author ?? "unknown author"}, ${fmtDateTime(p.at)}`} onClick={() => setRemovingPost(p)}>Delete</Button></div>
                 )}
               </div>
             </li>
@@ -128,7 +128,7 @@ export function ThreadView() {
         </ul>
       </Section>
       <form className="form" onSubmit={sendReply} noValidate>
-        <TextArea id="thread-reply" label="Reply" value={reply} onChange={(e) => setReply(e.target.value)} error={replyError} rows={4} />
+        <TextArea id="thread-reply" label="Reply" required value={reply} onChange={(e) => setReply(e.target.value)} error={replyError} rows={4} />
         <div className="actions"><Button variant="primary" type="submit" disabled={busy}>Reply</Button></div>
       </form>
       <Confirm

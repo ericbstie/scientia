@@ -4,12 +4,14 @@ import { useAuth } from "../../lib/auth";
 import { fmtDateTime, num, studentStatus } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ButtonLink, Empty, ErrorNote, Loading, PageHeader, StatusBadge } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { loadAssignments, loadMyWork } from "./work/shared";
 
 export function Assignments() {
   const { course, role } = useCourse();
   const { profile } = useAuth();
   const base = `/courses/${course.id}`;
+  useDocTitle("Assignments");
   const { data, error, loading } = useQuery(async () => {
     if (role === "teacher") return { assignments: await loadAssignments(course.id, false), subs: new Map(), grades: new Map() };
     return loadMyWork(course.id, profile!.id);

@@ -50,6 +50,7 @@ export function Announcements() {
     try {
       must(await db().from("announcements").update({ pinned: !a.pinned }).eq("id", a.id).select("id"));
       await q.reload();
+      toast(a.pinned ? "Announcement unpinned" : "Announcement pinned");
     } catch (e) { setActionError(e as Error); }
   }
 
@@ -92,9 +93,9 @@ export function Announcements() {
                   </div>
                   {teacher && (
                     <div className="row-side actions">
-                      <Button size="small" className="ghost" onClick={() => togglePin(a)}>{a.pinned ? "Unpin" : "Pin"}</Button>
-                      <ButtonLink size="small" variant="ghost" to={`${base}/announcements/${a.id}/edit`}>Edit</ButtonLink>
-                      <Button size="small" variant="danger" className="ghost" onClick={() => setRemoving(a)}>Delete</Button>
+                      <Button size="small" variant="ghost" aria-label={`${a.pinned ? "Unpin" : "Pin"} announcement ${a.title}`} onClick={() => togglePin(a)}>{a.pinned ? "Unpin" : "Pin"}</Button>
+                      <ButtonLink size="small" variant="ghost" aria-label={`Edit announcement ${a.title}`} to={`${base}/announcements/${a.id}/edit`}>Edit</ButtonLink>
+                      <Button size="small" variant="danger" className="ghost" aria-label={`Delete announcement ${a.title}`} onClick={() => setRemoving(a)}>Delete</Button>
                     </div>
                   )}
                 </div>

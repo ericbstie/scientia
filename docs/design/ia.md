@@ -68,7 +68,7 @@ Decisions that keep the route count low:
 ### R1 `/sign-in`
 - **Purpose:** authenticate; return to `next` if set.
 - **Who:** signed-out visitors. A signed-in visitor is sent to `/`.
-- **Regions:** `main` with one card: h1 "Sign in to Scientia"; Email; Password; error alert; Sign in.
+- **Regions:** `main` with one card: h1 "Sign in to Scientia"; Email; Password; error alert; Sign in. Demo build only: a list of the demo accounts and their shared password; the server reports `demo` in `/config.json` from `SEED_DEMO`, and the list is removed when `SEED_DEMO=false`.
 - **Primary action:** Sign in (Enter submits).
 - **Empty state:** none. Error: "Email or password is incorrect" (one message). Deactivated: "This account is deactivated. Contact your administrator."
 - **Stories:** US-1, US-2, US-40, US-41.

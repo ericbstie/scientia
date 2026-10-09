@@ -133,13 +133,13 @@ function Shell() {
         <div className="topbar-inner">
           <Link to="/" className="brand" aria-label="Scientia, go to dashboard"><span className="brand-mark" aria-hidden="true">S</span><span className="brand-name">Scientia</span></Link>
           <nav aria-label="Main" className="topnav">
-            <NavLink to="/" end className="nav-link">Dashboard</NavLink>
+            {!profile?.is_admin && <NavLink to="/" end className="nav-link">Dashboard</NavLink>}
             <NavLink to="/calendar" className="nav-link">Calendar</NavLink>
             {profile?.is_admin && <NavLink to="/admin/users" className={({ isActive }) => `nav-link ${isActive || pathname.startsWith("/admin") ? "active" : ""}`}>Admin</NavLink>}
           </nav>
           <div className="topnav-end">
             <NavLink to="/notifications" className="nav-link" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}>
-              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg><span className="nav-label">Notifications</span>
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg><span className="bell-label">Notifications</span>
               {unread > 0 && <span className="count" aria-hidden="true" data-testid="unread-count">{unread}</span>}
             </NavLink>
             <AccountMenu name={profile?.full_name ?? ""} />
@@ -209,8 +209,20 @@ function CourseLayout() {
   const { profile } = useAuth();
   const [state, setState] = useState<{ course: Course; role: CourseRole } | "none" | "missing" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
   useEffect(() => setMenuOpen(false), [pathname]);
+  // Escape closes the open course menu and returns focus to the Menu button.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMenuOpen(false);
+      menuButton.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   useEffect(() => {
     let live = true;
@@ -258,7 +270,7 @@ function CourseLayout() {
               <span className="nav-course-code">{state.course.code}</span>
               <span>{state.course.title}</span>
             </Link>
-            <button type="button" className="btn small course-menu-button" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
+            <button type="button" ref={menuButton} className="btn small course-menu-button" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
               Menu
             </button>
           </div>

@@ -131,6 +131,7 @@ services:
       REST_URL: http://rest:3000
       STORAGE_URL: http://storage:5000
       PORT: 3000
+      SEED_DEMO: ${SEED_DEMO:-true}
     ports:
       - "${WEB_PORT:-3000}:3000"
     healthcheck:

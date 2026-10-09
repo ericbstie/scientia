@@ -159,3 +159,14 @@ Severity: **blocker** = a user cannot finish a story; **should-fix** = breaks an
 ## Verdict
 
 0 blockers, 14 should-fix, 11 nits: the in-scope UI follows most of the guideline rules, but the error summaries, label visibility on phones, focus handling and per-row button names need fixing before M3 is called done.
+
+## Responses
+
+Fixed in the `m3-ux-fixes` brief. The same rules were applied to Assignments, AssignmentForm, AssignmentView, Grades, Grading, GradingSubmission and Gradebook.
+
+**Fixed:** S1 (Dashboard link hidden for admins), S2 (bell label stays visible on phones; top bar wraps at 320 px), S4 (44 px on `.btn` and `.nav-link` under 820 px, and on row title links), S5 (inline `outline: none` removed; Notifications moves focus to the h1), S6 (`ErrorSummary` with `role="alert"` and links, on the New user, New course, Link, Assignment and Password forms), S7 (`Select` supports `error` and `hint`; Courses form uses it), S8 ("Required" text beside the label, plus the `required` attribute), S9 (inline `ErrorNote`), S10 (per-row `aria-label`s on Announcements, Modules, ThreadView, People, Grading, Gradebook links), S11 (`Status` live regions on Calendar, Users, Grading), S12 (`useTitle` in `app/src/ui`; every page and the no-access and not-found pages), S13 (demo accounts shown only when `/config.json` reports `demo`, from `SEED_DEMO`; noted in `ia.md`), S14 (hint and disabled Save with a reason when no teacher exists). Nits fixed: N1, N2 (heading and autofocus), N3 (meta says "Opens in a new tab"), N4 (roles shown capitalised), N6, N7, N8, N9, N11 (field errors are no longer individual alerts; three e2e locators moved from `getByRole("alert")` or `getByText` to `.error-text`, assertions unchanged).
+
+**Partly declined:**
+- **S3:** Escape now closes the course menu and returns focus to the Menu button. No scrim and no focus trap: below 820 px the menu is an inline disclosure that pushes content down, not a modal panel, so keyboard users can tab past it and trapping them would be wrong. `ia.md:383` still describes a slide-in panel; the orchestrator should update the IA line or ask for the panel.
+- **N5:** the empty-state copy (full sentences, with periods) is the wording specified per route in `ia.md` and asserted by the e2e specs, so it stays. The Dashboard "Nothing missing" empty state now uses `Empty`.
+- **N10:** admin passwords stay as plain text on purpose: the admin chooses a temporary password and has to read it back to the person. Left as is; a show/hide toggle would add a control the stories do not ask for.

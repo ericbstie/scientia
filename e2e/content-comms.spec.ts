@@ -90,7 +90,7 @@ test.describe("Announcements", () => {
 
     // An empty title is refused and nothing is posted.
     await page.getByRole("button", { name: "Post" }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "Enter a title" })).toHaveText("Enter a title");
+    await expect(page.locator(".error-text").filter({ hasText: "Enter a title" })).toHaveText("Enter a title");
     await expect(page.getByLabel("Title")).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByLabel("Title")).toBeFocused();
 
@@ -181,7 +181,7 @@ test.describe("Discussions", () => {
 
     // An empty reply is refused; a real one appears last, stamped with the current time.
     await page.getByRole("button", { name: "Reply", exact: true }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "Enter a reply" })).toBeVisible();
+    await expect(page.locator(".error-text").filter({ hasText: "Enter a reply" })).toBeVisible();
     await page.getByLabel("Reply", { exact: true }).fill("Same here.");
     await page.getByRole("button", { name: "Reply", exact: true }).click();
     await expect(posts(page)).toHaveCount(4);
@@ -201,7 +201,7 @@ test.describe("Discussions", () => {
     await page.getByRole("link", { name: "New thread" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("New thread");
     await page.getByRole("button", { name: "Post" }).click();
-    await expect(page.getByRole("alert").filter({ hasText: "Enter a title" })).toHaveText("Enter a title");
+    await expect(page.locator(".error-text").filter({ hasText: "Enter a title" })).toHaveText("Enter a title");
     await expect(page.getByLabel("Title")).toHaveAttribute("aria-describedby", /error/);
     await page.getByLabel("Title").fill("Lab partner?");
     await page.getByLabel("Message").fill("Anyone free on Thursday?");

@@ -124,7 +124,7 @@ const server = Bun.serve({
   development: process.env.NODE_ENV !== "production",
   routes: {
     "/healthz": new Response("ok"),
-    "/config.json": () => Response.json({ anonKey }, { headers: { "cache-control": "no-store" } }),
+    "/config.json": () => Response.json({ anonKey, demo: process.env.SEED_DEMO !== "false" }, { headers: { "cache-control": "no-store" } }),
     "/api/admin/users": { POST: createUser },
     "/api/admin/users/:id": { PATCH: updateUser },
     "/auth/v1/*": proxy("/auth/v1"),

@@ -4,12 +4,14 @@ import { useAuth } from "../../lib/auth";
 import { fmtDateTime, num, studentStatus } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
 import { Empty, ErrorNote, Loading, PageHeader, StatusBadge } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { loadMyWork, pct1 } from "./work/shared";
 
 export function Grades() {
   const { course } = useCourse();
   const { profile } = useAuth();
   const base = `/courses/${course.id}`;
+  useDocTitle("Grades");
   const { data, error, loading } = useQuery(() => loadMyWork(course.id, profile!.id), [course.id, profile?.id]);
 
   let total = "No released grades yet";

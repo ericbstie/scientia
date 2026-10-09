@@ -19,7 +19,7 @@ export const fmtDateTime = (d: string | Date) => `${fmtDate(d)}, ${fmtTime(d)}`;
 export function relative(d: string | Date, now = Date.now()) {
   const diff = new Date(d).getTime() - now;
   const abs = Math.abs(diff);
-  const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+  const rtf = new Intl.RelativeTimeFormat("en-GB", { numeric: "auto" });
   const units: [Intl.RelativeTimeFormatUnit, number][] = [["day", 86400000], ["hour", 3600000], ["minute", 60000]];
   for (const [unit, ms] of units) if (abs >= ms || unit === "minute") return rtf.format(Math.round(diff / ms), unit);
   return "";
