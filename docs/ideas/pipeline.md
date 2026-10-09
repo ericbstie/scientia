@@ -4,34 +4,34 @@ The single ledger for ideas. Each idea starts at `proposed`; gates update the `s
 
 Role codes: S student, T teacher, A admin, All everyone.
 
-| id | idea | helps | stage |
-|---|---|---|---|
-| I-001 | Keep a draft of a typed answer while the student works, and restore it when they come back to the assignment. | S | proposed |
-| I-002 | Ask "Submit this file?" before a hand-in is final, showing the file name, size and time. | S | proposed |
-| I-003 | Add an "Ask about this assignment" button that opens a course discussion titled with the assignment name. | S, T | proposed |
-| I-004 | Mark discussion threads with new replies since the student last read them, with a count on the Discussions tab. | S | proposed |
-| I-005 | State in one line on each assignment what a late hand-in means, such as "Marked late, no penalty" or "Lose 10% per day". | S | proposed |
-| I-006 | Show office hours as a structured block on the course home (day, time, room) instead of free text on a page. | S | proposed |
-| I-007 | Let a student download all files of one module as a single zip. | S | proposed |
-| I-008 | Give the calendar a list view of the next 14 days for phones, with each item opening its assignment. | S | proposed |
-| I-009 | Show the time zone next to a due time when the student's zone differs from the course's. | S, T | proposed |
-| I-010 | Give teachers one grading inbox across all their courses, sorted by how long each submission has waited. | T | proposed |
-| I-011 | Add "Save and release" on the grade form, so a teacher does not have to return to the list to release a grade. | T | proposed |
-| I-012 | Add a one-click reminder to every student with missing work on an assignment, using a fixed short message. | T | proposed |
-| I-013 | Let a teacher duplicate one assignment within the same course, with its due date cleared for re-setting. | T | proposed |
-| I-014 | Let a teacher move modules and items up or down, so course order can change after publishing. | T | proposed |
-| I-015 | Let a teacher attach a returned file (for example a marked-up copy) to their feedback. | T, S | proposed |
-| I-016 | Give a teacher a per-student page showing that student's work, grades and last activity across the teacher's courses. | T | proposed |
-| I-017 | Notify the teacher when a student hands in work, with the late flag shown in the notice. | T | proposed |
-| I-018 | Show "2 of 4 graded" on each assignment row in the course, so progress is visible without opening the grading queue. | T | proposed |
-| I-019 | Let the gradebook sort by student name or by number of missing items, and mark students with two or more missing items. | T | proposed |
-| I-020 | Add next and previous keys (J and K) on the grading page to move between submissions. | T | proposed |
-| I-021 | Show an admin overview on the home page: user and course counts, and a list of courses with no teacher or no students. | A | proposed |
-| I-022 | Remove Calendar and Notifications from the admin navigation, since admins have no due work or notifications of their own. | A | proposed |
-| I-023 | Show each user's last sign-in in the users list, to help with support requests. | A | proposed |
-| I-024 | Replace the "You can't deactivate your own account" line with a disabled Deactivate button and a short tooltip. | A | proposed |
-| I-025 | Let a user filter the admin users list by course. | A | proposed |
-| I-026 | Add a search box in the header that finds courses, assignments and files the person can open. | All | proposed |
-| I-027 | Offer a text size control in the account menu, saved for the person across devices. | All | proposed |
-| I-028 | Show a 10-second "Undo" message after deactivating a user, unpublishing work or deleting a module item. | All | proposed |
-| I-029 | Let a person see recently opened courses in the account menu, as a shortcut back to where they were. | All | proposed |
+| id | idea | helps | stage | gate1 reason |
+|---|---|---|---|---|
+| I-001 | Keep a draft of a typed answer while the student works, and restore it when they come back to the assignment. | S | gate1-kept | Lost work is pain point 10 in the synthesis; US-9 only keeps text after a failed submit, not after a closed tab. |
+| I-002 | Ask "Submit this file?" before a hand-in is final, showing the file name, size and time. | S | gate1-dropped | Submit is deliberately unconfirmed in ui-guidelines, and resubmission is allowed until graded, so the step is reversible. |
+| I-003 | Add an "Ask about this assignment" button that opens a course discussion titled with the assignment name. | S, T | gate1-dropped | A second route to a new discussion thread; the new-thread form (R16) already exists. |
+| I-004 | Mark discussion threads with new replies since the student last read them, with a count on the Discussions tab. | S | gate1-dropped | New-activity counts on Discussions add a sixth kind of attention pull; replies to a student's own post already notify. |
+| I-005 | State in one line on each assignment what a late hand-in means, such as "Marked late, no penalty" or "Lose 10% per day". | S | gate1-dropped | Adds a field to the assignment form, against US-27; no late penalty is computed, and Late is already labelled. |
+| I-006 | Show office hours as a structured block on the course home (day, time, room) instead of free text on a page. | S | gate1-dropped | Office hours are not in the stories or IA; a structured block adds course data and setting sprawl. |
+| I-007 | Let a student download all files of one module as a single zip. | S | gate1-dropped | A module zip serves few students and needs server-side archiving for little gain. |
+| I-008 | Give the calendar a list view of the next 14 days for phones, with each item opening its assignment. | S | gate1-dropped | The dashboard Upcoming list (US-3) is already a phone-friendly list of the next due items. |
+| I-009 | Show the time zone next to a due time when the student's zone differs from the course's. | S, T | gate1-dropped | Dates show in the viewer's time zone and courses have no zone to compare against; this needs a new course setting. |
+| I-010 | Give teachers one grading inbox across all their courses, sorted by how long each submission has waited. | T | gate1-kept | Teachers with several courses open each queue in turn; one queue sorted by wait keeps late grading visible and reuses the existing queue. |
+| I-011 | Add "Save and release" on the grade form, so a teacher does not have to return to the list to release a grade. | T | gate1-dropped | Merges drafting and release into one click, blurring the draft and released states that principle 4 keeps separate. |
+| I-012 | Add a one-click reminder to every student with missing work on an assignment, using a fixed short message. | T | gate1-dropped | A sixth notification kind, and in-app only, so a reminder reaches students only when they already open the app. |
+| I-013 | Let a teacher duplicate one assignment within the same course, with its due date cleared for re-setting. | T | gate1-dropped | A narrow form of course copy and reuse, already gap analysis item 5. |
+| I-014 | Let a teacher move modules and items up or down, so course order can change after publishing. | T | gate1-dropped | Reordering modules is already parked in the synthesis under Later. |
+| I-015 | Let a teacher attach a returned file (for example a marked-up copy) to their feedback. | T, S | gate1-dropped | Returned marked-up files are richer feedback, which the synthesis parks under Later; M3 feedback is score plus written text. |
+| I-016 | Give a teacher a per-student page showing that student's work, grades and last activity across the teacher's courses. | T | gate1-dropped | A cross-course student page is teacher analytics (gap 22) and a new privacy-scoped view; the per-course gradebook covers the need. |
+| I-017 | Notify the teacher when a student hands in work, with the late flag shown in the notice. | T | gate1-dropped | Teacher notifications on hand-in add a sixth kind; the Needs grading count already shows new work. |
+| I-018 | Show "2 of 4 graded" on each assignment row in the course, so progress is visible without opening the grading queue. | T | gate1-kept | Per-assignment progress (N of M graded) fits in the existing row with no new page and answers how far along grading is. |
+| I-019 | Let the gradebook sort by student name or by number of missing items, and mark students with two or more missing items. | T | gate1-dropped | The two-missing flag invents a threshold and a label outside the status vocabulary; sorting alone is not enough. |
+| I-020 | Add next and previous keys (J and K) on the grading page to move between submissions. | T | gate1-dropped | Keyboard shortcuts are parked under Later, and single-letter keys break WCAG 2.1.4 Character Key Shortcuts. |
+| I-021 | Show an admin overview on the home page: user and course counts, and a list of courses with no teacher or no students. | A | gate1-dropped | An overview page is analytics the synthesis does not need on day one; the admin home is already the Users table. |
+| I-022 | Remove Calendar and Notifications from the admin navigation, since admins have no due work or notifications of their own. | A | gate1-kept | Admins have no courses or due work, so the Calendar and notification bell always show nothing for them. |
+| I-023 | Show each user's last sign-in in the users list, to help with support requests. | A | gate1-dropped | Recording sign-in times adds personal data use; the synthesis keeps privacy notices out of M3 and no admin story needs it. |
+| I-024 | Replace the "You can't deactivate your own account" line with a disabled Deactivate button and a short tooltip. | A | gate1-dropped | ui-guidelines already require a disabled button to show its reason in text and forbid tooltips for required information. |
+| I-025 | Let a user filter the admin users list by course. | A | gate1-dropped | Filters beyond the stories are forbidden in ui-guidelines; the admin search already covers the lookup. |
+| I-026 | Add a search box in the header that finds courses, assignments and files the person can open. | All | gate1-dropped | No story or research finding asks for search, and a permanent header control goes beyond the stories the IA defines. |
+| I-027 | Offer a text size control in the account menu, saved for the person across devices. | All | gate1-dropped | Display personalisation is parked under Later; browser zoom already resizes text. |
+| I-028 | Show a 10-second "Undo" message after deactivating a user, unpublishing work or deleting a module item. | All | gate1-dropped | Undo for deletions is parked under Later; M3 uses confirmation dialogs. |
+| I-029 | Let a person see recently opened courses in the account menu, as a shortcut back to where they were. | All | gate1-dropped | The dashboard course cards already give one click back to each course. |
