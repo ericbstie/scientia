@@ -100,15 +100,23 @@ for (const f of [...walk(p("app/src"), ".tsx"), ...walk(p("app/src"), ".ts"), p(
 }
 m["copy.leaks"] = leaks;
 
-// Design consistency (docs/design/ui-guidelines.md "Tokens"): the stylesheet is the only place a size or colour is defined.
+// Design consistency (docs/design/brand.md rules 1 and 2): the look comes from Designsystemet and its generated
+// theme; our stylesheet only lays pages out, and does it with the system's tokens.
 const sheet = (read(p("app/src/styles.css")) ?? "").replace(/\/\*[\s\S]*?\*\//g, "");
 const pages = [...walk(p("app/src"), ".tsx")].map((f) => readFileSync(f, "utf8"));
 m["design.inline_styles"] = pages.reduce((n, code) => n + (code.match(/style=\{\{|<style[ >]/g) ?? []).length, 0);
 m["design.font_sizes"] = new Set([...sheet.matchAll(/font-size:\s*([^;}]+)/g)].map((x) => x[1]!.trim())).size;
-// Colour literals are allowed only where tokens are declared (the two :root blocks).
+// Colour literals are allowed only where tokens are declared (the :root blocks).
 const outsideTokens = sheet.replace(/:root\s*\{[^}]*\}/g, "");
 m["design.literal_colors"] =
   (outsideTokens.match(/#[0-9a-f]{3,8}\b|rgba?\(|hsla?\(/gi) ?? []).length + pages.reduce((n, code) => n + (code.match(/#[0-9a-f]{6}\b|rgba?\(/gi) ?? []).length, 0);
+// Overrides of the system: !important, a --ds-* token assigned here, a selector on a component's own ds- class.
+m["design.overrides"] = (sheet.match(/!important|--ds-[\w-]+\s*:|\.ds-[\w-]+|\[class[*^$~|]?=["']?ds-/g) ?? []).length;
+// Type, shape and depth are tokens: a px/rem/em size (or a numeric weight) in these properties, outside var(), counts.
+m["design.literal_sizes"] = [...sheet.matchAll(/(?:font-size|line-height|border-radius|box-shadow|font-weight)\s*:\s*([^;}]+)/g)].filter(
+  (x) => /\d(?:px|rem|em)\b|^\s*\d{3}\s*$/.test(x[1]!.replace(/var\([^)]*\)/g, "")),
+).length;
+m["design.custom_css_lines"] = sheet.split("\n").filter((l) => l.trim()).length;
 
 // Blind user tests: first-pass "| Scenario | Result | ... |" table of the newest
 // docs/process/reviews/m<n>-user-test.md. Result cells start with Done, Partly or Failed.

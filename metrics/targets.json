@@ -9,8 +9,11 @@
   "ux.max_clicks_to_core_task": { "max": 3 },
   "copy.leaks": { "max": 0 },
   "design.inline_styles": { "max": 0 },
-  "design.font_sizes": { "max": 5 },
+  "design.font_sizes": { "max": 4 },
   "design.literal_colors": { "max": 0 },
+  "design.overrides": { "max": 0 },
+  "design.literal_sizes": { "max": 0 },
+  "design.custom_css_lines": { "max": 210 },
   "ux.blind_tasks_done_pct": { "min": 100 },
   "process.briefs_with_criteria_pct": { "min": 100 },
   "process.retro_changes": { "min": 1 }

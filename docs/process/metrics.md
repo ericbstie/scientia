@@ -18,9 +18,12 @@ measured yet are recorded as `null`, never guessed.
 | `bundle.js_kb_gz` | `dist/` after `mise run build` | Minimal UI should load fast | ↓ target ≤ 250 |
 | `ux.max_clicks_to_core_task` | `docs/design/ia.md` click budget table | Core tasks stay shallow | ↓ target ≤ 3 |
 | `copy.leaks` | Forbidden terms (other products, process words) in `app/src` strings | Copy says only what the user needs | ↓ target 0 |
-| `design.inline_styles` | `style={{` and `<style>` in `app/src/**/*.tsx` | One stylesheet is the source of truth for the look | ↓ target 0 |
-| `design.font_sizes` | Distinct `font-size` values in `styles.css` | A fixed type scale reads as one brand | ↓ target ≤ 5 |
-| `design.literal_colors` | Colour literals outside the `:root` token blocks and in `.tsx` | Colours come from tokens, so dark mode and rebranding stay one edit | ↓ target 0 |
+| `design.inline_styles` | `style={{` and `<style>` in `app/src/**/*.tsx` | The look lives in the theme and one small stylesheet, not in pages | ↓ target 0 |
+| `design.font_sizes` | Distinct `font-size` values in `app/src/styles.css` (all of them system tokens) | Few type sizes read as one brand | ↓ target ≤ 4 |
+| `design.literal_colors` | Colour literals outside the `:root` blocks of `styles.css` and in `.tsx` | Colours come from `--ds-color-…` tokens, so dark mode and the theme stay one edit | ↓ target 0 |
+| `design.overrides` | `!important`, an assigned `--ds-*` token or a `.ds-*` selector in `styles.css` | Components keep the look the system and the theme give them (brand rule 1) | ↓ target 0 |
+| `design.literal_sizes` | A px/rem/em size or numeric weight in `font-size`, `line-height`, `border-radius`, `box-shadow` or `font-weight` outside `var()` | Type, shape and depth are tokens | ↓ target 0 |
+| `design.custom_css_lines` | Non-blank, non-comment lines of `app/src/styles.css` | Our own CSS stays page layout only; 330 before the redesign, 206 after | ↓ target ≤ 210 (ratchet down) |
 | `ux.blind_tasks_done_pct` | First-pass `\| Scenario \| Result \|` table in the newest `docs/process/reviews/m<n>-user-test.md` (Done / Partly / Failed) | A newcomer can finish the core tasks; e2e only proves the stories we wrote | ↑ target 100 |
 | `process.briefs_with_criteria_pct` | `docs/process/briefs/*.md` with an "Acceptance criteria" section | Briefs are contracts | ↑ target 100 |
 | `process.retro_changes` | Process files touched by the last retro commit | Retros lead to change | ↑ ≥ 1 |

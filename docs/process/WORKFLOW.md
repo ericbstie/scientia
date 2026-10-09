@@ -69,8 +69,9 @@ Every milestone runs the same steps.
 - **Layout is looked at on a phone.** The e2e suite runs at desktop width, so a
   list row squeezed to 40 px or a table pushed off screen passes every test.
   Any change to styling or page structure is viewed at 390 px (`look.ts --phone`),
-  light and dark, before it lands. The design metrics (`design.*`) keep sizes
-  and colours in `styles.css`, which is what makes that check cheap.
+  light and dark, before it lands. The design metrics (`design.*`) keep the look in
+  Designsystemet's generated theme and our own CSS to page layout in `app/src/styles.css`,
+  which is what makes that check cheap.
 - **Decisions are written down.** Anything a future contributor would ask "why"
   about goes in `docs/decisions/` as a short ADR (context, decision,
   consequences).
