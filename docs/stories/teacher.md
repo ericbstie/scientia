@@ -223,7 +223,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Evidence:** none in the research; enabler for the Discussions row of the synthesis feature matrix (Scientia decision: threads with teacher delete)
 
 **Acceptance criteria:**
-- Given I open the thread "Question about the lab report" as Ingrid, When I click Delete on Maya's reply and confirm, Then the reply is replaced by "This post was removed by a teacher" for everyone, including Liam.
+- Given I open the thread "Question about the lab report" as Ingrid, When I click Delete on Maya's reply and confirm, Then the reply is replaced by "This reply was deleted by a teacher" for everyone, including Liam.
 - Given I am signed in as Maya, When I view Liam's post, Then there is no Delete button on it.
 - Given I delete the whole thread "Question about the lab report" and confirm, When I return to the list, Then the thread and its replies are gone.
 

@@ -68,9 +68,9 @@ test("@US-42 duplicate code and missing teacher are rejected", async ({ page }) 
   await expect(dialog.getByText("A course with this code already exists")).toBeVisible();
 
   await dialog.getByLabel("Code").fill("CHE110");
-  await dialog.getByLabel("Teacher").selectOption({ label: "Select a teacher" });
+  await dialog.getByLabel("Teacher").selectOption({ label: "Choose a teacher" });
   await dialog.getByRole("button", { name: "Save" }).click();
-  await expect(dialog.getByText("Choose a teacher")).toBeVisible();
+  await expect(dialog.locator("#nc-teacher-error")).toHaveText("Choose a teacher");
   await expect(dialog.getByLabel("Teacher")).toHaveAccessibleDescription(/Choose a teacher$/);
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByRole("table").getByRole("row")).toHaveCount(before);

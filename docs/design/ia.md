@@ -198,7 +198,7 @@ Decisions that keep the route count low:
 ### R17 `/courses/:courseId/discussions/:threadId`
 - **Purpose:** read and answer a thread.
 - **Who:** members; teacher moderates.
-- **Regions:** eyebrow link "‹ Discussions"; h1 thread title (teacher: Delete thread); posts in time order (author, "Teacher" label, time, text; teacher Delete on each post; removed post shows "This post was removed by a teacher"); Reply (TextArea, Reply button).
+- **Regions:** eyebrow link "‹ Discussions"; h1 thread title (teacher: Delete thread); posts in time order (author, "Teacher" label, time, text; teacher Delete on each post; removed post shows "This reply was deleted by a teacher"); Reply (TextArea, Reply button).
 - **Primary action:** Reply.
 - **Empty state:** none (the thread has at least its first post).
 - **Stories:** US-15, US-16, US-37.

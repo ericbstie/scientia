@@ -219,7 +219,7 @@ test.describe("Grades and feedback", () => {
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("Awaiting grade");
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet/ })).toContainText("Awaiting grade");
-    await expect(page.getByRole("row", { name: /Safety acknowledgement/ })).toContainText("Missing");
+    await expect(page.getByRole("row", { name: /Safety acknowledgement/ })).toContainText("Closed");
     await expect(page.getByText("72")).toHaveCount(0);
     await expect(page.getByText("Nothing graded yet. Grades appear here when your teacher releases them.")).toBeVisible();
   });

@@ -202,13 +202,13 @@ test.describe("Discussions", () => {
     await maya.getByRole("button", { name: "Delete" }).click();
     await dialog.getByRole("button", { name: "Delete" }).click();
     await expect(posts(page)).toHaveCount(3);
-    await expect(posts(page).nth(2)).toHaveText(/This post was removed by a teacher/);
+    await expect(posts(page).nth(2)).toHaveText(/This reply was deleted by a teacher/);
     await expect(page.getByText("Thanks, I wondered too.")).toHaveCount(0);
 
     // Liam sees the same, and cannot delete anything.
     await signIn(page, "liam");
     await page.goto(thread);
-    await expect(posts(page).nth(2)).toContainText("This post was removed by a teacher");
+    await expect(posts(page).nth(2)).toContainText("This reply was deleted by a teacher");
     await expect(page.getByText("Thanks, I wondered too.")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
     await page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: "Discussions" }).click();

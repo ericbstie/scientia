@@ -60,10 +60,10 @@ export function ThreadView() {
       // Flag it and clear the text, so the post stays visible as removed but its content is gone.
       must(await db().from("replies").update({ removed: true, body: "" }).eq("id", removingPost.replyId).select("id"));
       setRemovingPost(null);
-      toast("Post removed");
+      toast("Reply deleted");
       await q.reload();
       focusHeading();
-    } catch (err) { setFail("Could not remove the post. Check your connection and try again."); setRemovingPost(null); console.error(err); }
+    } catch (err) { setFail("Could not delete the reply. Check your connection and try again."); setRemovingPost(null); console.error(err); }
     setBusy(false);
   }
 
@@ -104,7 +104,7 @@ export function ThreadView() {
                 <div className="row-main">
                   {p.removed ? (
                     <>
-                      <p className="muted">This post was removed by a teacher</p>
+                      <p className="muted">This reply was deleted by a teacher</p>
                       <div className="row-meta"><time dateTime={p.at}>{fmtDateTime(p.at)}</time></div>
                     </>
                   ) : (
@@ -138,7 +138,7 @@ export function ThreadView() {
         onCancel={() => setRemovingPost(null)}
         busy={busy}
       >
-        Everyone will see "This post was removed by a teacher" in its place. This cannot be undone.
+        Everyone will see "This reply was deleted by a teacher" in its place. This cannot be undone.
       </Confirm>
       <Confirm
         open={removingThread}
