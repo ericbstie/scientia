@@ -1,13 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDateTime, lateBy, num, studentStatus } from "../../lib/format";
-import { db } from "../../lib/supabase";
+import { db, MAX_UPLOAD_BYTES } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ButtonLink, ErrorNote, Field, Loading, NotFound, PageHeader, Section, StatusBadge, TextArea, useToast } from "../../ui";
-import { useDocTitle } from "./content/util";
-import { Facts, FileLinks, MAX_FILE_BYTES, acceptsLabel, lateWorkLabel, loadAssignment, normSub, type Assignment, type FileRef, type Submission } from "./work/shared";
+import { Facts, FileLinks, acceptsLabel, lateWorkLabel, loadAssignment, normSub, type Assignment, type FileRef, type Submission } from "./work/shared";
 
 export function AssignmentView() {
   const { course, role } = useCourse();
@@ -60,7 +59,7 @@ function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
       <Section title="Instructions">
         <p className="prose">{a.description || "No instructions."}</p>
       </Section>
-      {err && <div className="alert danger" role="alert">{err}</div>}
+      <ErrorNote error={err} />
       <div className="actions">
         <ButtonLink to={`${base}/assignments/${a.id}/edit`}>Edit</ButtonLink>
         {a.published ? (
@@ -115,6 +114,7 @@ function StudentView({ a }: { a: Assignment }) {
   const pastDue = Date.now() > new Date(a.due_at).getTime();
   const closed = !a.allow_late && pastDue;
   const canEdit = !!sub && !graded && !closed;
+  const late = sub && lateBy(a.due_at, sub.submitted_at);
 
   return (
     <div className="content">
@@ -136,9 +136,7 @@ function StudentView({ a }: { a: Assignment }) {
         {sub && !editing ? (
           <div className="card stack">
             <p>
-              {new Date(sub.submitted_at) > new Date(a.due_at)
-                ? <strong>Submitted {lateBy(a.due_at, sub.submitted_at)}</strong>
-                : <strong>Submitted</strong>}
+              <strong>Submitted{late && ` ${late} late`}</strong>
               {" "}<time dateTime={sub.submitted_at}>{fmtDateTime(sub.submitted_at)}</time>
               {" "}<span className="muted">· Attempt {sub.attempt}</span>
             </p>
@@ -190,7 +188,7 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
     setFileError(undefined);
     const hasText = a.accepts_text && text.trim() !== "";
     const hasFile = a.accepts_files && (!!file || (existing?.files.length ?? 0) > 0);
-    if (file && file.size > MAX_FILE_BYTES) {
+    if (file && file.size > MAX_UPLOAD_BYTES) {
       setFileError("This file is larger than the 10 MB limit");
       document.getElementById("sub-file")?.focus();
       return;
@@ -230,7 +228,7 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
 
   return (
     <form className="card form" onSubmit={submit} noValidate>
-      {fail && <div className="alert danger" role="alert">{fail}</div>}
+      <ErrorNote error={fail} />
       {Date.now() > new Date(a.due_at).getTime() && <p className="muted">The due date has passed. Your work will be marked late.</p>}
       {a.accepts_text && (
         <TextArea id="sub-text" label="Your answer" rows={8} value={text} onChange={(e) => setText(e.target.value)} error={textError} />

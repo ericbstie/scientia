@@ -1,10 +1,9 @@
 import { Link } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { ButtonLink, Empty, ErrorNote, Loading, PageHeader } from "../../ui";
-import { useDocTitle } from "./content/util";
 
 type ThreadRow = { id: string; title: string; created_at: string; author: { full_name: string } | null; replies: { created_at: string }[] };
 

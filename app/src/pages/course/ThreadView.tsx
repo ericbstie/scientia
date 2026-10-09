@@ -1,12 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime } from "../../lib/format";
-import { db, must } from "../../lib/supabase";
+import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, Confirm, ErrorNote, Loading, NotFound, PageHeader, Section, TextArea, useToast } from "../../ui";
-import { Prose } from "./content/Prose";
-import { focusField, focusHeading, useDocTitle } from "./content/util";
+import { Badge, Button, Confirm, ErrorNote, focusField, focusHeading, Loading, NotFound, PageHeader, Section, TextArea, useToast } from "../../ui";
+import { Prose } from "../../ui/Prose";
 
 type Post = { key: string; kind: "first" | "reply"; removed?: boolean; replyId?: string; authorId?: string; author?: string; at: string; text: string };
 
@@ -19,13 +18,13 @@ export function ThreadView() {
   const base = `/courses/${course.id}`;
   const [reply, setReply] = useState("");
   const [replyError, setReplyError] = useState<string>();
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [removingPost, setRemovingPost] = useState<Post | null>(null);
   const [removingThread, setRemovingThread] = useState(false);
 
   const q = useQuery(async () => {
-    if (!/^[0-9a-f-]{36}$/i.test(threadId ?? "")) return null;
+    if (!isUuid(threadId)) return null;
     const [thread, replies, people] = await Promise.all([
       db().from("threads").select("id, title, body, created_at, author_id, author:profiles!author_id(full_name)").eq("id", threadId!).eq("course_id", course.id).maybeSingle(),
       db().from("replies").select("id, body, removed, created_at, author_id, author:profiles!author_id(full_name)").eq("thread_id", threadId!).order("created_at"),
@@ -49,7 +48,7 @@ export function ThreadView() {
       setReply("");
       toast("Reply posted");
       await q.reload();
-    } catch (err) { setFail(new Error("Could not post. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not post. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
 
@@ -64,7 +63,7 @@ export function ThreadView() {
       toast("Post removed");
       await q.reload();
       focusHeading();
-    } catch (err) { setFail(new Error("Could not remove the post. Check your connection and try again.")); setRemovingPost(null); console.error(err); }
+    } catch (err) { setFail("Could not remove the post. Check your connection and try again."); setRemovingPost(null); console.error(err); }
     setBusy(false);
   }
 
@@ -75,7 +74,7 @@ export function ThreadView() {
       must(await db().from("threads").delete().eq("id", threadId!).select("id"));
       toast("Thread deleted");
       navigate(`${base}/discussions`);
-    } catch (err) { setFail(new Error("Could not delete the thread. Check your connection and try again.")); setRemovingThread(false); console.error(err); }
+    } catch (err) { setFail("Could not delete the thread. Check your connection and try again."); setRemovingThread(false); console.error(err); }
     setBusy(false);
   }
 

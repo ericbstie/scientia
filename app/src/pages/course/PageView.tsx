@@ -1,16 +1,15 @@
 import { Link, useParams } from "react-router";
-import { useCourse } from "../../App";
-import { db, must } from "../../lib/supabase";
+import { useCourse, useDocTitle } from "../../App";
+import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { ErrorNote, Loading, NotFound, PageHeader } from "../../ui";
-import { Prose } from "./content/Prose";
-import { useDocTitle } from "./content/util";
+import { Prose } from "../../ui/Prose";
 
 export function PageView() {
   const { course } = useCourse();
   const { pageId } = useParams();
   const q = useQuery(async () => {
-    if (!/^[0-9a-f-]{36}$/i.test(pageId ?? "")) return null;
+    if (!isUuid(pageId)) return null;
     // The inner join drops pages of modules the viewer cannot see (draft modules for students).
     return must(
       await db().from("materials").select("id, title, body, kind, modules!inner(id, title)").eq("id", pageId!).eq("course_id", course.id).eq("kind", "page").maybeSingle(),

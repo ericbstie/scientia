@@ -5,8 +5,7 @@ import { useAuth } from "../lib/auth";
 import { fmtDateTime } from "../lib/format";
 import { db, must } from "../lib/supabase";
 import { useQuery } from "../lib/useQuery";
-import { Badge, Button, Empty, ErrorNote, Loading, PageHeader, useTitle, useToast } from "../ui";
-import { focusHeading } from "./course/content/util";
+import { Badge, Button, Empty, ErrorNote, focusHeading, Loading, PageHeader, useTitle, useToast } from "../ui";
 
 type Note = { id: string; title: string; link: string; read_at: string | null; created_at: string };
 
@@ -16,7 +15,7 @@ export function Notifications() {
   const navigate = useNavigate();
   const toast = useToast();
   useTitle("Notifications");
-  const [failure, setFailure] = useState<Error | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
   const { data, error, loading, reload } = useQuery(
     async () => must(await db().from("notifications").select("id, title, link, read_at, created_at").eq("user_id", profile!.id).order("created_at", { ascending: false })) as Note[],
     [profile!.id],
@@ -42,7 +41,7 @@ export function Notifications() {
       toast("All notifications marked as read");
       focusHeading();
     } catch {
-      setFailure(new Error("Could not mark notifications as read. Check your connection and try again."));
+      setFailure("Could not mark notifications as read. Check your connection and try again.");
     }
   }
 

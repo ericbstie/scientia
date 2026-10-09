@@ -2,8 +2,9 @@
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { BrowserRouter, Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router";
 import { AuthProvider, useAuth } from "./lib/auth";
-import { db } from "./lib/supabase";
-import { Loading, NoAccess, NotFound, ToastProvider } from "./ui";
+import { initials } from "./lib/format";
+import { db, isUuid } from "./lib/supabase";
+import { Loading, NoAccess, NotFound, ToastProvider, useTitle } from "./ui";
 import { SignIn } from "./pages/SignIn";
 
 const page = <T extends Record<string, React.ComponentType>>(load: () => Promise<T>, name: keyof T) =>
@@ -183,7 +184,7 @@ function AccountMenu({ name }: { name: string }) {
   return (
     <div className="menu" ref={ref}>
       <button className="nav-link" aria-haspopup="menu" aria-expanded={open} aria-label={`Account menu for ${name}`} onClick={() => setOpen(!open)}>
-        <span className="nav-label">{name}</span><span className="mobile-only initials" aria-hidden="true">{name.split(/\s+/).filter(Boolean).slice(-2).map((w) => w[0]).join("").toUpperCase()}</span> <span aria-hidden="true">▾</span>
+        <span className="nav-label">{name}</span><span className="mobile-only initials" aria-hidden="true">{initials(name)}</span> <span aria-hidden="true">▾</span>
       </button>
       {open && (
         <div className="menu-list" role="menu" aria-label="Account">
@@ -203,6 +204,8 @@ export type CourseRole = "teacher" | "student";
 const CourseContext = createContext<{ course: Course; role: CourseRole }>(null!);
 /** Current course and the viewer's role in it (admins act as teachers). */
 export const useCourse = () => useContext(CourseContext);
+/** Document title inside a course: "<page> · <course code> · Scientia". */
+export const useDocTitle = (page: string | undefined) => useTitle(page, useCourse().course.code);
 
 function CourseLayout() {
   const { courseId } = useParams();
@@ -228,7 +231,7 @@ function CourseLayout() {
     let live = true;
     setState(null);
     (async () => {
-      const uuid = /^[0-9a-f-]{36}$/i.test(courseId ?? "");
+      const uuid = isUuid(courseId);
       const [{ data: course }, { data: enrol }] = uuid
         ? await Promise.all([
             db().from("courses").select("id, code, title, description, term, archived").eq("id", courseId!).maybeSingle(),

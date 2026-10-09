@@ -1,12 +1,11 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
-import { useCourse } from "../../App";
-import { fmtDateTime, num } from "../../lib/format";
+import { useCourse, useDocTitle } from "../../App";
+import { fmtDateTime, lateBy, num } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ErrorNote, Field, Loading, NotFound, PageHeader, Section, StatusBadge, TextArea, useToast } from "../../ui";
-import { useDocTitle } from "./content/util";
-import { FileLinks, buildQueue, lateByLabel, loadTeacherData, useUnsavedGuard } from "./work/shared";
+import { FileLinks, buildQueue, loadTeacherData, useUnsavedGuard } from "./work/shared";
 
 export function GradingSubmission() {
   const { submissionId } = useParams();
@@ -53,7 +52,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
   if (!sub || !assignment || !student || saved === null) return <NotFound />;
 
   const state = !saved.exists ? "Needs grading" : saved.released ? "Released" : "Graded (not released)";
-  const late = lateByLabel(assignment.due_at, sub.submitted_at);
+  const late = lateBy(assignment.due_at, sub.submitted_at);
 
   async function save(e: FormEvent | null, release: boolean) {
     e?.preventDefault();
@@ -92,14 +91,14 @@ function GradeOne({ submissionId }: { submissionId: string }) {
           <p>
             Submitted <time dateTime={sub.submitted_at}>{fmtDateTime(sub.submitted_at)}</time>
             {" "}<span className="muted">· Attempt {sub.attempt}</span>
-            {late && <> <Badge tone="warning">{late}</Badge></>}
+            {late && <> <Badge tone="warning">Late by {late}</Badge></>}
           </p>
           {sub.body ? <p className="prose">{sub.body}</p> : <p className="muted">No text.</p>}
           <FileLinks files={sub.files} />
         </div>
       </Section>
       <Section title="Grade">
-        {fail && <div className="alert danger" role="alert">{fail}</div>}
+        <ErrorNote error={fail} />
         <form className="card form" onSubmit={(e) => save(e, false)} noValidate>
           <Field
             id="g-score" label="Score" required type="number" step="any" inputMode="decimal" hint={`out of ${num(assignment.points)}`}

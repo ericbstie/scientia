@@ -1,10 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useCourse } from "../../App";
-import { db, must } from "../../lib/supabase";
+import { useCourse, useDocTitle } from "../../App";
+import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Button, ButtonLink, ErrorNote, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
-import { focusField, useDocTitle } from "./content/util";
+import { Button, ButtonLink, ErrorNote, Field, focusField, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
 
 export function PageNew() {
   const { course } = useCourse();
@@ -15,16 +14,14 @@ export function PageNew() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [titleError, setTitleError] = useState<string>();
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useDocTitle("Add page");
 
   const q = useQuery(async () => {
-    const uuid = /^[0-9a-f-]{36}$/i.test(moduleId ?? "");
-    if (!uuid) return null;
-    const mod = must(await db().from("modules").select("id, title, materials(position)").eq("id", moduleId!).eq("course_id", course.id).maybeSingle()) as
+    if (!isUuid(moduleId)) return null;
+    return must(await db().from("modules").select("id, title, materials(position)").eq("id", moduleId).eq("course_id", course.id).maybeSingle()) as
       { id: string; title: string; materials: { position: number }[] } | null;
-    return mod;
   }, [moduleId, course.id]);
 
   function edit(fn: (value: string, start: number, end: number) => { value: string; start: number; end: number }) {
@@ -53,7 +50,7 @@ export function PageNew() {
       must(await db().from("materials").insert({ course_id: course.id, module_id: moduleId, kind: "page", title: title.trim(), body, position, published: true }).select("id"));
       toast("Page saved");
       navigate(`${base}/modules`);
-    } catch (err) { setFail(new Error("Could not save. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not save. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
 

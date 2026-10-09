@@ -1,7 +1,7 @@
 // Shared UI primitives. Prefer these over ad-hoc markup so pages stay consistent.
 import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode, type Ref, type ButtonHTMLAttributes, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from "react";
 import { Link, useLocation } from "react-router";
-import { fmtDateTime, relative, type StudentStatus } from "../lib/format";
+import { fmtDateTime, initials, relative, type StudentStatus } from "../lib/format";
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "danger" | "ghost"; size?: "small" };
 export function Button({ variant, size, className = "", type = "button", ...rest }: BtnProps) {
@@ -104,10 +104,16 @@ export function Loading({ label = "Loading" }: { label?: string }) {
   return <p className="muted" role="status" aria-live="polite">{label}…</p>;
 }
 
-export function ErrorNote({ error }: { error: Error | null | undefined }) {
+export function ErrorNote({ error }: { error: Error | string | null | undefined }) {
   if (!error) return null;
-  return <div className="alert danger" role="alert">{error.message}</div>;
+  return <div className="alert danger" role="alert">{typeof error === "string" ? error : error.message}</div>;
 }
+
+/** Focus a field by id, after React has rendered its error text. */
+export const focusField = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus());
+
+/** After a row disappears, keep keyboard users in the page: focus the page heading. */
+export const focusHeading = () => requestAnimationFrame(() => document.querySelector<HTMLElement>("main h1")?.focus());
 
 const describedBy = (id: string, hint?: string, error?: string) =>
   [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
@@ -221,8 +227,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export const useToast = () => useContext(ToastContext);
 
 export function Avatar({ name }: { name: string }) {
-  const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join("");
-  return <span aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 999, background: "var(--surface-2)", border: "1px solid var(--border)", display: "inline-grid", placeItems: "center", fontSize: "0.78rem", fontWeight: 600, color: "var(--text-2)", flex: "none" }}>{initials}</span>;
+  return <span aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 999, background: "var(--surface-2)", border: "1px solid var(--border)", display: "inline-grid", placeItems: "center", fontSize: "0.78rem", fontWeight: 600, color: "var(--text-2)", flex: "none" }}>{initials(name)}</span>;
 }
 
 /** Confirmation dialog for destructive actions: Cancel is focused first. */

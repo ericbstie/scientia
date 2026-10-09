@@ -1,7 +1,7 @@
 // Shared types, loaders and small components for assignments, submissions and grading.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
-import { db, must } from "../../../lib/supabase";
+import { db, isUuid, must } from "../../../lib/supabase";
 import { Button, Dialog } from "../../../ui";
 
 export type Assignment = {
@@ -12,8 +12,6 @@ export type FileRef = { path: string; name: string; size: number };
 export type Submission = { id: string; assignment_id: string; student_id: string; body: string; files: FileRef[]; attempt: number; submitted_at: string };
 export type Grade = { assignment_id: string; student_id: string; score: number | null; feedback: string; released: boolean; graded_at: string };
 export type Student = { user_id: string; full_name: string; email: string | null };
-
-export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normAssignment = (a: any): Assignment => ({ ...a, points: Number(a.points) });
@@ -28,7 +26,7 @@ export function normSub(s: any): Submission {
 const rowsOf = <T,>(res: { data: T[] | null; error: { message: string } | null }): T[] => must(res) ?? [];
 
 export async function loadAssignment(courseId: string, id: string): Promise<Assignment | null> {
-  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  if (!isUuid(id)) return null;
   const { data, error } = await db().from("assignments").select("*").eq("id", id).eq("course_id", courseId).maybeSingle();
   if (error) throw new Error(error.message);
   return data ? normAssignment(data) : null;
@@ -83,26 +81,6 @@ export async function loadTeacherData(courseId: string) {
 export type TeacherData = Awaited<ReturnType<typeof loadTeacherData>>;
 
 export const key = (assignmentId: string, studentId: string) => `${assignmentId}:${studentId}`;
-
-export const lastName = (full: string) => full.trim().split(/\s+/).slice(-1)[0] ?? "";
-export const firstName = (full: string) => full.trim().split(/\s+/).slice(0, -1).join(" ");
-
-/** "Late by 1 day", "Late by 3 hours"; null when on time. */
-export function lateByLabel(dueAt: string, submittedAt: string) {
-  const ms = new Date(submittedAt).getTime() - new Date(dueAt).getTime();
-  if (ms <= 0) return null;
-  const days = Math.round(ms / 86400000);
-  if (days >= 1) return `Late by ${days} day${days === 1 ? "" : "s"}`;
-  const hours = Math.max(1, Math.round(ms / 3600000));
-  return `Late by ${hours} hour${hours === 1 ? "" : "s"}`;
-}
-
-/** One decimal, always: 72.0, 87.3 */
-export const pct1 = (score: number, points: number) => (points > 0 ? (Math.round((score / points) * 1000) / 10).toFixed(1) : "0.0");
-
-const pad = (n: number) => String(n).padStart(2, "0");
-/** Value for <input type="datetime-local"> in the viewer's time zone. */
-export const toLocalInput = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
 export function acceptsLabel(a: Pick<Assignment, "accepts_text" | "accepts_files">) {
   return a.accepts_files && a.accepts_text ? "Upload a file or type an answer" : a.accepts_files ? "Upload a file" : "Type an answer";

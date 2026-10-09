@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Button, Checkbox, ErrorNote, ErrorSummary, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
-import { useDocTitle } from "./content/util";
-import { loadAssignment, toLocalInput } from "./work/shared";
+import { toLocalInput } from "../../lib/format";
+import { loadAssignment } from "./work/shared";
 
 type Errors = { title?: string; due?: string; points?: string; accepts?: string };
 
@@ -86,7 +86,7 @@ export function AssignmentForm() {
       />
       <ErrorNote error={existing.error} />
       <ErrorSummary errors={[errors.title && { id: "a-title", message: errors.title }, errors.due && { id: "a-due", message: errors.due }, errors.points && { id: "a-points", message: errors.points }, errors.accepts && { id: "a-accepts", message: errors.accepts }]} />
-      {saveError && <div className="alert danger" role="alert">{saveError}</div>}
+      <ErrorNote error={saveError} />
       <form className="form" ref={formRef} onSubmit={(e) => save(e, editing ? null : true)} noValidate>
         <Field id="a-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} autoComplete="off" />
         <TextArea id="a-instructions" label="Instructions" rows={6} value={description} onChange={(e) => setDescription(e.target.value)} />

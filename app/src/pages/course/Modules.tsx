@@ -1,17 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router";
-import { useCourse } from "../../App";
-import { db, must } from "../../lib/supabase";
+import { useCourse, useDocTitle } from "../../App";
+import { db, MAX_UPLOAD_BYTES, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, Loading, PageHeader, Section, useToast } from "../../ui";
-import { focusField, focusHeading, useDocTitle } from "./content/util";
+import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, focusHeading, Loading, PageHeader, Section, useToast } from "../../ui";
 
 type Item = { id: string; kind: "page" | "file" | "link"; title: string; url: string | null; file_name: string | null; file_path: string | null; position: number };
 type Mod = { id: string; title: string; position: number; published: boolean; materials: Item[] };
 type Dlg = { kind: "module" } | { kind: "file" | "link"; module: Mod } | null;
 
 const KIND_LABEL = { page: "Page", file: "File", link: "Link" } as const;
-const MAX_BYTES = 10 * 1024 * 1024;
 const isWebAddress = (s: string) => /^https?:\/\/\S+$/i.test(s.trim());
 
 export function Modules() {
@@ -21,9 +19,9 @@ export function Modules() {
   useDocTitle("Modules");
   const base = `/courses/${course.id}`;
   const [dialog, setDialog] = useState<Dlg>(null);
-  const [removing, setRemoving] = useState<{ mod: Mod; item: Item } | null>(null);
+  const [removing, setRemoving] = useState<Item | null>(null);
   const [busy, setBusy] = useState(false);
-  const [actionError, setActionError] = useState<Error | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const q = useQuery(async () => {
     const mods = must(
@@ -49,7 +47,7 @@ export function Modules() {
       must(await db().from("modules").update({ published }).eq("id", mod.id).select("id"));
       toast(published ? "Module published" : "Module unpublished");
       q.reload();
-    } catch (e) { setActionError(e as Error); }
+    } catch { setActionError("Could not save. Check your connection and try again."); }
   }
 
   async function removeItem() {
@@ -57,14 +55,14 @@ export function Modules() {
     setBusy(true);
     setActionError(null);
     try {
-      const { item } = removing;
+      const item = removing;
       must(await db().from("materials").delete().eq("id", item.id).select("id"));
       if (item.file_path) await db().storage.from("materials").remove([item.file_path]);
       setRemoving(null);
       toast("Item deleted");
       await q.reload();
       focusHeading();
-    } catch (e) { setActionError(e as Error); setRemoving(null); }
+    } catch { setActionError("Could not delete the item. Check your connection and try again."); setRemoving(null); }
     setBusy(false);
   }
 
@@ -113,7 +111,7 @@ export function Modules() {
                         )}
                         <div className="row-meta">{KIND_LABEL[i.kind]}{i.kind === "link" && " · Opens in a new tab"}{i.kind === "file" && i.file_name && <> · {i.file_name}</>}</div>
                       </div>
-                      {teacher && <div className="row-side"><Button variant="danger" size="small" className="ghost" aria-label={`Delete ${KIND_LABEL[i.kind].toLowerCase()} ${i.title}`} onClick={() => setRemoving({ mod: m, item: i })}>Delete</Button></div>}
+                      {teacher && <div className="row-side"><Button variant="danger" size="small" className="ghost" aria-label={`Delete ${KIND_LABEL[i.kind].toLowerCase()} ${i.title}`} onClick={() => setRemoving(i)}>Delete</Button></div>}
                     </div>
                   </li>
                 ))}
@@ -150,7 +148,7 @@ export function Modules() {
       </Dialog>
       <Confirm
         open={!!removing}
-        title={`Delete "${removing?.item.title ?? ""}"?`}
+        title={`Delete "${removing?.title ?? ""}"?`}
         confirmLabel="Delete"
         onConfirm={removeItem}
         onCancel={() => setRemoving(null)}
@@ -175,7 +173,7 @@ function ModuleForm({ position, onCancel, onDone }: { position: number; onCancel
   const { course } = useCourse();
   const [name, setName] = useState("");
   const [error, setError] = useState<string>();
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -186,7 +184,7 @@ function ModuleForm({ position, onCancel, onDone }: { position: number; onCancel
     try {
       must(await db().from("modules").insert({ course_id: course.id, title: name.trim(), position, published: false }).select("id"));
       onDone();
-    } catch (err) { setFail(new Error("Could not save. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not save. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
   return (
@@ -204,13 +202,13 @@ function FileForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
   const { course } = useCourse();
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string>();
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
     setFail(null);
     if (!file) { setError("Choose a file"); focusField("file-input"); return; }
-    if (file.size > MAX_BYTES) {
+    if (file.size > MAX_UPLOAD_BYTES) {
       setError(`The file is ${Math.ceil(file.size / 1048576)} MB. The limit is 10 MB. Choose a smaller file.`);
       focusField("file-input");
       return;
@@ -229,7 +227,7 @@ function FileForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
         throw err;
       }
       onDone();
-    } catch (err) { setFail(new Error("Could not upload the file. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not upload the file. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
   return (
@@ -246,7 +244,7 @@ function LinkForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [errors, setErrors] = useState<{ title?: string; url?: string }>({});
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -261,7 +259,7 @@ function LinkForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
     try {
       must(await db().from("materials").insert({ course_id: course.id, module_id: mod.id, kind: "link", title: title.trim(), url: url.trim(), position: nextPosition(mod), published: true }).select("id"));
       onDone();
-    } catch (err) { setFail(new Error("Could not save. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not save. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
   return (

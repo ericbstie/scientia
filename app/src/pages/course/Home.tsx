@@ -1,11 +1,10 @@
 import { Link } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDate, studentStatus } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ButtonLink, Due, ErrorNote, Loading, PageHeader, Section, StatusBadge, Empty } from "../../ui";
-import { useDocTitle } from "./content/util";
 
 type Asg = { id: string; title: string; due_at: string; allow_late: boolean; published: boolean };
 type Ann = { id: string; title: string; created_at: string; pinned?: boolean };

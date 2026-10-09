@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, Field, Loading, PageHeader, Section, useToast } from "../../ui";
-import { focusField, focusHeading, lastName, useDocTitle } from "./content/util";
+import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, Field, focusField, focusHeading, Loading, PageHeader, Section, useToast } from "../../ui";
+import { byLastName } from "../../lib/format";
 
 type Person = { user_id: string; full_name: string; email: string | null; role: "teacher" | "student" };
 
@@ -15,7 +15,7 @@ export function People() {
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState<Person | null>(null);
   const [busy, setBusy] = useState(false);
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
 
   const q = useQuery(async () => must(await db().rpc("course_people", { c: course.id })) as Person[], [course.id]);
 
@@ -29,13 +29,13 @@ export function People() {
       toast(`${removing.full_name} removed`);
       await q.reload();
       focusHeading();
-    } catch (e) { setFail(new Error("Could not remove the student. Check your connection and try again.")); setRemoving(null); console.error(e); }
+    } catch (e) { setFail("Could not remove the student. Check your connection and try again."); setRemoving(null); console.error(e); }
     setBusy(false);
   }
 
   const people = q.data ?? [];
   const teachers = people.filter((p) => p.role === "teacher").sort((a, b) => a.full_name.localeCompare(b.full_name));
-  const students = people.filter((p) => p.role === "student").sort((a, b) => lastName(a.full_name).localeCompare(lastName(b.full_name)) || a.full_name.localeCompare(b.full_name));
+  const students = people.filter((p) => p.role === "student").sort(byLastName);
 
   return (
     <div className="content">

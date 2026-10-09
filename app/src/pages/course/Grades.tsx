@@ -1,11 +1,10 @@
 import { Link } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
-import { fmtDateTime, num, studentStatus } from "../../lib/format";
+import { fmtDateTime, num, pct, studentStatus } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
 import { Empty, ErrorNote, Loading, PageHeader, StatusBadge } from "../../ui";
-import { useDocTitle } from "./content/util";
-import { loadMyWork, pct1 } from "./work/shared";
+import { loadMyWork } from "./work/shared";
 
 export function Grades() {
   const { course } = useCourse();
@@ -20,7 +19,7 @@ export function Grades() {
     if (scored.length) {
       const got = scored.reduce((s, a) => s + data.grades.get(a.id)!.score!, 0);
       const of = scored.reduce((s, a) => s + a.points, 0);
-      total = `Total: ${pct1(got, of)}% (${num(got)} of ${num(of)} points graded so far)`;
+      total = `Total: ${pct(got, of)}% (${num(got)} of ${num(of)} points graded so far)`;
     }
   }
 

@@ -11,13 +11,13 @@ export function Profile() {
 
   const [name, setName] = useState(profile!.full_name);
   const [nameError, setNameError] = useState<string>();
-  const [nameFail, setNameFail] = useState<Error | null>(null);
+  const [nameFail, setNameFail] = useState<string | null>(null);
 
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [curError, setCurError] = useState<string>();
   const [nextError, setNextError] = useState<string>();
-  const [pwFail, setPwFail] = useState<Error | null>(null);
+  const [pwFail, setPwFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function saveName(e: FormEvent) {
@@ -27,7 +27,7 @@ export function Profile() {
     if (!trimmed) { setNameError("Enter a display name."); document.getElementById("pf-name")?.focus(); return; }
     setNameError(undefined);
     const { error } = await db().from("profiles").update({ full_name: trimmed }).eq("id", profile!.id);
-    if (error) return setNameFail(new Error("Could not save. Check your connection and try again."));
+    if (error) return setNameFail("Could not save. Check your connection and try again.");
     await refreshProfile();
     setName(trimmed);
     toast("Saved");
@@ -49,7 +49,7 @@ export function Profile() {
       if (error) {
         if (/different from the old/i.test(error.message)) return setNextError("The new password must be different from the current one.");
         if (/at least|weak|short/i.test(error.message)) return setNextError("Password must be at least 8 characters");
-        return setPwFail(new Error("Could not change the password. Check your connection and try again."));
+        return setPwFail("Could not change the password. Check your connection and try again.");
       }
       setCurrent("");
       setNext("");

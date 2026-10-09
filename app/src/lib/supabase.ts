@@ -22,3 +22,9 @@ export function must<T>(res: { data: T; error: { message: string } | null }): T 
   if (res.error) throw new Error(res.error.message);
   return res.data;
 }
+
+/** Ids in URLs are checked before querying, so a mistyped link shows "not found" instead of an error. */
+export const isUuid = (s: string | undefined): s is string => /^[0-9a-f-]{36}$/i.test(s ?? "");
+
+/** Largest file a teacher or student can upload (the storage service allows more). */
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;

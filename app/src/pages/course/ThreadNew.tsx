@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { db, must } from "../../lib/supabase";
-import { Button, ButtonLink, ErrorNote, Field, PageHeader, TextArea, useToast } from "../../ui";
-import { focusField, useDocTitle } from "./content/util";
+import { Button, ButtonLink, ErrorNote, Field, focusField, PageHeader, TextArea, useToast } from "../../ui";
 
 export function ThreadNew() {
   const { course } = useCourse();
@@ -13,7 +12,7 @@ export function ThreadNew() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [titleError, setTitleError] = useState<string>();
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useDocTitle("New thread");
 
@@ -27,7 +26,7 @@ export function ThreadNew() {
       must(await db().from("threads").insert({ course_id: course.id, title: title.trim(), body: message }).select("id"));
       toast("Thread posted");
       navigate(`${base}/discussions`);
-    } catch (err) { setFail(new Error("Could not post. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not post. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
 

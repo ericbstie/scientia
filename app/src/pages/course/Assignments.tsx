@@ -1,10 +1,9 @@
 import { Link } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDateTime, num, studentStatus } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ButtonLink, Empty, ErrorNote, Loading, PageHeader, StatusBadge } from "../../ui";
-import { useDocTitle } from "./content/util";
 import { loadAssignments, loadMyWork } from "./work/shared";
 
 export function Assignments() {

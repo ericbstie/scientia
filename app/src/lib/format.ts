@@ -9,7 +9,7 @@ export function fmtDate(d: string | Date) {
   const year = date.getFullYear() === new Date().getFullYear() ? "" : ` ${p.year}`;
   return `${p.weekday} ${p.day} ${p.month}${year}`;
 }
-export function fmtTime(d: string | Date) {
+function fmtTime(d: string | Date) {
   const p = parts(new Date(d), { hour: "2-digit", minute: "2-digit" });
   return `${p.hour}:${p.minute}`;
 }
@@ -36,18 +36,31 @@ export function studentStatus(a: { due_at: string; allow_late: boolean }, submit
   return a.allow_late ? "Missing" : "Closed";
 }
 
-/** "1 day late", "3 hours late" */
+/** How late a submission was ("1 day", "3 hours"), or null when it was on time. */
 export function lateBy(dueAt: string, submittedAt: string) {
   const ms = new Date(submittedAt).getTime() - new Date(dueAt).getTime();
+  if (ms <= 0) return null;
   const days = Math.round(ms / 86400000);
-  if (days >= 1) return `${days} day${days === 1 ? "" : "s"} late`;
+  if (days >= 1) return `${days} day${days === 1 ? "" : "s"}`;
   const hours = Math.max(1, Math.round(ms / 3600000));
-  return `${hours} hour${hours === 1 ? "" : "s"} late`;
+  return `${hours} hour${hours === 1 ? "" : "s"}`;
 }
 
-export const pct = (score: number, points: number) => (points > 0 ? Math.round((score / points) * 1000) / 10 : 0);
+/** Percentage with one decimal, always: "72.0", "87.3". */
+export const pct = (score: number, points: number) => (points > 0 ? (Math.round((score / points) * 1000) / 10).toFixed(1) : "0.0");
 export const num = (n: number | string | null | undefined) => (n == null ? "–" : Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 }));
 
-export function initials(name: string) {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0]!.toUpperCase()).join("");
-}
+const words = (name: string) => name.trim().split(/\s+/).filter(Boolean);
+/** "Dr. Ingrid Solberg" → "IS" (the last two words, so titles are skipped). */
+export const initials = (name: string) => words(name).slice(-2).map((w) => w[0]!.toUpperCase()).join("");
+export const lastName = (name: string) => words(name).at(-1) ?? "";
+export const firstName = (name: string) => words(name).slice(0, -1).join(" ");
+/** Sorts people by last name, then full name. */
+export const byLastName = <T extends { full_name: string }>(a: T, b: T) =>
+  lastName(a.full_name).localeCompare(lastName(b.full_name)) || a.full_name.localeCompare(b.full_name);
+
+const pad = (n: number) => String(n).padStart(2, "0");
+/** "2026-10-09" in the viewer's time zone. */
+export const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** Value for <input type="datetime-local"> in the viewer's time zone. */
+export const toLocalInput = (d: Date) => `${dayKey(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`;

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { AdminNav } from "./AdminNav";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, Loading, PageHeader, Select, Status, useTitle, useToast } from "../../ui";
+import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, Status, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { useAuth } from "../../lib/auth";
@@ -19,7 +19,6 @@ async function api(path: string, method: string, body: unknown) {
 }
 
 const emailOk = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-const focusLater = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus());
 
 export function AdminUsers() {
   const { profile } = useAuth();
@@ -63,7 +62,7 @@ export function AdminUsers() {
       <PageHeader title="Users" actions={<Button variant="primary" onClick={() => setCreating(true)}>New user</Button>} />
       <AdminNav />
       <ErrorNote error={error} />
-      {actionError && <div className="alert danger" role="alert">{actionError}</div>}
+      <ErrorNote error={actionError} />
       <Status>{data ? `Showing ${rows.length} ${rows.length === 1 ? "user" : "users"}` : ""}</Status>
       <div className="form" style={{ display: "flex", gap: "var(--s4)", flexWrap: "wrap", alignItems: "flex-end", marginBottom: "var(--s4)" }}>
         <Field label="Search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -155,13 +154,13 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
     if (password.length < 8) errs.password = "Password must be at least 8 characters";
     setErrors(errs);
     setFormError(null);
-    if (Object.keys(errs).length) return focusLater(errs.name ? "nu-name" : errs.email ? "nu-email" : "nu-password");
+    if (Object.keys(errs).length) return focusField(errs.name ? "nu-name" : errs.email ? "nu-email" : "nu-password");
     setBusy(true);
     const r = await api("/api/admin/users", "POST", { email: email.trim(), password, full_name: name.trim(), role });
     setBusy(false);
     if (r.status === 409) {
       setErrors({ email: "An account with this email already exists" });
-      return focusLater("nu-email");
+      return focusField("nu-email");
     }
     if (!r.ok) return setFormError(r.error ?? "Could not create the account. Check your connection and try again.");
     onDone(name.trim(), role);
@@ -169,7 +168,7 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
 
   return (
     <form className="form" onSubmit={submit} noValidate>
-      {formError && <div className="alert danger" role="alert">{formError}</div>}
+      <ErrorNote error={formError} />
       <ErrorSummary errors={[errors.name && { id: "nu-name", message: errors.name }, errors.email && { id: "nu-email", message: errors.email }, errors.password && { id: "nu-password", message: errors.password }]} />
       <Field id="nu-name" label="Name" required value={name} error={errors.name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
       <Field id="nu-email" label="Email" required type="email" value={email} error={errors.email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
@@ -198,7 +197,7 @@ function ResetForm({ user, onCancel, onDone }: { user: Row; onCancel: () => void
     setFormError(null);
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
-      return focusLater("rp-password");
+      return focusField("rp-password");
     }
     setError(undefined);
     setBusy(true);
@@ -210,7 +209,7 @@ function ResetForm({ user, onCancel, onDone }: { user: Row; onCancel: () => void
 
   return (
     <form className="form" onSubmit={submit} noValidate>
-      {formError && <div className="alert danger" role="alert">{formError}</div>}
+      <ErrorNote error={formError} />
       <Field id="rp-password" label="New password" required type="text" hint="At least 8 characters." value={password} error={error} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>

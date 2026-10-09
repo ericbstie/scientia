@@ -1,10 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useCourse } from "../../App";
-import { db, must } from "../../lib/supabase";
+import { useCourse, useDocTitle } from "../../App";
+import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Button, ButtonLink, ErrorNote, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
-import { focusField, useDocTitle } from "./content/util";
+import { Button, ButtonLink, ErrorNote, Field, focusField, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
 
 export function AnnouncementForm() {
   const { course } = useCourse();
@@ -17,13 +16,13 @@ export function AnnouncementForm() {
   const [message, setMessage] = useState("");
   const [original, setOriginal] = useState({ title: "", message: "" });
   const [titleError, setTitleError] = useState<string>();
-  const [fail, setFail] = useState<Error | null>(null);
+  const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   useDocTitle(editing ? "Edit announcement" : "New announcement");
 
   const q = useQuery(async () => {
     if (!editing) return { found: true };
-    if (!/^[0-9a-f-]{36}$/i.test(announcementId!)) return { found: false };
+    if (!isUuid(announcementId)) return { found: false };
     const row = must(await db().from("announcements").select("id, title, body").eq("id", announcementId!).eq("course_id", course.id).maybeSingle()) as { id: string; title: string; body: string } | null;
     if (!row) return { found: false };
     setTitle(row.title);
@@ -49,7 +48,7 @@ export function AnnouncementForm() {
         toast("Announcement posted");
       }
       navigate(`${base}/announcements`);
-    } catch (err) { setFail(new Error("Could not save. Check your connection and try again.")); console.error(err); }
+    } catch (err) { setFail("Could not save. Check your connection and try again."); console.error(err); }
     setBusy(false);
   }
 

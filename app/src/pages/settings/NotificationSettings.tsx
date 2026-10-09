@@ -17,7 +17,7 @@ export function NotificationSettings() {
   const { profile } = useAuth();
   const toast = useToast();
   useTitle("Notification settings");
-  const [failure, setFailure] = useState<Error | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
   const { data, error, loading, setData } = useQuery(async () => {
     const rows = must(await db().from("notification_prefs").select("kind, enabled").eq("user_id", profile!.id)) as { kind: string; enabled: boolean }[];
     const off = new Set(rows.filter((r) => !r.enabled).map((r) => r.kind));
@@ -31,7 +31,7 @@ export function NotificationSettings() {
     const { error } = await db().from("notification_prefs").upsert({ user_id: profile!.id, kind, enabled }, { onConflict: "user_id,kind" });
     if (error) {
       setData(before);
-      setFailure(new Error("Could not save. Check your connection and try again."));
+      setFailure("Could not save. Check your connection and try again.");
     } else toast("Saved");
   }
 

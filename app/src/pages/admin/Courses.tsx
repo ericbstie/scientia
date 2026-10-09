@@ -1,13 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { AdminNav } from "./AdminNav";
-import { Button, Dialog, Empty, ErrorNote, ErrorSummary, Field, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
+import { Button, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 
 type CourseRow = { id: string; code: string; title: string; enrollments: { role: string; profiles: { full_name: string } | null }[] };
 type Teacher = { id: string; full_name: string };
 
-const focusLater = (id: string) => requestAnimationFrame(() => document.getElementById(id)?.focus());
 
 export function AdminCourses() {
   const toast = useToast();
@@ -71,14 +70,14 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
     if (!teacher) errs.teacher = "Choose a teacher";
     setErrors(errs);
     setFormError(null);
-    if (Object.keys(errs).length) return focusLater(errs.code ? "nc-code" : errs.title ? "nc-title" : "nc-teacher");
+    if (Object.keys(errs).length) return focusField(errs.code ? "nc-code" : errs.title ? "nc-title" : "nc-teacher");
     setBusy(true);
     try {
       const { data: course, error } = await db().from("courses").insert({ code: c, title: title.trim() }).select("id").single();
       if (error) {
         if (error.code === "23505") {
           setErrors({ code: "A course with this code already exists" });
-          return focusLater("nc-code");
+          return focusField("nc-code");
         }
         throw error;
       }
@@ -97,7 +96,7 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
 
   return (
     <form className="form" onSubmit={submit} noValidate>
-      {formError && <div className="alert danger" role="alert">{formError}</div>}
+      <ErrorNote error={formError} />
       <ErrorSummary errors={[errors.code && { id: "nc-code", message: errors.code }, errors.title && { id: "nc-title", message: errors.title }, errors.teacher && { id: "nc-teacher", message: errors.teacher }]} />
       <Field id="nc-code" label="Code" required value={code} error={errors.code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
       <Field id="nc-title" label="Title" required value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} autoComplete="off" />

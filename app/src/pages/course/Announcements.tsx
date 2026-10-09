@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { useCourse } from "../../App";
+import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDate } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ButtonLink, Confirm, Empty, ErrorNote, Loading, PageHeader, useToast } from "../../ui";
-import { focusHeading, useDocTitle } from "./content/util";
+import { Badge, Button, ButtonLink, Confirm, Empty, ErrorNote, focusHeading, Loading, PageHeader, useToast } from "../../ui";
 
 export type AnnouncementRow = { id: string; title: string; body: string; pinned: boolean; created_at: string; edited_at: string | null; author: { full_name: string } | null };
 
@@ -21,7 +20,7 @@ export function Announcements() {
   useDocTitle("Announcements");
   const [removing, setRemoving] = useState<AnnouncementRow | null>(null);
   const [busy, setBusy] = useState(false);
-  const [actionError, setActionError] = useState<Error | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   
   const q = useQuery(async () => {
     const [anns, reads] = await Promise.all([
@@ -51,7 +50,7 @@ export function Announcements() {
       must(await db().from("announcements").update({ pinned: !a.pinned }).eq("id", a.id).select("id"));
       await q.reload();
       toast(a.pinned ? "Announcement unpinned" : "Announcement pinned");
-    } catch (e) { setActionError(e as Error); }
+    } catch { setActionError("Could not save. Check your connection and try again."); }
   }
 
   async function remove() {
@@ -64,7 +63,7 @@ export function Announcements() {
       toast("Announcement deleted");
       await q.reload();
       focusHeading();
-    } catch (e) { setActionError(e as Error); setRemoving(null); }
+    } catch { setActionError("Could not delete the announcement. Check your connection and try again."); setRemoving(null); }
     setBusy(false);
   }
 

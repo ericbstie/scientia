@@ -1,13 +1,12 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router";
-import { useCourse, useUnread } from "../../App";
+import { useCourse, useDocTitle, useUnread } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDate } from "../../lib/format";
-import { db, must } from "../../lib/supabase";
+import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ErrorNote, Loading, NotFound, PageHeader } from "../../ui";
-import { Prose } from "./content/Prose";
-import { useDocTitle } from "./content/util";
+import { Prose } from "../../ui/Prose";
 import type { AnnouncementRow } from "./Announcements";
 
 export function AnnouncementView() {
@@ -16,7 +15,7 @@ export function AnnouncementView() {
   const { refreshUnread } = useUnread();
   const { announcementId } = useParams();
   const q = useQuery(async () => {
-    if (!/^[0-9a-f-]{36}$/i.test(announcementId ?? "")) return null;
+    if (!isUuid(announcementId)) return null;
     return must(
       await db().from("announcements").select("id, title, body, pinned, created_at, edited_at, author:profiles!author_id(full_name)").eq("id", announcementId!).eq("course_id", course.id).maybeSingle(),
     ) as unknown as AnnouncementRow | null;

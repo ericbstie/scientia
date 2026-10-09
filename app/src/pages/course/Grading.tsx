@@ -1,12 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
-import { useCourse } from "../../App";
-import { fmtDateTime } from "../../lib/format";
+import { useCourse, useDocTitle } from "../../App";
+import { fmtDateTime, lateBy } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, Loading, PageHeader, Status, StatusBadge, useToast } from "../../ui";
-import { useDocTitle } from "./content/util";
-import { buildQueue, lateByLabel, loadTeacherData, type QueueRow } from "./work/shared";
+import { buildQueue, loadTeacherData, type QueueRow } from "./work/shared";
 
 import type { Filter } from "./work/shared";
 const FILTERS: { id: Filter; label: string; empty: string }[] = [
@@ -58,7 +57,7 @@ export function Grading() {
         actions={drafted.length > 0 ? <Button variant="primary" onClick={() => setReleaseAll(true)}>Release all graded to students ({drafted.length})</Button> : undefined}
       />
       <ErrorNote error={error} />
-      {actionError && <div className="alert danger" role="alert">{actionError}</div>}
+      <ErrorNote error={actionError} />
       <nav aria-label="Filter" className="tabs">
         {FILTERS.map((f) => (
           <Link key={f.id} className="tab" to={`${base}/grading?status=${f.id}`} aria-current={f.id === active.id ? "page" : undefined}>
@@ -73,7 +72,7 @@ export function Grading() {
         ) : (
           <ul className="list">
             {shown.map((r) => {
-              const late = r.submittedAt ? lateByLabel(r.due, r.submittedAt) : null;
+              const late = r.submittedAt && lateBy(r.due, r.submittedAt);
               return (
                 <li key={r.id}>
                   <div className="row">
@@ -89,7 +88,7 @@ export function Grading() {
                       </div>
                     </div>
                     <div className="actions">
-                      {late && <Badge tone="warning">{late}</Badge>}
+                      {late && <Badge tone="warning">Late by {late}</Badge>}
                       {r.filter === "needs-grading" && <StatusBadge status="Needs grading" />}
                       {r.filter === "graded" && <StatusBadge status="Graded (not released)" />}
                       {r.filter === "released" && <StatusBadge status="Released" />}
