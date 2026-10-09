@@ -69,23 +69,18 @@ async function ensureUsers(sql: SQL): Promise<Record<Person, string>> {
   const emails = Object.values(people).map((p) => p.email);
   // Remove accounts created by tests or by hand so the seed state is exact.
   await sql`delete from auth.users where email not in ${sql(emails)}`;
-  const existing: { id: string; email: string }[] = await sql`select id, email from auth.users`;
+  // Restore the remaining accounts in one statement: GoTrue would hash the password once per account.
+  const existing: { id: string; email: string }[] = await sql`
+    update auth.users set encrypted_password = (select extensions.crypt(${DEMO_PASSWORD}, extensions.gen_salt('bf', 10))), banned_until = null
+    returning id, email`;
   const ids = {} as Record<Person, string>;
   for (const [key, p] of Object.entries(people) as [Person, (typeof people)[Person]][]) {
-    const found = existing.find((u) => u.email === p.email);
-    if (found) {
-      await api(`${authUrl}/admin/users/${found.id}`, {
-        method: "PUT",
-        body: JSON.stringify({ password: DEMO_PASSWORD, ban_duration: "none", user_metadata: { full_name: p.name } }),
-      });
-      ids[key] = found.id;
-    } else {
-      const u = await api(`${authUrl}/admin/users`, {
+    ids[key] =
+      existing.find((u) => u.email === p.email)?.id ??
+      (await api(`${authUrl}/admin/users`, {
         method: "POST",
         body: JSON.stringify({ email: p.email, password: DEMO_PASSWORD, email_confirm: true, user_metadata: { full_name: p.name } }),
-      });
-      ids[key] = u.id;
-    }
+      })).id;
     await sql`update public.profiles set full_name = ${p.name}, role = ${p.role}, deactivated = false where id = ${ids[key]}`;
   }
   return ids;
