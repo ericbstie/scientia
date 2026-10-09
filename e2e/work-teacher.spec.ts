@@ -315,7 +315,11 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByRole("button", { name: "Release all graded to students (3)" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toContainText("Release 3 grades?");
-    await expect(dialog).toContainText("Students will see their scores and feedback.");
+    await expect(dialog).toContainText("These students will see their scores and feedback:");
+    // Every grade is named, so nothing from another assignment goes out unseen (#27).
+    const items = dialog.getByRole("listitem");
+    await expect(items).toHaveCount(3);
+    for (const name of ["Sofia Reyes, Lab report 1", "Liam Hansen, Lab report 1", "Liam Hansen, Photosynthesis worksheet"]) await expect(items.filter({ hasText: name })).toHaveCount(1);
     await dialog.getByRole("button", { name: "Release", exact: true }).click();
     await expect(page.getByRole("button", { name: /Release all graded/ })).toHaveCount(0);
     await page.getByRole("navigation", { name: "Filter" }).getByRole("link", { name: /Released/ }).click();

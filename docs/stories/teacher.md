@@ -141,7 +141,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 
 **Acceptance criteria:**
 - Given Liam's Lab report 1 is "Graded, not released", When I click Release on its row, Then the row moves to "Released" and Liam's Grades page shows "72 / 100" with the feedback "Good observations; the conclusion needs evidence from your data."
-- Given I save a draft of 78 for Sofia's Lab report 1 and a draft of 40 for Liam's Photosynthesis worksheet (so three graded-not-released submissions exist with Liam's seeded one), When I click "Release all graded (3)", Then the dialog reads "Release 3 grades? Students will see their scores and feedback." and after I confirm, all three rows are "Released" and the button is gone.
+- Given I save a draft of 78 for Sofia's Lab report 1 and a draft of 40 for Liam's Photosynthesis worksheet (so three graded-not-released submissions exist with Liam's seeded one), When I click "Release all graded (3)", Then the dialog reads "Release 3 grades? These students will see their scores and feedback:" and names each grade (Sofia Reyes, Lab report 1; Liam Hansen, Lab report 1; Liam Hansen, Photosynthesis worksheet), and after I confirm, all three rows are "Released" and the button is gone.
 - Given Maya's Lab report 1 is "Released", When I click Withdraw on its row and confirm, Then it returns to "Graded, not released" and Maya's Grades page shows "Awaiting grade" for it.
 - Given all graded work has been released (Liam's Lab report 1 released as in the first criterion), When I open the queue, Then there is no "Release all graded" button.
 

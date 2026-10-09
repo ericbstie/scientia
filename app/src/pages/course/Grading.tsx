@@ -115,7 +115,8 @@ export function Grading() {
       </Confirm>
 
       <Dialog open={releaseAll} onClose={() => setReleaseAll(false)} title={`Release ${drafted.length} ${drafted.length === 1 ? "grade" : "grades"}?`}>
-        <p>Students will see their scores and feedback.</p>
+        <p>These students will see their scores and feedback:</p>
+        <ul>{drafted.map((r) => <li key={r.id}>{r.student}, {r.assignment}</li>)}</ul>
         <div className="actions">
           <Button onClick={() => setReleaseAll(false)}>Cancel</Button>
           <Button variant="primary" disabled={busy} onClick={() => setReleased(drafted, true)}>Release</Button>
