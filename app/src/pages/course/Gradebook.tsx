@@ -62,7 +62,6 @@ export function Gradebook() {
     <div className="content wide">
       <PageHeader
         title="Gradebook"
-        eyebrow={course.code}
         actions={data && students.length > 0 ? <Button onClick={() => download(`${course.code.toLowerCase()}-gradebook.csv`, buildCsv(data))}>Export CSV</Button> : undefined}
       />
       <ErrorNote error={error} />
@@ -76,7 +75,7 @@ export function Gradebook() {
                 <caption className="visually-hidden">Gradebook for {course.title}</caption>
                 <thead>
                   <tr>
-                    <th scope="col" style={{ position: "sticky", left: 0, zIndex: 2 }}>Student</th>
+                    <th scope="col">Student</th>
                     {data.assignments.map((a) => <th key={a.id} scope="col" className="num">{a.title} ({num(a.points)})</th>)}
                     <th scope="col" className="num">Total</th>
                   </tr>
@@ -84,12 +83,12 @@ export function Gradebook() {
                 <tbody>
                   {students.map((s) => (
                     <tr key={s.user_id}>
-                      <th scope="row" style={{ position: "sticky", left: 0, zIndex: 1 }}>{s.full_name}</th>
+                      <th scope="row">{s.full_name}</th>
                       {data.assignments.map((a) => {
                         const sub = subOf(a.id, s.user_id);
                         const g = gradeOf(a.id, s.user_id);
                         const link = (content: ReactNode, text: string) => (
-                          <Link to={`${base}/grading/${sub!.id}`} aria-label={`${s.full_name}, ${a.title}: ${text}`} style={{ display: "block", margin: "calc(-1 * var(--s2)) calc(-1 * var(--s3))", padding: "var(--s2) var(--s3)" }}>{content}</Link>
+                          <Link to={`${base}/grading/${sub!.id}`} aria-label={`${s.full_name}, ${a.title}: ${text}`} className="fill">{content}</Link>
                         );
                         let cell: ReactNode;
                         if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Not released"}</span></>, `${num(g.score)} ${g.released ? "Released" : "Not released"}`);
@@ -105,12 +104,12 @@ export function Gradebook() {
               </table>
             </div>
             <Section title="Legend">
-              <dl style={{ display: "grid", gridTemplateColumns: "max-content 1fr", gap: "var(--s1) var(--s4)", margin: 0 }}>
-                <dt>Not released</dt><dd style={{ margin: 0 }}>Graded, but the student cannot see it yet. Counted in the total shown here.</dd>
-                <dt>Released</dt><dd style={{ margin: 0 }}>The student can see the score and feedback.</dd>
-                <dt>Missing</dt><dd style={{ margin: 0 }}>Past the due date and nothing was submitted. Not counted as zero.</dd>
-                <dt>Late</dt><dd style={{ margin: 0 }}>Submitted after the due date.</dd>
-                <dt>Needs grading</dt><dd style={{ margin: 0 }}>Submitted, with no score yet. Not counted in the total.</dd>
+              <dl className="defs">
+                <dt>Not released</dt><dd>Graded, but the student cannot see it yet. Counted in the total shown here.</dd>
+                <dt>Released</dt><dd>The student can see the score and feedback.</dd>
+                <dt>Missing</dt><dd>Past the due date and nothing was submitted. Not counted as zero.</dd>
+                <dt>Late</dt><dd>Submitted after the due date.</dd>
+                <dt>Needs grading</dt><dd>Submitted, with no score yet. Not counted in the total.</dd>
               </dl>
             </Section>
           </>

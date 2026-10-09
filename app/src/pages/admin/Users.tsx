@@ -64,7 +64,7 @@ export function AdminUsers() {
       <ErrorNote error={error} />
       <ErrorNote error={actionError} />
       <Status>{data ? `Showing ${rows.length} ${rows.length === 1 ? "user" : "users"}` : ""}</Status>
-      <div className="form" style={{ display: "flex", gap: "var(--s4)", flexWrap: "wrap", alignItems: "flex-end", marginBottom: "var(--s4)" }}>
+      <div className="toolbar">
         <Field label="Search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
         <Select label="Show role" value={role} onChange={(e) => setRole(e.target.value)}>
           <option value="">All roles</option>
@@ -86,7 +86,7 @@ export function AdminUsers() {
                   <th scope="row">{u.full_name}</th>
                   <td>{u.email}</td>
                   <td>
-                    {u.id === profile?.id ? <span style={{ textTransform: "capitalize" }}>{u.role}</span> : (
+                    {u.id === profile?.id ? <span className="cap">{u.role}</span> : (
                       <select className="select" aria-label={`Role for ${u.full_name}`} value={u.role} disabled={busy} onChange={(e) => setUserRole(u, e.target.value)}>
                         <option value="student">Student</option>
                         <option value="teacher">Teacher</option>

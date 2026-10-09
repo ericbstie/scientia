@@ -7,8 +7,17 @@ Rules for M3 implementers. Screens and routes are in `ia.md`. Use the tokens in 
 - Page content sits in `.content` (max 880 px). Gradebook, Grading queue and Admin tables use `.content.wide` (max 1160 px). Sign-in card is 420 px.
 - Course navigation is 248 px (`--sidebar`) at the left of course pages. Top bar is on every page except sign-in.
 - Spacing only from the scale `--s1` to `--s7` (4, 8, 12, 16, 24, 32, 48 px). Sections are separated by `--s6`.
-- Every page starts with `PageHeader`: optional eyebrow (course code or a "‹ Parent" back link), one h1, optional subtitle, actions on the right. One h1 per page, h2 for sections, no skipped levels.
+- Every page starts with `PageHeader`: optional eyebrow (a "‹ Parent" back link, never the course code, which the course navigation already shows), one h1, optional subtitle, actions on the right. One h1 per page, h2 for sections, no skipped levels.
 - Breakpoint is 820 px. Content stays one column below it.
+
+## Tokens
+
+`app/src/styles.css` is the only place a colour, size, radius or shadow is defined. Components and pages use the tokens and nothing else.
+
+- Type: five sizes, `--fs-xs` (0.78 rem, the smallest allowed) to `--fs-xl`. Controls: `--control` (40 px), `--control-sm` (32 px), `--touch` (44 px on phones). Shape: `--radius`, `--radius-sm`, `--radius-pill`. Depth: `--shadow` for panels, `--shadow-pop` for menus, dialogs and toasts.
+- No `style={{ }}` in pages and no `<style>` blocks: add a class to `styles.css` instead. Layout that only one page needs still goes there, named for what it is (`.toolbar`, `.defs`, `.choices`).
+- Typeface is Inter, shipped in `app/src/fonts/` so every browser shows the same text. The Scientia mark is `BrandMark` in `ui/`; the favicon in `index.html` is the same shape.
+- Sub-navigation inside a page (Settings, Admin, Grading filters) is always `.tabs` and `.tab`.
 
 ## Choosing list rows, cards or tables
 

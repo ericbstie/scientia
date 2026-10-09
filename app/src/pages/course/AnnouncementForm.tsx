@@ -56,7 +56,7 @@ export function AnnouncementForm() {
   if (q.data && !q.data.found) return <NotFound />;
   return (
     <div className="content">
-      <PageHeader eyebrow={<Link to={`${base}/announcements`}>Announcements</Link>} title={editing ? "Edit announcement" : "New announcement"} />
+      <PageHeader eyebrow={<Link to={`${base}/announcements`}>‹ Announcements</Link>} title={editing ? "Edit announcement" : "New announcement"} />
       <form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail ?? q.error} />
         <Field id="announcement-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />

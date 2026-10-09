@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { db, isDemo } from "../lib/supabase";
-import { Button, ErrorNote, Field, useTitle } from "../ui";
+import { BrandMark, Button, ErrorNote, Field, useTitle } from "../ui";
 
 const DEMO_ACCOUNTS = [
   { label: "Student", email: "maya.okafor@scientia.test" },
@@ -38,10 +38,8 @@ export function SignIn() {
   return (
     <main className="auth-page" id="main">
       <div className="auth-card card">
-        <div className="brand" style={{ padding: 0, marginBottom: "var(--s5)" }}>
-          <span className="brand-mark" aria-hidden="true">S</span> Scientia
-        </div>
-        <h1>Sign in to Scientia</h1>
+        <div className="brand"><BrandMark /> Scientia</div>
+        <h1>Sign in</h1>
         <ErrorNote error={error} />
         <form className="form" onSubmit={submit}>
           <Field label="Email" type="email" autoFocus autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

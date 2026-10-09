@@ -53,7 +53,6 @@ export function Grading() {
     <div className="content wide">
       <PageHeader
         title="Grading"
-        eyebrow={course.code}
         actions={drafted.length > 0 ? <Button variant="primary" onClick={() => setReleaseAll(true)}>Release all graded to students ({drafted.length})</Button> : undefined}
       />
       <ErrorNote error={error} />

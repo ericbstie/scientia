@@ -58,7 +58,7 @@ export function PageNew() {
   if (!q.data) return <NotFound />;
   return (
     <div className="content">
-      <PageHeader eyebrow={<><Link to={`${base}/modules`}>Modules</Link> › {q.data.title}</>} title="Add page" />
+      <PageHeader eyebrow={<Link to={`${base}/modules`}>‹ Modules</Link>} title="Add page" />
       <form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail} />
         <Field id="page-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />

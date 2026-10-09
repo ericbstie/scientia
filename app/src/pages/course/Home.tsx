@@ -46,7 +46,7 @@ function StudentHome() {
 
   return (
     <div className="content">
-      <PageHeader eyebrow={course.code} title={course.title} subtitle={course.description || undefined} />
+      <PageHeader title={course.title} subtitle={course.description || undefined} />
       <ErrorNote error={q.error} />
       {q.loading && !q.data ? <Loading /> : q.data && (
         <>
@@ -110,11 +110,11 @@ function TeacherHome() {
 
   return (
     <div className="content">
-      <PageHeader eyebrow={course.code} title={course.title} subtitle={course.description || undefined} />
+      <PageHeader title={course.title} subtitle={course.description || undefined} />
       <ErrorNote error={q.error} />
       {q.loading && !q.data ? <Loading /> : q.data && (
         <>
-          <ul className="list" style={{ marginBottom: "var(--s6)" }}>
+          <ul className="list section">
             <li>
               <div className="row">
                 <div className="row-main">

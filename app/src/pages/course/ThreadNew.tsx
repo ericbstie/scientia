@@ -32,7 +32,7 @@ export function ThreadNew() {
 
   return (
     <div className="content">
-      <PageHeader eyebrow={<Link to={`${base}/discussions`}>Discussions</Link>} title="New thread" />
+      <PageHeader eyebrow={<Link to={`${base}/discussions`}>‹ Discussions</Link>} title="New thread" />
       <form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail} />
         <Field id="thread-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />

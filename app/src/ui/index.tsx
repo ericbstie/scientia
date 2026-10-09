@@ -4,6 +4,16 @@ import { Link, useLocation } from "react-router";
 import { fmtDateTime, initials, relative, type StudentStatus } from "../lib/format";
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "danger" | "ghost"; size?: "small" };
+/** The Scientia mark. The favicon in index.html is the same shape; change both together. */
+export function BrandMark() {
+  return (
+    <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="var(--accent)" />
+      <path d="M10 21c1.5 1.4 3.6 2 5.8 2 3 0 5.2-1.4 5.2-3.8 0-5-10.2-2.9-10.2-7.6C10.8 9.4 12.9 8 15.6 8c2 0 3.7.6 5 1.6" fill="none" stroke="var(--on-accent)" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function Button({ variant, size, className = "", type = "button", ...rest }: BtnProps) {
   return <button type={type} className={`btn ${variant ?? ""} ${size ?? ""} ${className}`} {...rest} />;
 }
@@ -51,8 +61,8 @@ export function ErrorSummary({ errors: all }: { errors: (false | undefined | "" 
   if (errors.length < 2) return null;
   return (
     <div className="alert danger" role="alert">
-      <p style={{ margin: 0, fontWeight: 600 }}>There are {errors.length} problems with this form.</p>
-      <ul style={{ margin: "var(--s1) 0 0", paddingLeft: "var(--s5)" }}>
+      <p>There are {errors.length} problems with this form.</p>
+      <ul>
         {errors.map((e) => (
           <li key={e.id}><a href={`#${e.id}`} onClick={(ev) => { ev.preventDefault(); const el = document.getElementById(e.id); (el?.matches("fieldset") ? el.querySelector<HTMLElement>("input") : el)?.focus(); }}>{e.message}</a></li>
         ))}
@@ -238,14 +248,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export const useToast = () => useContext(ToastContext);
 
 export function Avatar({ name }: { name: string }) {
-  return <span aria-hidden="true" style={{ width: 32, height: 32, borderRadius: 999, background: "var(--surface-2)", border: "1px solid var(--border)", display: "inline-grid", placeItems: "center", fontSize: "0.78rem", fontWeight: 600, color: "var(--text-2)", flex: "none" }}>{initials(name)}</span>;
+  return <span className="avatar" aria-hidden="true">{initials(name)}</span>;
 }
 
 /** Confirmation dialog for destructive actions: Cancel is focused first. */
 export function Confirm({ open, title, children, confirmLabel, onConfirm, onCancel, busy }: { open: boolean; title: string; children?: ReactNode; confirmLabel: string; onConfirm: () => void; onCancel: () => void; busy?: boolean }) {
   return (
     <Dialog open={open} onClose={onCancel} title={title}>
-      {children && <div style={{ marginBottom: "var(--s4)" }}>{children}</div>}
+      {children && <div className="dialog-body">{children}</div>}
       <div className="actions">
         <Button onClick={onCancel}>Cancel</Button>
         <Button variant="danger" onClick={onConfirm} disabled={busy}>{confirmLabel}</Button>

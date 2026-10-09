@@ -12,21 +12,6 @@ const pad = (n: number) => String(n).padStart(2, "0");
 const key = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const css = `
-.cal-grid td { vertical-align: top; white-space: normal; min-width: 110px; height: 96px; width: 14.28%; border-right: 1px solid var(--border); }
-.cal-grid td:last-child { border-right: 0; }
-.cal-grid td.cal-today { outline: 2px solid var(--accent); outline-offset: -2px; }
-.cal-day { display: flex; gap: var(--s1); align-items: baseline; font-weight: 600; color: var(--text-2); margin-bottom: var(--s1); }
-.cal-today-label { font-size: 0.78rem; color: var(--accent); font-weight: 600; }
-.cal-items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s1); }
-.cal-items a { font-size: 0.85rem; overflow-wrap: anywhere; }
-.cal-list { display: none; }
-@media (max-width: 820px) {
-  .cal-wrap { display: none; }
-  .cal-list { display: block; }
-}
-`;
-
 export function Calendar() {
   const { profile } = useAuth();
   useTitle("Calendar");
@@ -68,7 +53,6 @@ export function Calendar() {
 
   return (
     <div className="content wide">
-      <style>{css}</style>
       <PageHeader title="Calendar" />
       <ErrorNote error={error} />
       <Status>Showing {monthName}</Status>
@@ -116,7 +100,7 @@ export function Calendar() {
             {data && count === 0 ? null : (
               <ul className="list">
                 {listDays.map((d) => (
-                  <li key={key(d)} className="row" style={{ alignItems: "flex-start" }}>
+                  <li key={key(d)} className="row top">
                     <div className="row-main">
                       <div className="row-meta"><time dateTime={key(d)}>{fmtDate(d)}</time>{key(d) === todayKey && " · Today"}</div>
                       <ul className="cal-items">

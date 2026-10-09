@@ -43,7 +43,7 @@ export function NotificationSettings() {
         <p>Notifications appear in Scientia only. No email is sent.</p>
         <ErrorNote error={error ?? failure} />
         {loading && !data ? <Loading /> : data && (
-          <fieldset style={{ border: 0, padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "var(--s3)" }}>
+          <fieldset className="choices">
             <legend className="visually-hidden">Notify me about</legend>
             {KINDS.map(([k, label]) => (
               <Checkbox key={k} label={label} checked={data[k]} onChange={(e) => change(k, e.target.checked)} />

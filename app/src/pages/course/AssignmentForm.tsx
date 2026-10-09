@@ -94,12 +94,10 @@ export function AssignmentForm() {
           <Field id="a-due" label="Due date and time" required type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} />
           <Field id="a-points" label="Points" required type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />
         </div>
-        <fieldset id="a-accepts" style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>
-          <legend className="label" style={{ marginBottom: "var(--s2)" }}>Students hand in by</legend>
-          <div className="stack" style={{ display: "grid", gap: "var(--s2)" }}>
-            <Checkbox label="Uploading a file" checked={files} onChange={(e) => setFiles(e.target.checked)} />
-            <Checkbox label="Typing an answer" checked={text} onChange={(e) => setText(e.target.checked)} />
-          </div>
+        <fieldset id="a-accepts" className="choices" aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>
+          <legend className="label">Students hand in by</legend>
+          <Checkbox label="Uploading a file" checked={files} onChange={(e) => setFiles(e.target.checked)} />
+          <Checkbox label="Typing an answer" checked={text} onChange={(e) => setText(e.target.checked)} />
           {errors.accepts && <span className="error-text" id="a-accepts-error">{errors.accepts}</span>}
         </fieldset>
         <Checkbox label="Accept work after the due date (marked late)" checked={late} onChange={(e) => setLate(e.target.checked)} />

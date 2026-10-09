@@ -4,7 +4,7 @@ import { BrowserRouter, Link, Navigate, NavLink, Outlet, Route, Routes, useLocat
 import { AuthProvider, useAuth } from "./lib/auth";
 import { initials } from "./lib/format";
 import { db, isUuid } from "./lib/supabase";
-import { Loading, NoAccess, NotFound, ToastProvider, useTitle } from "./ui";
+import { BrandMark, Loading, NoAccess, NotFound, ToastProvider, useTitle } from "./ui";
 import { SignIn } from "./pages/SignIn";
 
 const page = <T extends Record<string, React.ComponentType>>(load: () => Promise<T>, name: keyof T) =>
@@ -132,7 +132,7 @@ function Shell() {
       <a href="#main" className="skip-link">Skip to main content</a>
       <header className="topbar">
         <div className="topbar-inner">
-          <Link to="/" className="brand" aria-label="Scientia, go to dashboard"><span className="brand-mark" aria-hidden="true">S</span><span className="brand-name">Scientia</span></Link>
+          <Link to="/" className="brand" aria-label="Scientia, go to dashboard"><BrandMark /><span className="brand-name">Scientia</span></Link>
           <nav aria-label="Main" className="topnav">
             {!profile?.is_admin && <NavLink to="/" end className="nav-link">Dashboard</NavLink>}
             <NavLink to="/calendar" className="nav-link">Calendar</NavLink>

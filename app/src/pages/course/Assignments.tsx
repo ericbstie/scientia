@@ -19,7 +19,7 @@ export function Assignments() {
   const newButton = role === "teacher" ? <ButtonLink to={`${base}/assignments/new`} variant="primary">New assignment</ButtonLink> : undefined;
   return (
     <div className="content">
-      <PageHeader title="Assignments" eyebrow={course.code} actions={newButton} />
+      <PageHeader title="Assignments" actions={newButton} />
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && (
         data.assignments.length === 0 ? (

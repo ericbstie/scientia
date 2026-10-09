@@ -25,7 +25,7 @@ export function Grades() {
 
   return (
     <div className="content">
-      <PageHeader title="Grades" eyebrow={course.code} />
+      <PageHeader title="Grades" />
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && (
         data.assignments.length === 0 ? (
@@ -33,7 +33,7 @@ export function Grades() {
         ) : (
           <>
             <p><strong>{total}</strong></p>
-            <div className="table-wrap">
+            <div className="table-wrap fit">
               <table>
                 <caption className="visually-hidden">Your grades in {course.title}</caption>
                 <thead>
@@ -48,7 +48,7 @@ export function Grades() {
                     const score = released ? `${num(g!.score)} / ${num(a.points)}` : sub ? "Awaiting grade" : pastDue ? "Missing" : "Not submitted";
                     return (
                       <tr key={a.id}>
-                        <th scope="row"><Link to={`${base}/assignments/${a.id}`}>{a.title}</Link><div style={{ color: "var(--text-2)", fontSize: "0.85rem", fontWeight: 400 }}>Due {fmtDateTime(a.due_at)}</div>{released && g!.feedback && <div style={{ color: "var(--text-2)", fontSize: "0.85rem", fontWeight: 400, whiteSpace: "normal", maxWidth: "48ch" }}>Feedback: {g!.feedback}</div>}</th>
+                        <th scope="row"><Link to={`${base}/assignments/${a.id}`}>{a.title}</Link><div className="row-meta">Due {fmtDateTime(a.due_at)}</div>{released && g!.feedback && <div className="row-meta wrap">Feedback: {g!.feedback}</div>}</th>
                         <td><StatusBadge status={studentStatus(a, sub?.submitted_at, released)} /></td>
                         <td className="num">{score}</td>
                       </tr>

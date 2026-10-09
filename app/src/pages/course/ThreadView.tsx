@@ -100,17 +100,17 @@ export function ThreadView() {
         <ul className="list">
           {posts.map((p) => (
             <li key={p.key}>
-              <div className="row" style={{ alignItems: "flex-start" }}>
+              <div className="row top">
                 <div className="row-main">
                   {p.removed ? (
                     <>
-                      <p className="muted" style={{ margin: 0 }}>This post was removed by a teacher</p>
+                      <p className="muted">This post was removed by a teacher</p>
                       <div className="row-meta"><time dateTime={p.at}>{fmtDateTime(p.at)}</time></div>
                     </>
                   ) : (
                     <>
-                      <div className="row-meta" style={{ marginBottom: "var(--s1)" }}>
-                        <strong style={{ color: "var(--text)" }}>{p.author}</strong>
+                      <div className="row-meta">
+                        <strong className="author">{p.author}</strong>
                         {p.authorId && teachers.has(p.authorId) && <> <Badge>Teacher</Badge></>}
                         {" · "}<time dateTime={p.at}>{fmtDateTime(p.at)}</time>
                       </div>

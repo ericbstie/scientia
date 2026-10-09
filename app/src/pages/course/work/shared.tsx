@@ -111,7 +111,7 @@ export function FileLinks({ files }: { files: FileRef[] }) {
   }, [paths]);
   if (!files.length) return null;
   return (
-    <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+    <ul className="plain-list">
       {files.map((f) => (
         <li key={f.path}>{urls[f.path] ? <a href={urls[f.path]} download={f.name} target="_blank" rel="noreferrer">{f.name}</a> : <span>{f.name}</span>}</li>
       ))}
@@ -122,9 +122,9 @@ export function FileLinks({ files }: { files: FileRef[] }) {
 /** Facts list (definition list) used on assignment pages. */
 export function Facts({ items }: { items: [string, ReactNode][] }) {
   return (
-    <dl style={{ display: "grid", gridTemplateColumns: "max-content 1fr", gap: "var(--s1) var(--s4)", margin: "0 0 var(--s6)" }}>
+    <dl className="defs section">
       {items.map(([k, v]) => (
-        <div key={k} style={{ display: "contents" }}><dt className="muted">{k}</dt><dd style={{ margin: 0 }}>{v}</dd></div>
+        <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
       ))}
     </dl>
   );
