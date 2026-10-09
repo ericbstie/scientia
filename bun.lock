@@ -7,6 +7,7 @@
       "dependencies": {
         "@digdir/designsystemet-css": "1.23.0",
         "@digdir/designsystemet-react": "1.23.0",
+        "@digdir/designsystemet-web": "1.23.0",
         "@navikt/aksel-icons": "8.19.1",
         "@supabase/auth-js": "^2.117.3",
         "@supabase/postgrest-js": "^2.117.3",
@@ -26,6 +27,9 @@
         "typescript": "^5.9.0",
       },
     },
+  },
+  "patchedDependencies": {
+    "@digdir/designsystemet-react@1.23.0": "patches/@digdir%2Fdesignsystemet-react@1.23.0.patch",
   },
   "packages": {
     "@axe-core/playwright": ["@axe-core/playwright@4.13.0", "", { "dependencies": { "axe-core": "~4.13.0" }, "peerDependencies": { "playwright-core": ">= 1.0.0" } }, "sha512-6YLx+kxXu5GJceG4ozFg+33a2EMTdjYwWGloJ3sb9Kta5pp+ZNS53uxGVog5JetIY8s++P5UrtX+cri+u0VAVg=="],

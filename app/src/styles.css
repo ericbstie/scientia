@@ -9,12 +9,10 @@
 @import "@digdir/designsystemet-css/base.css" layer(ds.base);
 @import "@digdir/designsystemet-css/alert.css" layer(ds.components);
 @import "@digdir/designsystemet-css/avatar.css" layer(ds.components);
-@import "@digdir/designsystemet-css/badge.css" layer(ds.components);
 @import "@digdir/designsystemet-css/breadcrumbs.css" layer(ds.components);
 @import "@digdir/designsystemet-css/button.css" layer(ds.components);
 @import "@digdir/designsystemet-css/card.css" layer(ds.components);
 @import "@digdir/designsystemet-css/dialog.css" layer(ds.components);
-@import "@digdir/designsystemet-css/popover.css" layer(ds.components);
 @import "@digdir/designsystemet-css/dropdown.css" layer(ds.components);
 @import "@digdir/designsystemet-css/error-summary.css" layer(ds.components);
 @import "@digdir/designsystemet-css/field.css" layer(ds.components);
@@ -130,8 +128,6 @@
   .section { display: flex; flex-direction: column; gap: var(--ds-size-4); margin-bottom: var(--ds-size-10); }
   .section-title { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ds-size-2) var(--ds-size-3); }
   .stack { display: flex; flex-direction: column; gap: var(--ds-size-4); }
-  .split { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: var(--ds-size-6); align-items: start; }
-  @media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
 
   /* List rows: the blocks of one Designsystemet card */
   .list { list-style: none; margin: 0; }

@@ -12,9 +12,15 @@ SERVICE=$(grep '^SERVICE_ROLE_KEY=' .env.example | cut -d= -f2)
 export COMPOSE_PROJECT_NAME="scientia-$n" WEB_PORT=$((3100 + n)) DB_PORT=$((54400 + n))
 DEV_PORT=$((3200 + n))
 PIDFILE="/tmp/scientia-slot-$n.pid"
-# Stops the slot's dev server (a stale one keeps serving old code on the same port). A pid that
-# is already gone, e.g. after a Docker daemon restart, must not end the script under `set -e`.
-stop_dev() { [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null || true; rm -f "$PIDFILE"; }
+# Stops the slot's dev server (a stale one keeps serving old code on the same port). The pid file
+# can outlive it (a sandbox restart), and its pid may since belong to another process: only a
+# process that is still this app's server is stopped.
+stop_dev() {
+  local pid
+  pid=$(cat "$PIDFILE" 2>/dev/null) || return 0
+  if ps -p "$pid" -o args= 2>/dev/null | grep -q "app/server.ts"; then kill "$pid"; fi
+  rm -f "$PIDFILE"
+}
 case "$cmd" in
   env)
     echo "export BASE_URL=http://localhost:$DEV_PORT"

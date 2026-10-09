@@ -11,6 +11,7 @@
   "dependencies": {
     "@digdir/designsystemet-css": "1.23.0",
     "@digdir/designsystemet-react": "1.23.0",
+    "@digdir/designsystemet-web": "1.23.0",
     "@navikt/aksel-icons": "8.19.1",
     "@supabase/auth-js": "^2.117.3",
     "@supabase/postgrest-js": "^2.117.3",
@@ -28,5 +29,8 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "typescript": "^5.9.0"
+  },
+  "patchedDependencies": {
+    "@digdir/designsystemet-react@1.23.0": "patches/@digdir%2Fdesignsystemet-react@1.23.0.patch"
   }
 }

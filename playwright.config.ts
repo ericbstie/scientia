@@ -16,6 +16,8 @@ export default defineConfig({
     baseURL: process.env.BASE_URL ?? "http://localhost:3000",
     trace: "retain-on-failure",
     timezoneId: "UTC",
+    // The suite checks behaviour, not motion: without this, every click in a dialog waits for its 300 ms slide-in.
+    reducedMotion: "reduce",
     locale: "en-GB",
     launchOptions: process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {},
   },

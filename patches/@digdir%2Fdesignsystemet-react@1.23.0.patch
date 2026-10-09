@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+index 08e7d6200c0780be97efdbe9ee15ea4f0cb5f50a..3096f82ae49b96c3be5a9b0d97d9f645450c7934 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,7 @@
+ {
+   "name": "@digdir/designsystemet-react",
+   "type": "module",
++  "sideEffects": false,
+   "version": "1.23.0",
+   "description": "React components for Designsystemet",
+   "author": "Designsystemet team",
