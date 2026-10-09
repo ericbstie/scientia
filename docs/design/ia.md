@@ -247,15 +247,15 @@ Decisions that keep the route count low:
 ### R23 `/courses/:courseId/grading`
 - **Purpose:** the teacher's queue.
 - **Who:** teacher.
-- **Regions:** h1 "Grading"; Release all graded (N) button, shown only when N is above 0; filter links with counts (Needs grading, Graded not released, Released, Missing) as a `nav` labelled "Filter"; list rows: student, assignment, submitted time, badges ("Late by 1 day"), row action (Release, Withdraw) and the row links to R24. Missing rows have no link.
-- **Primary action:** Release all graded (N) when shown; otherwise opening the first row.
+- **Regions:** h1 "Grading"; Release all graded to students (N) button, shown only when N is above 0; filter links with counts (Needs grading, Graded not released, Released, Missing) as a `nav` labelled "Filter"; list rows: student, assignment, submitted time, badges ("Late by 1 day"), row action (Release, Withdraw) and the row links to R24. Missing rows have no link.
+- **Primary action:** Release all graded to students (N) when shown; otherwise opening the first row.
 - **Empty state:** Needs grading "Nothing needs grading."; Graded not released "No unreleased grades."; Released "No grades released yet."; Missing "No missing work."
 - **Stories:** US-22, US-29, US-31, US-36, US-43.
 
 ### R24 `/courses/:courseId/grading/:submissionId`
 - **Purpose:** grade one submission and move on.
 - **Who:** teacher.
-- **Regions:** eyebrow link "‹ Grading"; h1 "Sofia Reyes: Lab report 1" with state badge; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted).
+- **Regions:** eyebrow link "‹ Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted).
 - **Primary action:** Save (Release is separate).
 - **Empty state:** "Next to grade" disabled with "Nothing else needs grading" when the queue is empty.
 - **Stories:** US-29, US-30, US-31, US-32.
@@ -336,7 +336,7 @@ Shorthand: `C` = `/courses/:courseId`. R-numbers refer to the Routes section. "P
 | US-28 | R20 (teacher), R21 `C/assignments/:assignmentId/edit` | Assignments → row → Edit, Publish or Unpublish |
 | US-29 | R23 `C/grading` | Dashboard → "2 need grading" → queue → filter links |
 | US-30 | R24 `C/grading/:submissionId` | Queue → row → Score, Feedback → Save → Next to grade |
-| US-31 | R23, R24 | Dashboard → "2 need grading" → Release all graded (N) → confirm; or row Release, Withdraw |
+| US-31 | R23, R24 | Dashboard → "2 need grading" → Release all graded to students (N) → confirm; or row Release, Withdraw |
 | US-32 | R25 `C/gradebook`, R24 | Course nav Gradebook → cell → grading view |
 | US-33 | R25, R29 `C/gradebook.csv` | Gradebook → Export CSV |
 | US-34 | R26 `C/people` | Course nav People |
@@ -371,7 +371,7 @@ How each count is reached:
 - **Read latest feedback (2):** Notifications bell → "Grade released" item, which opens the assignment with score and feedback. Via Grades it is 3.
 - **Post an announcement (3):** teacher course card → New announcement on Course home → Post.
 - **Grade the next submission (3):** "N need grading" on the course card → first row → Save.
-- **Release grades (3):** "N need grading" on the course card → Release all graded (N) → confirm in the dialog.
+- **Release grades (3):** "N need grading" on the course card → Release all graded to students (N) → confirm in the dialog.
 - **Create an assignment (3):** course card → New assignment on Course home → Save and publish.
 - **Find a course's material (3):** course card → Modules → item.
 

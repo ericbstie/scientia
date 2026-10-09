@@ -22,7 +22,7 @@ export function AdminCourses() {
   const newButton = <Button variant="primary" onClick={() => setCreating(true)}>New course</Button>;
   return (
     <div className="content wide">
-      <PageHeader title="Courses" actions={data && data.courses.length > 0 ? newButton : undefined} />
+      <PageHeader title="Courses" subtitle="The teacher of each course adds its students, on the course's People page." actions={data && data.courses.length > 0 ? newButton : undefined} />
       <AdminNav />
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && data.courses.length === 0 ? (

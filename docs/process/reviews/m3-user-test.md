@@ -42,8 +42,8 @@ interface. `copy.leaks` is 0.
 | 2 | New course "Teacher" list silently omits non-teachers | Hint: "Only accounts with the teacher role are listed." |
 | 3 | Password hint promised "they can change it later" (there is no such page) | "At least 8 characters. Give it to the person so they can sign in." |
 | 4 | "Accepts: Text entry" is jargon | Student and teacher pages: "How to hand in: Type an answer / Upload a file"; form: "Students hand in by" with "Typing an answer", "Uploading a file" |
-| 5 | Past-due work shows a Submit form but nothing says late work is allowed | New "Late work" fact on the student page: "Accepted after the due date, marked late" or "Not accepted after the due date"; form checkbox "Accept work after the due date (marked late)" |
-| 6 | The status badge reads as part of the assignment title | Moved out of the h1 into a "Status" fact |
+| 5 | Past-due work shows a Submit form but nothing says late work is allowed | New "Late work" fact on the student page: "Accepted, marked late" or "Not accepted after the due date"; form checkbox "Accept work after the due date (marked late)"; past-due submit form says "The due date has passed. Your work will be marked late." |
+| 6 | The status badge reads as part of the assignment title (student) and the grading page title (teacher) | Moved out of the h1: a "Status" fact for students, a "Status:" subtitle on the grading page; bulk button reads "Release all graded to students (N)" |
 | 7 | One grading state has three names ("Graded (not released)", gradebook "Draft", legend) and "Not graded" vs "Needs grading" | Gradebook now says "Not released", "Needs grading", "Late, needs grading"; legend says unreleased grades count in the teacher's total |
 | 8 | "Save draft" suggests the grade is not saved | Button is "Save"; Release stays separate |
 | 9 | Grades: "No released grades yet" above a table looks contradictory | "Total: none yet. Your total appears when your teacher releases a grade." |
@@ -63,3 +63,15 @@ interface. `copy.leaks` is 0.
 - **Native date picker.** The tester saw the raw `2026-10-16T23:59` value only because
   the text browser shows the field value; people see the browser's picker.
 - **Module dates.** "Which week is this week" is a demo-data naming issue, not a missing feature.
+
+## 4. Retest after the fixes (fresh testers, same rules)
+
+| Scenario | Before | After |
+| --- | --- | --- |
+| Admin: new teacher, course, enrol Maya | Failed | Account (as teacher) and course done in 11 commands; enrolling Maya failed because only the course teacher can enrol students (US-18) and nothing said so. The Courses page now says "The teacher of each course adds its students, on the course's People page." Admin-side course management is gap 7 in `docs/research/gap-analysis.md` |
+| Ingrid: grade, release, find who is behind | Done, 8 commands | Done, 9 commands; status in the title and the unexplained bulk release were the remaining complaints, both changed |
+| Noah on a phone: missed work, can it still go in, latest news | Done, 11 commands | Done, 8 commands; asked for a warning before a late hand-in, added |
+
+The two retests ran at the same time on one database, so the teacher saw Noah's new
+late submission appear mid-test; the gradebook "inconsistencies" the teacher reported
+came from that, not from the app.

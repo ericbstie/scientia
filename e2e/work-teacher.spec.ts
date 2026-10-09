@@ -245,7 +245,7 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByLabel("Score").fill("78");
     await page.getByLabel("Feedback").fill("Good analysis, cite your sources");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
+    await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
 
     await page.getByRole("link", { name: "‹ Grading" }).click();
     await page.getByRole("navigation", { name: "Filter" }).getByRole("link", { name: /Graded, not released/ }).click();
@@ -269,7 +269,7 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByLabel("Score").fill("");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByText("Enter a score")).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Needs grading");
+    await expect(page.locator(".page-header .subtitle")).toContainText("Needs grading");
     await page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: "Grading" }).click();
     await expect(page.getByRole("navigation", { name: "Filter" }).getByRole("link", { name: /Needs grading \(2\)/ })).toBeVisible();
   });
@@ -281,12 +281,12 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByLabel("Score").fill("78");
     await page.getByLabel("Feedback").fill("Good analysis, cite your sources");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
+    await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
     await page.getByRole("button", { name: "Next to grade" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Liam Hansen: Photosynthesis worksheet");
     await page.getByLabel("Score").fill("40");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
+    await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
     await expect(page.getByRole("button", { name: "Next to grade" })).toBeDisabled();
     await expect(page.getByText("Nothing else needs grading")).toBeVisible();
   });
@@ -333,14 +333,14 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("78");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
+    await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
     await page.getByRole("button", { name: "Next to grade" }).click();
     await page.getByLabel("Score").fill("40");
     await page.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
+    await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
     await courseNav(page, "Grading").click();
 
-    await page.getByRole("button", { name: "Release all graded (3)" }).click();
+    await page.getByRole("button", { name: "Release all graded to students (3)" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toContainText("Release 3 grades?");
     await expect(dialog).toContainText("Students will see their scores and feedback.");

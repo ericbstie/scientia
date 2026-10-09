@@ -231,6 +231,7 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
   return (
     <form className="card form" onSubmit={submit} noValidate>
       {fail && <div className="alert danger" role="alert">{fail}</div>}
+      {Date.now() > new Date(a.due_at).getTime() && <p className="muted">The due date has passed. Your work will be marked late.</p>}
       {a.accepts_text && (
         <TextArea id="sub-text" label="Your answer" rows={8} value={text} onChange={(e) => setText(e.target.value)} error={textError} />
       )}

@@ -84,7 +84,8 @@ function GradeOne({ submissionId }: { submissionId: string }) {
     <div className="content wide">
       <PageHeader
         eyebrow={<Link to={`${base}/grading`}>‹ Grading</Link>}
-        title={<>{student.full_name}: {assignment.title} <StatusBadge status={state} /></>}
+        title={`${student.full_name}: ${assignment.title}`}
+        subtitle={<>Status: <StatusBadge status={state} /></>}
       />
       <Section title="Submission">
         <div className="card stack">

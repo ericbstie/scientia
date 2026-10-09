@@ -55,7 +55,7 @@ export function Grading() {
       <PageHeader
         title="Grading"
         eyebrow={course.code}
-        actions={drafted.length > 0 ? <Button variant="primary" onClick={() => setReleaseAll(true)}>Release all graded ({drafted.length})</Button> : undefined}
+        actions={drafted.length > 0 ? <Button variant="primary" onClick={() => setReleaseAll(true)}>Release all graded to students ({drafted.length})</Button> : undefined}
       />
       <ErrorNote error={error} />
       {actionError && <div className="alert danger" role="alert">{actionError}</div>}

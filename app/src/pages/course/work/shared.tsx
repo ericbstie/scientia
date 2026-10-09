@@ -108,7 +108,7 @@ export function acceptsLabel(a: Pick<Assignment, "accepts_text" | "accepts_files
   return a.accepts_files && a.accepts_text ? "Upload a file or type an answer" : a.accepts_files ? "Upload a file" : "Type an answer";
 }
 
-export const lateWorkLabel = (allowLate: boolean) => (allowLate ? "Accepted after the due date, marked late" : "Not accepted after the due date");
+export const lateWorkLabel = (allowLate: boolean) => (allowLate ? "Accepted, marked late" : "Not accepted after the due date");
 
 /** Links to files in the private submissions bucket, via short-lived signed URLs. */
 export function FileLinks({ files }: { files: FileRef[] }) {
