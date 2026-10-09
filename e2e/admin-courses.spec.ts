@@ -83,6 +83,9 @@ test("@US-42 admin adds a student to an existing course", async ({ page, browser
   await expect(page.getByRole("heading", { level: 1, name: "People" })).toBeVisible();
   await page.getByRole("button", { name: "Add student" }).first().click();
   const dialog = page.getByRole("dialog", { name: "Add student" });
+  await dialog.getByLabel("Email").fill("nobody@scientia.test");
+  await dialog.getByRole("button", { name: "Add student" }).click();
+  await expect(dialog.getByText("No Scientia account uses this email. Create it on the Users page first.")).toBeVisible();
   await dialog.getByLabel("Email").fill(users.sofia.email);
   await dialog.getByRole("button", { name: "Add student" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Sofia Reyes added" })).toBeVisible();
