@@ -26,18 +26,18 @@ export function reset() {
 }
 
 export async function signIn(page: Page, who: Who, password = PASSWORD) {
-  await page.goto("/signin");
+  await page.goto("/sign-in");
   await page.getByLabel("Email").fill(users[who].email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page.getByRole("main")).toBeVisible();
-  await page.waitForURL((url) => !url.pathname.startsWith("/signin"));
+  await page.waitForURL((url) => !url.pathname.startsWith("/sign-in"));
 }
 
 export async function signOut(page: Page) {
   await page.getByRole("button", { name: /account menu/i }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).click();
-  await page.waitForURL(/\/signin/);
+  await page.waitForURL(/\/sign-in/);
 }
 
 export async function scan(page: Page) {
