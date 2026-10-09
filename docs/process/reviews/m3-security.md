@@ -144,3 +144,24 @@ Counts: **8 blockers, 9 should-fix, 6 nits.**
 
 ## Verdict
 Not ready for the final metrics run: B1 to B3 (defaults and signup give admin access), B4 to B5 (hidden content leaks), B6 to B7 (session-takeover XSS) and B8 (moderation is reversible) each need a fix and a regression test before M3 is signed off.
+
+## Responses (orchestrator)
+
+| Finding | Outcome |
+| --- | --- |
+| B1 role from signup metadata | Fixed: trigger dropped (0007), role set by the admin endpoint with the service key; signup disabled in compose |
+| B2 committed dev secrets | Declined for the dev defaults (needed for a zero-config `docker compose up`); the server now logs a warning when the development keys are in use, and `.env.example`/ADR 0004 say they must be overridden |
+| B3 seed defaults | Partly: the seed runs once on first start only (marker in `app_private.migrations`); `reset.ts` now refuses non-local databases; `SEED_DEMO=false` disables it |
+| B4 unpublished module material | Fixed (materials_read checks module_published) |
+| B5 storage files of hidden material | Fixed (material_file_visible) |
+| B6 uploaded HTML as stored XSS | Fixed: storage responses get `content-security-policy: sandbox; default-src 'none'` and `nosniff` |
+| B7 javascript: links | Fixed: DB check constraint + href guard in Modules |
+| B8 authors undo moderation | Fixed: guard_post trigger |
+| S1–S4, S6, S7 | Fixed in 0007 |
+| S5 moving posts | Fixed (guard_post) |
+| S8 gateway | Fixed: `/auth/v1/admin` needs the service key; security headers on API responses. The SPA HTML route is served by Bun's HTML import and does not get the CSP header yet (carried forward) |
+| N1, N2, N5 | Fixed |
+| N3, N4 | Accepted: RLS is the boundary by design (ADR 0005); column grants documented in ADR 0006 |
+| N6 | Fixed by the image (`NODE_ENV=production`); dev server is only for development |
+
+Regression tests: `e2e/security.spec.ts`.
