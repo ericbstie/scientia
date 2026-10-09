@@ -10,7 +10,7 @@ measured yet are recorded as `null`, never guessed.
 | `stories.total` | `docs/stories/*.md`, ids like `US-12` | Size of the product promise | — |
 | `stories.covered_pct` | Story ids tagged in `e2e/**/*.spec.ts` | Every promise is tested | ↑ target 100 |
 | `e2e.pass_rate` | Playwright JSON report | The product works | ↑ target 100 |
-| `e2e.duration_s` | Playwright JSON report | Fast feedback keeps agents honest | ↓ |
+| `e2e.duration_s` | Playwright JSON report, against the production build (`docker compose up`); the hot-reloading dev server is slower | Fast feedback keeps agents honest | ↓ target ≤ 360 |
 | `e2e.flaky` | Tests that passed only on retry | Flaky tests hide regressions | ↓ target 0 |
 | `a11y.serious` | axe-core results written by the e2e fixture | Usable by everyone, keyboard and screen reader | ↓ target 0 |
 | `a11y.pages_scanned` | same | Scans actually happen | ↑ |

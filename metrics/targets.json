@@ -2,6 +2,7 @@
   "stories.covered_pct": { "min": 100 },
   "e2e.pass_rate": { "min": 100 },
   "e2e.flaky": { "max": 0 },
+  "e2e.duration_s": { "max": 360 },
   "a11y.serious": { "max": 0 },
   "bundle.js_kb_gz": { "max": 250 },
   "ux.max_clicks_to_core_task": { "max": 3 },
