@@ -62,15 +62,18 @@ if (report) {
 const a11yRaw = read(a11yFile);
 const a11y = a11yRaw && `[${a11yRaw.trim().split("\n").filter(Boolean).join(",")}]`;
 if (a11y) {
-  const scans: { url: string; violations: { id: string; impact: string; nodes: number }[] }[] = JSON.parse(a11y);
+  const scans: { url: string; violations: { id: string; impact: string; nodes: number }[]; overflow?: string | null }[] = JSON.parse(a11y);
   m["a11y.pages_scanned"] = new Set(scans.map((s) => s.url)).size;
   const serious = new Set<string>();
   for (const s of scans)
     for (const v of s.violations)
       if (v.impact === "serious" || v.impact === "critical") serious.add(`${new URL(s.url).pathname}|${v.id}`);
   m["a11y.serious"] = serious.size;
+  const wide = new Map(scans.filter((s) => s.overflow).map((s) => [new URL(s.url).pathname, s.overflow]));
+  m["design.phone_overflow"] = wide.size;
+  for (const [path, why] of wide) console.warn(`scrolls sideways at 390px: ${path}: ${why}`);
 } else {
-  m["a11y.pages_scanned"] = m["a11y.serious"] = null;
+  m["a11y.pages_scanned"] = m["a11y.serious"] = m["design.phone_overflow"] = null;
 }
 
 // Bundle size

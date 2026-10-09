@@ -14,6 +14,7 @@ measured yet are recorded as `null`, never guessed.
 | `e2e.flaky` | Tests that passed only on retry | Flaky tests hide regressions | ↓ target 0 |
 | `a11y.serious` | axe-core results written by the e2e fixture | Usable by everyone, keyboard and screen reader | ↓ target 0 |
 | `a11y.pages_scanned` | same | Scans actually happen | ↑ |
+| `design.phone_overflow` | Pages from the same scans that scroll sideways at 390 px wide; tables may scroll inside `.table-wrap`. `mise run metrics` prints each page and the element that is too wide | Phone layout stays usable after nobody is looking at it | ↓ target 0 |
 | `bundle.js_kb_gz` | `dist/` after `mise run build` | Minimal UI should load fast | ↓ target ≤ 250 |
 | `ux.max_clicks_to_core_task` | `docs/design/ia.md` click budget table | Core tasks stay shallow | ↓ target ≤ 3 |
 | `copy.leaks` | Forbidden terms (other products, process words) in `app/src` strings | Copy says only what the user needs | ↓ target 0 |

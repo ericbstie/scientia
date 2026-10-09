@@ -7,8 +7,9 @@
 //    calls and course pages as the signed-in user.
 //  - token(request, who), client(request, who): sign in through the auth API and call
 //    the data API, for checks without a page.
-//  - scan(page): axe accessibility scan of the current page (also runs
-//    automatically at the end of every test). Results feed `mise run metrics`.
+//  - scan(page): axe accessibility scan of the current page, plus a check that it
+//    does not scroll sideways at phone width (also runs automatically at the end
+//    of every test). Results feed `mise run metrics`.
 import { test as base, expect, type APIRequestContext, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { appendFileSync } from "node:fs";
@@ -107,9 +108,27 @@ export async function scan(page: Page) {
     url: page.url(),
     test: base.info().title,
     violations: results.violations.map((v) => ({ id: v.id, impact: v.impact ?? "minor", nodes: v.nodes.length, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })),
+    overflow: await phoneOverflow(page),
   };
   appendFileSync("e2e/.results/a11y.jsonl", JSON.stringify(line) + "\n");
   return line.violations;
+}
+
+/** At phone width the page itself must not scroll sideways (tables may, inside .table-wrap). Returns the widest offender, or null. */
+async function phoneOverflow(page: Page) {
+  const size = page.viewportSize();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const found = await page.evaluate(() => {
+    const root = document.documentElement;
+    if (root.scrollWidth <= root.clientWidth) return null;
+    const el = [...document.body.querySelectorAll<HTMLElement>("*")].find(
+      (e) => e.getBoundingClientRect().right > root.clientWidth + 1 && !e.closest(".table-wrap") && getComputedStyle(e).position !== "fixed",
+    );
+    const name = el ? el.tagName.toLowerCase() + [...el.classList].map((c) => `.${c}`).join("") : "unknown element";
+    return `${name} "${(el?.textContent ?? "").trim().slice(0, 40)}" makes the page ${root.scrollWidth}px wide`;
+  });
+  if (size) await page.setViewportSize(size);
+  return found;
 }
 
 export const test = base.extend<{ autoScan: void }>({
