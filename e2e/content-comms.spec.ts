@@ -1,35 +1,13 @@
 import type { Page } from "@playwright/test";
-import { test, expect, reset, signIn, signOut, type Who } from "./fixtures";
-
-// Sign in with the shared fixture; when someone else is signed in, sign out first.
-async function login(page: Page, who: Who) {
-  if (page.url().startsWith("http") && !page.url().includes("/sign-in")) await signOut(page);
-  await signIn(page, who);
-}
-
-async function courseBase(page: Page, code: string) {
-  const id = await page.evaluate(async (c) => {
-    const { anonKey } = await (await fetch("/config.json")).json();
-    const s = JSON.parse(localStorage.getItem("scientia-auth")!);
-    const r = await fetch(`/rest/v1/courses?select=id&code=eq.${c}`, { headers: { apikey: anonKey, authorization: `Bearer ${s.access_token}` } });
-    return (await r.json())[0].id as string;
-  }, code);
-  return `/courses/${id}`;
-}
+import { test, expect, reset, signIn, api, coursePath, type Who } from "./fixtures";
 
 async function notificationTitles(page: Page) {
-  const rows = await page.evaluate(async () => {
-    const { anonKey } = await (await fetch("/config.json")).json();
-    const s = JSON.parse(localStorage.getItem("scientia-auth")!);
-    const r = await fetch("/rest/v1/notifications?select=title&order=title", { headers: { apikey: anonKey, authorization: `Bearer ${s.access_token}` } });
-    return (await r.json()) as { title: string }[];
-  });
-  return rows.map((r) => r.title);
+  return ((await api(page, "/rest/v1/notifications?select=title&order=title")).data as { title: string }[]).map((r) => r.title);
 }
 
 async function open(page: Page, who: Who, code: string, section: "Announcements" | "Discussions") {
-  await login(page, who);
-  await page.goto(await courseBase(page, code));
+  await signIn(page, who);
+  await page.goto(await coursePath(page, code));
   await page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: section }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(section);
 }
@@ -71,15 +49,10 @@ test.describe("Announcements", () => {
   });
 
   test("@US-7 a notification link opens the announcement", async ({ page }) => {
-    await login(page, "maya");
-    const base = await courseBase(page, "BIO101");
-    const id = await page.evaluate(async () => {
-      const { anonKey } = await (await fetch("/config.json")).json();
-      const s = JSON.parse(localStorage.getItem("scientia-auth")!);
-      const r = await fetch("/rest/v1/announcements?select=id&title=eq.Lab report 1 marking update", { headers: { apikey: anonKey, authorization: `Bearer ${s.access_token}` } });
-      return (await r.json())[0].id as string;
-    });
-    await page.goto(`${base}/announcements#${id}`);
+    await signIn(page, "maya");
+    const base = await coursePath(page, "BIO101");
+    const [ann] = (await api(page, "/rest/v1/announcements?select=id&title=eq.Lab report 1 marking update")).data;
+    await page.goto(`${base}/announcements#${ann.id}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Lab report 1 marking update");
   });
 
@@ -117,7 +90,7 @@ test.describe("Announcements", () => {
   test("@US-26 Ingrid pins, edits and deletes announcements", async ({ page }) => {
     await open(page, "ingrid", "BIO101", "Announcements");
     const lab = () => rows(page).filter({ hasText: "Lab report 1 marking update" });
-    const mayaBefore = (await (async () => { await login(page, "maya"); return notificationTitles(page); })());
+    const mayaBefore = (await (async () => { await signIn(page, "maya"); return notificationTitles(page); })());
     await open(page, "ingrid", "BIO101", "Announcements");
 
     await lab().getByRole("button", { name: "Pin" }).click();
@@ -233,7 +206,7 @@ test.describe("Discussions", () => {
     await expect(page.getByText("Thanks, I wondered too.")).toHaveCount(0);
 
     // Liam sees the same, and cannot delete anything.
-    await login(page, "liam");
+    await signIn(page, "liam");
     await page.goto(thread);
     await expect(posts(page).nth(2)).toContainText("This post was removed by a teacher");
     await expect(page.getByText("Thanks, I wondered too.")).toHaveCount(0);
@@ -242,7 +215,7 @@ test.describe("Discussions", () => {
     await expect(rows(page).first()).toContainText("2 replies");
 
     // Delete the whole thread.
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await page.goto(thread);
     await page.getByRole("button", { name: "Delete thread" }).click();
     await expect(dialog.getByRole("heading")).toContainText("Question about the lab report");

@@ -1,14 +1,5 @@
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
+import { test, expect, reset, signIn, users, PASSWORD } from "./fixtures";
 import type { Page } from "@playwright/test";
-
-// e2e/fixtures.ts signIn() visits /signin, which is not a route (the app uses /sign-in); local copy until the fixture is fixed.
-async function signIn(page: Page, who: Who, password = PASSWORD) {
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("banner")).toContainText(users[who].name);
-}
 
 test.beforeEach(() => reset());
 

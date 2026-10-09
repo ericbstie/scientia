@@ -1,5 +1,5 @@
 // Stories US-27 to US-31: creating and changing assignments, the grading queue, grading and releasing.
-import { test, expect, reset, signIn, users, type Who } from "./fixtures";
+import { test, expect, reset, signIn, signOut, api, openCourse } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 let T = Date.now();
@@ -18,29 +18,6 @@ const fmt = (d: Date) => {
 const inputAt = (n: number) => dueAt(n).toISOString().slice(0, 16);
 
 /** Local copy: the shared signOut waits for /signin but the route is /sign-in. */
-async function signOut(page: Page) {
-  await page.getByRole("button", { name: /account menu/i }).click();
-  await page.getByRole("menuitem", { name: "Sign out" }).click();
-  await page.waitForURL(/\/sign-in/);
-}
-
-async function login(page: Page, who: Who) {
-  await signIn(page, who);
-  await expect(page.getByRole("banner")).toContainText(users[who].name);
-}
-
-async function openCourse(page: Page, code: string, path = "") {
-  const id = await page.evaluate(async (code) => {
-    const token = JSON.parse(localStorage.getItem("scientia-auth")!).access_token;
-    const cfg = await (await fetch("/config.json")).json();
-    const res = await fetch(`/rest/v1/courses?select=id,code&code=eq.${code}`, { headers: { apikey: cfg.anonKey, authorization: `Bearer ${token}` } });
-    return (await res.json())[0].id as string;
-  }, code);
-  await page.goto(`/courses/${id}${path}`);
-  await expect(page.getByRole("navigation", { name: "Course" })).toBeVisible();
-  return id;
-}
-
 const row = (page: Page, text: string) => page.getByRole("listitem").filter({ hasText: text });
 const courseNav = (page: Page, name: string) => page.getByRole("navigation", { name: "Course" }).getByRole("link", { name });
 
@@ -51,7 +28,7 @@ test.beforeEach(() => {
 
 test.describe("Creating and changing assignments", () => {
   test("@US-27 the new assignment form has exactly the specified controls", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments");
     await page.getByRole("link", { name: "New assignment" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("New assignment");
@@ -68,7 +45,7 @@ test.describe("Creating and changing assignments", () => {
   });
 
   test("@US-27 a draft is hidden from students", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments/new");
     await page.getByLabel("Title").fill("Reading quiz");
     await page.getByLabel("Due date and time").fill(inputAt(10));
@@ -80,14 +57,14 @@ test.describe("Creating and changing assignments", () => {
     await expect(page.getByText("Draft", { exact: true })).toBeVisible();
 
     await signOut(page);
-    await login(page, "maya");
+    await signIn(page, "maya");
     await openCourse(page, "BIO101", "/assignments");
     await expect(page.getByText("Safety acknowledgement")).toBeVisible();
     await expect(page.getByText("Reading quiz")).toHaveCount(0);
   });
 
   test("@US-27 a published assignment shows up for students in due-date order", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments/new");
     await page.getByLabel("Title").fill("Reading quiz");
     await page.getByLabel("Due date and time").fill(inputAt(10));
@@ -97,7 +74,7 @@ test.describe("Creating and changing assignments", () => {
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Reading quiz");
 
     await signOut(page);
-    await login(page, "maya");
+    await signIn(page, "maya");
     await openCourse(page, "BIO101", "/assignments");
     await expect(row(page, "Reading quiz")).toHaveCount(1);
     const titles = await page.locator(".row-title").allTextContents();
@@ -108,7 +85,7 @@ test.describe("Creating and changing assignments", () => {
   });
 
   test("@US-27 an invalid form shows linked errors and creates nothing", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments/new");
     await page.getByLabel("Points").fill("0");
     await page.getByRole("checkbox", { name: "Uploading a file" }).uncheck();
@@ -128,7 +105,7 @@ test.describe("Creating and changing assignments", () => {
   });
 
   test("@US-28 changing a due date reaches students", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments");
     await page.getByRole("link", { name: "Field journal" }).click();
     await page.getByRole("link", { name: "Edit" }).click();
@@ -138,20 +115,15 @@ test.describe("Creating and changing assignments", () => {
     await expect(page.getByText(fmt(dueAt(14)))).toBeVisible();
 
     await signOut(page);
-    await login(page, "maya");
+    await signIn(page, "maya");
     await openCourse(page, "BIO101", "/assignments");
     await expect(row(page, "Field journal")).toContainText(fmt(dueAt(14)));
-    const notes = await page.evaluate(async () => {
-      const token = JSON.parse(localStorage.getItem("scientia-auth")!).access_token;
-      const cfg = await (await fetch("/config.json")).json();
-      const res = await fetch("/rest/v1/notifications?select=title", { headers: { apikey: cfg.anonKey, authorization: `Bearer ${token}` } });
-      return (await res.json()) as { title: string }[];
-    });
+    const notes = (await api(page, "/rest/v1/notifications?select=title")).data as { title: string }[];
     expect(notes.map((n) => n.title)).toContain("Due date changed: Field journal");
   });
 
   test("@US-28 publish a draft and unpublish an assignment nobody has submitted to", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments");
     await page.getByRole("link", { name: "Final project" }).click();
     await expect(page.getByText("Draft", { exact: true })).toBeVisible();
@@ -165,14 +137,14 @@ test.describe("Creating and changing assignments", () => {
     await expect(page.getByText("Draft", { exact: true })).toBeVisible();
 
     await signOut(page);
-    await login(page, "maya");
+    await signIn(page, "maya");
     await openCourse(page, "BIO101", "/assignments");
     await expect(page.getByRole("link", { name: "Final project" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Field journal" })).toHaveCount(0);
   });
 
   test("@US-28 an assignment with submissions cannot be unpublished", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments");
     await page.getByRole("link", { name: "Photosynthesis worksheet" }).click();
     await expect(page.getByRole("button", { name: "Unpublish" })).toBeDisabled();
@@ -183,7 +155,7 @@ test.describe("Creating and changing assignments", () => {
 
 test.describe("Grading queue, grading and releasing", () => {
   test("@US-29 the queue defaults to Needs grading, ordered by due date", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Grading");
     const items = page.locator("main ul.list > li");
@@ -198,7 +170,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-29 filters show graded, released and missing work", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     const filter = page.getByRole("navigation", { name: "Filter" });
     const items = page.locator("main ul.list > li");
@@ -226,7 +198,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-29 a queue row opens that submission's grading view", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await row(page, "Sofia Reyes").getByRole("link", { name: "Sofia Reyes" }).click();
     await expect(page).toHaveURL(/\/grading\/[0-9a-f-]{36}$/);
@@ -234,7 +206,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-30 grade a submission with a score and feedback", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await expect(page.getByText("Sorry this is late. Report text: cells observed under 400x magnification.")).toBeVisible();
@@ -252,14 +224,14 @@ test.describe("Grading queue, grading and releasing", () => {
     await expect(row(page, "Sofia Reyes")).toContainText("Graded (not released)");
 
     await signOut(page);
-    await login(page, "sofia");
+    await signIn(page, "sofia");
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("Awaiting grade");
     await expect(page.getByText("78")).toHaveCount(0);
   });
 
   test("@US-30 an out-of-range or empty score is refused", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("101");
@@ -275,7 +247,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-30 Next to grade moves on to the next submission", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("78");
@@ -292,7 +264,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-30 leaving with unsaved changes asks first", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     const url = page.url();
@@ -311,7 +283,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-31 release one grade from its queue row", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading?status=graded");
     await row(page, "Liam Hansen").getByRole("button", { name: "Release" }).click();
     await expect(row(page, "Liam Hansen")).toHaveCount(0);
@@ -320,7 +292,7 @@ test.describe("Grading queue, grading and releasing", () => {
     await expect(page.getByRole("button", { name: /Release all graded/ })).toHaveCount(0);
 
     await signOut(page);
-    await login(page, "liam");
+    await signIn(page, "liam");
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("72 / 100");
     await page.getByRole("link", { name: "Lab report 1" }).click();
@@ -328,7 +300,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-31 release all graded work after confirming the count", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("78");
@@ -353,7 +325,7 @@ test.describe("Grading queue, grading and releasing", () => {
   });
 
   test("@US-31 withdraw a released grade", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/grading?status=released");
     await row(page, "Lab report 1").getByRole("button", { name: "Withdraw" }).click();
     const dialog = page.getByRole("dialog");
@@ -364,7 +336,7 @@ test.describe("Grading queue, grading and releasing", () => {
     await expect(row(page, "Maya Okafor")).toContainText("Lab report 1");
 
     await signOut(page);
-    await login(page, "maya");
+    await signIn(page, "maya");
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("Awaiting grade");
   });

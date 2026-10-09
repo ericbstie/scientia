@@ -1,41 +1,8 @@
 // Notifications list and bell (US-17) and who receives which notification (US-16).
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
-import type { APIRequestContext, Page } from "@playwright/test";
+import { test, expect, reset, signIn, client, type Who } from "./fixtures";
+import type { Page } from "@playwright/test";
 
-async function login(page: Page, who: Who) {
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
-}
-
-/** Data API access as a signed-in user (see "Data API checks" in docs/stories/README.md). */
-async function api(request: APIRequestContext, who: Who) {
-  const { anonKey } = await (await request.get("/config.json")).json();
-  const res = await request.post("/auth/v1/token?grant_type=password", { headers: { apikey: anonKey }, data: { email: users[who].email, password: PASSWORD } });
-  expect(res.ok()).toBe(true);
-  const token = (await res.json()).access_token as string;
-  const headers = { apikey: anonKey, authorization: `Bearer ${token}`, prefer: "return=representation" };
-  return {
-    async get(path: string) {
-      const r = await request.get(`/rest/v1/${path}`, { headers });
-      expect(r.ok(), `${path}: ${await r.text()}`).toBe(true);
-      return r.json();
-    },
-    async post(path: string, data: object) {
-      const r = await request.post(`/rest/v1/${path}`, { headers, data });
-      expect(r.ok(), `${path}: ${await r.text()}`).toBe(true);
-      return r.json();
-    },
-    async patch(path: string, data: object) {
-      const r = await request.patch(`/rest/v1/${path}`, { headers, data });
-      expect(r.ok(), `${path}: ${await r.text()}`).toBe(true);
-      return r.json();
-    },
-  };
-}
-type Api = Awaited<ReturnType<typeof api>>;
+type Api = Awaited<ReturnType<typeof client>>;
 const titlesOf = async (a: Api) => (await a.get("notifications?select=title&order=created_at.desc")).map((n: { title: string }) => n.title) as string[];
 
 const bell = (page: Page) => page.getByRole("banner").getByRole("link", { name: /^Notifications/ });
@@ -44,7 +11,7 @@ test.describe("Notification list", () => {
   test.beforeEach(() => reset());
 
   test("@US-17 the bell shows the unread count and the list shows read state", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await expect(page.getByTestId("unread-count")).toHaveText("2");
     await bell(page).click();
     await expect(page.getByRole("heading", { level: 1, name: "Notifications" })).toBeVisible();
@@ -61,7 +28,7 @@ test.describe("Notification list", () => {
   });
 
   test("@US-17 opening a notification goes to its target and counts it as read", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await bell(page).click();
     await page.getByRole("link", { name: "Grade released: Lab report 1" }).click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+\/assignments\/[0-9a-f-]+$/);
@@ -71,7 +38,7 @@ test.describe("Notification list", () => {
   });
 
   test("@US-17 Mark all as read clears the count and keeps the list", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await bell(page).click();
     await page.getByRole("button", { name: "Mark all as read" }).click();
     await expect(page.getByTestId("unread-count")).toHaveCount(0);
@@ -81,7 +48,7 @@ test.describe("Notification list", () => {
   });
 
   test("@US-17 an account without notifications sees an empty state", async ({ page }) => {
-    await login(page, "liam");
+    await signIn(page, "liam");
     await expect(page.getByTestId("unread-count")).toHaveCount(0);
     await bell(page).click();
     await expect(page.getByText("You have no notifications.")).toBeVisible();
@@ -95,51 +62,51 @@ test.describe("Who is notified", () => {
   const students: Who[] = ["maya", "liam", "sofia", "noah"];
 
   test("@US-16 an announcement notifies each student once, even after an edit", async ({ request }) => {
-    const ingrid = await api(request, "ingrid");
+    const ingrid = await client(request, "ingrid");
     const [bio] = await ingrid.get("courses?code=eq.BIO101&select=id");
     const [ann] = await ingrid.post("announcements", { course_id: bio.id, title: "Field trip", body: "Bring boots." });
     await ingrid.patch(`announcements?id=eq.${ann.id}`, { body: "Bring boots and water." });
     for (const who of students) {
-      const titles = await titlesOf(await api(request, who));
+      const titles = await titlesOf(await client(request, who));
       expect(titles.filter((t) => t === "New announcement: Field trip"), who).toHaveLength(1);
     }
-    for (const who of ["priya", "ingrid"] as Who[]) expect(await titlesOf(await api(request, who)), who).toEqual([]);
+    for (const who of ["priya", "ingrid"] as Who[]) expect(await titlesOf(await client(request, who)), who).toEqual([]);
   });
 
   test("@US-16 publishing an assignment and changing a due date each notify the students once", async ({ request }) => {
-    const ingrid = await api(request, "ingrid");
+    const ingrid = await client(request, "ingrid");
     await ingrid.patch("assignments?title=eq.Final%20project", { published: true });
     const [journal] = await ingrid.get("assignments?title=eq.Field%20journal&select=due_at");
     await ingrid.patch("assignments?title=eq.Field%20journal", { due_at: new Date(new Date(journal.due_at).getTime() + 86400000).toISOString() });
     for (const who of students) {
-      const titles = await titlesOf(await api(request, who));
+      const titles = await titlesOf(await client(request, who));
       expect(titles.filter((t) => t === "New assignment: Final project"), who).toHaveLength(1);
       expect(titles.filter((t) => t === "Due date changed: Field journal"), who).toHaveLength(1);
     }
   });
 
   test("@US-16 releasing a grade notifies only that student", async ({ request }) => {
-    const ingrid = await api(request, "ingrid");
+    const ingrid = await client(request, "ingrid");
     const [lab] = await ingrid.get("assignments?title=eq.Lab%20report%201&select=id");
-    const liam = await api(request, "liam");
+    const liam = await client(request, "liam");
     const [me] = await liam.get("profiles?full_name=eq.Liam%20Hansen&select=id");
     await ingrid.patch(`grades?assignment_id=eq.${lab.id}&student_id=eq.${me.id}`, { released: true });
     expect((await titlesOf(liam)).filter((t) => t === "Grade released: Lab report 1")).toHaveLength(1);
-    expect((await titlesOf(await api(request, "maya"))).filter((t) => t === "Grade released: Lab report 1")).toHaveLength(1);
+    expect((await titlesOf(await client(request, "maya"))).filter((t) => t === "Grade released: Lab report 1")).toHaveLength(1);
   });
 
   test("@US-16 a reply notifies the thread author only", async ({ request }) => {
-    const maya = await api(request, "maya");
+    const maya = await client(request, "maya");
     const [thread] = await maya.get("threads?title=eq.Question%20about%20the%20lab%20report&select=id,course_id");
     await maya.post("replies", { thread_id: thread.id, body: "One more thing." });
     await maya.post("threads", { course_id: thread.course_id, title: "Lab partner?", body: "Anyone want to pair up?" });
-    expect((await titlesOf(await api(request, "liam"))).filter((t) => t === "New reply: Question about the lab report")).toHaveLength(1);
+    expect((await titlesOf(await client(request, "liam"))).filter((t) => t === "New reply: Question about the lab report")).toHaveLength(1);
     for (const who of ["maya", "sofia", "noah", "priya", "ingrid"] as Who[]) {
-      const titles = await titlesOf(await api(request, who));
+      const titles = await titlesOf(await client(request, who));
       expect(titles.filter((t) => t.startsWith("New reply")), who).toEqual([]);
     }
     for (const who of ["maya", "liam", "sofia", "noah", "priya", "ingrid"] as Who[]) {
-      expect((await titlesOf(await api(request, who))).filter((t) => t.includes("Lab partner?")), who).toEqual([]);
+      expect((await titlesOf(await client(request, who))).filter((t) => t.includes("Lab partner?")), who).toEqual([]);
     }
   });
 });

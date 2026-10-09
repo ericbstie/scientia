@@ -1,34 +1,12 @@
 // Stories US-32 and US-33: the teacher's gradebook and its CSV export.
-import { test, expect, reset, signIn, users, type Who } from "./fixtures";
+import { test, expect, reset, signIn, api, openCourse } from "./fixtures";
 import { readFileSync } from "node:fs";
-import type { Page } from "@playwright/test";
-
-async function login(page: Page, who: Who) {
-  await signIn(page, who);
-  await expect(page.getByRole("banner")).toContainText(users[who].name);
-}
-
-async function api(page: Page, path: string) {
-  return page.evaluate(async (path) => {
-    const token = JSON.parse(localStorage.getItem("scientia-auth")!).access_token;
-    const cfg = await (await fetch("/config.json")).json();
-    const res = await fetch(path, { headers: { apikey: cfg.anonKey, authorization: `Bearer ${token}` } });
-    return { status: res.status, text: await res.text() };
-  }, path);
-}
-
-async function openCourse(page: Page, code: string, path = "") {
-  const id = JSON.parse((await api(page, `/rest/v1/courses?select=id&code=eq.${code}`)).text)[0].id as string;
-  await page.goto(`/courses/${id}${path}`);
-  await expect(page.getByRole("navigation", { name: "Course" })).toBeVisible();
-  return id;
-}
 
 test.beforeEach(() => reset());
 
 test.describe("Gradebook", () => {
   test("@US-32 rows and columns follow the specification", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/gradebook");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Gradebook");
     const rows = page.locator("main tbody tr");
@@ -40,7 +18,7 @@ test.describe("Gradebook", () => {
   });
 
   test("@US-32 cells show scores, drafts, late and missing work, and totals skip missing", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/gradebook");
     const cell = (student: string, col: number) => page.locator("main tbody tr").filter({ has: page.getByRole("rowheader", { name: student }) }).locator("td").nth(col);
     await expect(cell("Maya Okafor", 0)).toContainText("10");
@@ -59,14 +37,14 @@ test.describe("Gradebook", () => {
   });
 
   test("@US-32 a cell opens that submission's grading view", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/gradebook");
     await page.locator("main tbody tr").filter({ has: page.getByRole("rowheader", { name: "Liam Hansen" }) }).locator("td").nth(1).getByRole("link").click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Liam Hansen: Lab report 1");
   });
 
   test("@US-33 export the gradebook as CSV", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await openCourse(page, "BIO101", "/gradebook");
     const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export CSV" }).click()]);
     expect(download.suggestedFilename()).toBe("bio101-gradebook.csv");
@@ -79,7 +57,7 @@ test.describe("Gradebook", () => {
   });
 
   test("@US-33 students have no export and only see their own released grades", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     const id = await openCourse(page, "BIO101");
     for (const path of ["", "/modules", "/assignments", "/announcements", "/discussions", "/grades", "/people", "/gradebook", "/grading"]) {
       await page.goto(`/courses/${id}${path}`);
@@ -89,7 +67,7 @@ test.describe("Gradebook", () => {
     }
     const me = await page.evaluate(() => JSON.parse(localStorage.getItem("scientia-auth")!).user.id as string);
     const res = await api(page, "/rest/v1/grades");
-    const rows = JSON.parse(res.text) as { student_id: string; released: boolean }[];
+    const rows = res.data as { student_id: string; released: boolean }[];
     expect(rows).toHaveLength(2);
     expect(rows.every((r) => r.student_id === me && r.released)).toBe(true);
     expect(res.text).not.toContain("Good observations");

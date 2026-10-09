@@ -1,25 +1,9 @@
 import type { Page } from "@playwright/test";
-import { test, expect, reset, signIn, signOut, type Who } from "./fixtures";
-
-// Sign in with the shared fixture; when someone else is signed in, sign out first.
-async function login(page: Page, who: Who) {
-  if (page.url().startsWith("http") && !page.url().includes("/sign-in")) await signOut(page);
-  await signIn(page, who);
-}
-
-async function courseBase(page: Page, code: string) {
-  const id = await page.evaluate(async (c) => {
-    const { anonKey } = await (await fetch("/config.json")).json();
-    const s = JSON.parse(localStorage.getItem("scientia-auth")!);
-    const r = await fetch(`/rest/v1/courses?select=id&code=eq.${c}`, { headers: { apikey: anonKey, authorization: `Bearer ${s.access_token}` } });
-    return (await r.json())[0].id as string;
-  }, code);
-  return `/courses/${id}`;
-}
+import { test, expect, reset, signIn, coursePath, type Who } from "./fixtures";
 
 async function openModules(page: Page, who: Who) {
-  await login(page, who);
-  await page.goto(await courseBase(page, "BIO101"));
+  await signIn(page, who);
+  await page.goto(await coursePath(page, "BIO101"));
   await page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: "Modules" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Modules");
   return page.url();
@@ -59,13 +43,13 @@ test.describe("Modules", () => {
   });
 
   test("@US-6 a draft page is not found for a student", async ({ page }) => {
-    await login(page, "ingrid");
-    const base = await courseBase(page, "BIO101");
+    await signIn(page, "ingrid");
+    const base = await coursePath(page, "BIO101");
     await page.goto(`${base}/modules`);
     await page.getByRole("link", { name: "Mendel and peas" }).click();
     const url = page.url();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Mendel and peas");
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.goto(url);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
   });

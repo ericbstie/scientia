@@ -1,16 +1,8 @@
 // Dashboard (US-3, US-4, US-22), calendar (US-14) and the phone layout of the personal pages (US-21).
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
+import { test, expect, reset, signIn, users, PASSWORD } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 // Own sign-in helper: goes straight to /sign-in and waits for the dashboard.
-async function login(page: Page, who: Who) {
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
-}
-
 /** The date "T+Nd 23:59 UTC" for the moment t0, as the stories define it. */
 const dueAt = (t0: number, days: number) => {
   const d = new Date(t0);
@@ -32,7 +24,7 @@ test.describe("Dashboard", () => {
   });
 
   test("@US-3 student sees everything due across courses, soonest first", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     const upcoming = page.getByRole("region", { name: "Upcoming" });
     const rows = upcoming.getByRole("listitem");
     await expect(rows).toHaveCount(4);
@@ -52,7 +44,7 @@ test.describe("Dashboard", () => {
   });
 
   test("@US-3 statuses and opening an assignment from its row", async ({ page }) => {
-    await login(page, "liam");
+    await signIn(page, "liam");
     const rows = page.getByRole("region", { name: "Upcoming" }).getByRole("listitem");
     await expect(rows.filter({ hasText: "Photosynthesis worksheet" })).toContainText("Submitted");
     await expect(rows.filter({ hasText: "Photosynthesis worksheet" })).not.toContainText("Not submitted");
@@ -63,7 +55,7 @@ test.describe("Dashboard", () => {
   });
 
   test("@US-4 missing and overdue work is shown apart from upcoming work", async ({ page }) => {
-    await login(page, "noah");
+    await signIn(page, "noah");
     const missing = page.getByRole("region", { name: "Missing" });
     const rows = missing.getByRole("listitem");
     await expect(rows).toHaveCount(2);
@@ -87,12 +79,12 @@ test.describe("Dashboard", () => {
   });
 
   test("@US-4 nothing missing", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await expect(page.getByRole("region", { name: "Missing" })).toContainText("Nothing missing");
   });
 
   test("@US-3 student lists their courses", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     const courses = page.getByRole("region", { name: "Your courses" });
     await expect(courses.getByRole("link", { name: /BIO101/ })).toBeVisible();
     await expect(courses.getByRole("link", { name: /HIS201/ })).toBeVisible();
@@ -101,7 +93,7 @@ test.describe("Dashboard", () => {
   });
 
   test("@US-22 teacher starts from a dashboard of courses and grading work", async ({ page }) => {
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     const bio = page.locator(".course-card", { hasText: "BIO101" });
     const his = page.locator(".course-card", { hasText: "HIS201" });
     await expect(bio).toContainText("4 students");
@@ -144,7 +136,7 @@ test.describe("Calendar", () => {
   }
 
   test("@US-14 month view opens on the current month with today marked", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.getByRole("banner").getByRole("link", { name: "Calendar" }).click();
     await expect(page.getByRole("heading", { level: 1, name: "Calendar" })).toBeVisible();
     const today = page.locator('td[aria-current="date"]');
@@ -155,7 +147,7 @@ test.describe("Calendar", () => {
   });
 
   test("@US-14 due dates appear on their day and open the assignment", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.goto("/calendar");
     await expect(await cellFor(page, 2)).toContainText("BIO101 Photosynthesis worksheet");
     await expect(await cellFor(page, 5)).toContainText("HIS201 Essay: the 1848 revolutions");
@@ -167,7 +159,7 @@ test.describe("Calendar", () => {
   });
 
   test("@US-14 Previous month and Today move around the calendar", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.goto("/calendar");
     const heading = page.getByRole("heading", { level: 2 });
     const first = await heading.textContent();
@@ -183,7 +175,7 @@ test.describe("Calendar", () => {
   });
 
   test("@US-14 a month without deadlines says so", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.goto("/calendar");
     for (let i = 0; i < 6; i++) await page.getByRole("button", { name: "Previous month" }).click();
     await expect(page.getByText("Nothing is due this month.")).toBeVisible();
@@ -203,7 +195,7 @@ test.describe("Phone layout", () => {
     expect(await page.evaluate(() => { const m = document.getElementById("main")!; return m.scrollWidth === m.clientWidth; })).toBe(true);
 
   test("@US-21 the dashboard fits a phone and lists the same four items in the same order", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await noHorizontalScroll(page);
     const rows = page.getByRole("region", { name: "Upcoming" }).getByRole("listitem");
     await expect(rows).toHaveCount(4);
@@ -214,7 +206,7 @@ test.describe("Phone layout", () => {
   });
 
   test("@US-21 the course home and the worksheet page fit a phone", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.getByRole("link", { name: /BIO101/ }).first().click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+$/);
     await noHorizontalScroll(page);
@@ -225,7 +217,7 @@ test.describe("Phone layout", () => {
   });
 
   test("@US-21 calendar, notifications and settings fit a phone", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     await page.goto("/calendar");
     await expect(page.getByRole("heading", { level: 1, name: "Calendar" })).toBeVisible();
     await noHorizontalScroll(page);
@@ -243,7 +235,7 @@ test.describe("Phone layout", () => {
   });
 
   test("@US-21 no page scrolls sideways", async ({ page }) => {
-    await login(page, "maya");
+    await signIn(page, "maya");
     for (const path of ["/", "/calendar", "/notifications", "/settings/profile", "/settings/notifications"]) {
       await page.goto(path);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -253,7 +245,7 @@ test.describe("Phone layout", () => {
 
   test("@US-21 the dashboard still fits at 320 px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
-    await login(page, "noah");
+    await signIn(page, "noah");
     await noHorizontalScroll(page);
     await expect(page.getByRole("region", { name: "Missing" })).toBeVisible();
   });

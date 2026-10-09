@@ -1,27 +1,5 @@
 import type { Page } from "@playwright/test";
-import { test, expect, reset, signIn, signOut, type Who } from "./fixtures";
-
-// Local helpers: sign in through the real form, and find a course id through the data API
-// (the dashboard is a separate slice, so these specs do not depend on it).
-// Sign in with the shared fixture; when someone else is signed in, sign out first.
-async function login(page: Page, who: Who) {
-  if (page.url().startsWith("http") && !page.url().includes("/sign-in")) await signOut(page);
-  await signIn(page, who);
-}
-
-async function api(page: Page, path: string) {
-  return page.evaluate(async (p) => {
-    const { anonKey } = await (await fetch("/config.json")).json();
-    const s = JSON.parse(localStorage.getItem("scientia-auth")!);
-    const r = await fetch(p, { headers: { apikey: anonKey, authorization: `Bearer ${s.access_token}` } });
-    return r.json();
-  }, path);
-}
-
-async function courseBase(page: Page, code: string) {
-  const rows = await api(page, `/rest/v1/courses?select=id&code=eq.${code}`);
-  return `/courses/${rows[0].id}`;
-}
+import { test, expect, reset, signIn, api, coursePath } from "./fixtures";
 
 const courseNav = (page: Page) => page.getByRole("navigation", { name: "Course" });
 const studentItems = ["Home", "Modules", "Assignments", "Announcements", "Discussions", "Grades", "People"];
@@ -30,9 +8,9 @@ test.describe("Course layout and people", () => {
   test.beforeEach(() => reset());
 
   test("@US-5 every course has the same navigation and Maya's BIO101 home shows announcements and the next two due", async ({ page }) => {
-    await login(page, "maya");
-    const bio = await courseBase(page, "BIO101");
-    const his = await courseBase(page, "HIS201");
+    await signIn(page, "maya");
+    const bio = await coursePath(page, "BIO101");
+    const his = await coursePath(page, "HIS201");
 
     await page.goto(bio);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Introduction to Biology");
@@ -57,8 +35,8 @@ test.describe("Course layout and people", () => {
   });
 
   test("@US-5 Maya sees the roster by name and role without emails", async ({ page }) => {
-    await login(page, "maya");
-    await page.goto(await courseBase(page, "BIO101"));
+    await signIn(page, "maya");
+    await page.goto(await coursePath(page, "BIO101"));
     await courseNav(page).getByRole("link", { name: "People" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("People");
     const rows = page.getByRole("listitem").filter({ has: page.locator(".row") });
@@ -73,8 +51,8 @@ test.describe("Course layout and people", () => {
   });
 
   test("@US-20 course home: skip link, landmarks, headings and visible focus", async ({ page }) => {
-    await login(page, "maya");
-    await page.goto(await courseBase(page, "BIO101"));
+    await signIn(page, "maya");
+    await page.goto(await coursePath(page, "BIO101"));
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.locator("body").press("Tab");
     const skip = page.getByRole("link", { name: "Skip to main content" });
@@ -109,8 +87,8 @@ test.describe("Course layout and people", () => {
   });
 
   test("@US-34 Ingrid sees the BIO101 roster with emails, sorted by last name", async ({ page }) => {
-    await login(page, "ingrid");
-    const bio = await courseBase(page, "BIO101");
+    await signIn(page, "ingrid");
+    const bio = await coursePath(page, "BIO101");
     await page.goto(`${bio}/people`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("People");
     await expect(page.getByRole("region", { name: "Teachers" })).toContainText("Dr. Ingrid Solberg");
@@ -122,14 +100,14 @@ test.describe("Course layout and people", () => {
       /Sofia Reyes.*sofia\.reyes@scientia\.test/,
     ]);
 
-    await page.goto(`${await courseBase(page, "HIS201")}/people`);
+    await page.goto(`${await coursePath(page, "HIS201")}/people`);
     const his = page.getByRole("region", { name: "2 students" }).getByRole("listitem");
     await expect(his).toHaveText([/Liam Hansen/, /Maya Okafor/]);
   });
 
   test("@US-35 Ingrid adds a student by email, with clear errors", async ({ page }) => {
-    await login(page, "ingrid");
-    const bio = await courseBase(page, "BIO101");
+    await signIn(page, "ingrid");
+    const bio = await coursePath(page, "BIO101");
     await page.goto(`${bio}/people`);
     const students = page.getByRole("region", { name: /\d students?/ });
 
@@ -159,8 +137,8 @@ test.describe("Course layout and people", () => {
     await expect(students).toHaveCount(1);
 
     // Priya now has the course, with its upcoming work on the course home.
-    await login(page, "priya");
-    const rows = await api(page, "/rest/v1/courses?select=code");
+    await signIn(page, "priya");
+    const rows = (await api(page, "/rest/v1/courses?select=code")).data;
     expect(rows.map((r: { code: string }) => r.code)).toEqual(["BIO101"]);
     await page.goto(bio);
     const due = page.getByRole("region", { name: "Next due" });
@@ -169,12 +147,12 @@ test.describe("Course layout and people", () => {
   });
 
   test("@US-36 Ingrid removes Sofia, who then loses access, and adds her back", async ({ page }) => {
-    await login(page, "sofia");
-    const bio = await courseBase(page, "BIO101");
-    const before = await api(page, "/rest/v1/submissions?select=id");
+    await signIn(page, "sofia");
+    const bio = await coursePath(page, "BIO101");
+    const before = (await api(page, "/rest/v1/submissions?select=id")).data;
     expect(before).toHaveLength(1);
 
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await page.goto(`${bio}/people`);
     const sofia = page.getByRole("listitem").filter({ hasText: "Sofia Reyes" });
     await sofia.getByRole("button", { name: "Remove" }).click();
@@ -190,12 +168,12 @@ test.describe("Course layout and people", () => {
     await page.goto(bio);
     await expect(page.getByRole("link", { name: "1 need grading" })).toBeVisible();
 
-    await login(page, "sofia");
+    await signIn(page, "sofia");
     await page.goto(bio);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("You don't have access to this course");
-    expect(await api(page, "/rest/v1/courses?select=id")).toEqual([]);
+    expect((await api(page, "/rest/v1/courses?select=id")).data).toEqual([]);
 
-    await login(page, "ingrid");
+    await signIn(page, "ingrid");
     await page.goto(`${bio}/people`);
     await page.getByRole("button", { name: "Add student" }).first().click();
     await page.getByRole("dialog").getByLabel("Email").fill("sofia.reyes@scientia.test");
@@ -203,7 +181,7 @@ test.describe("Course layout and people", () => {
     await expect(page.getByRole("region", { name: "4 students" })).toContainText("Sofia Reyes");
 
     // Her work is kept, so the Gradebook shows her Lab report 1 again.
-    await login(page, "sofia");
-    expect(await api(page, "/rest/v1/submissions?select=id")).toHaveLength(1);
+    await signIn(page, "sofia");
+    expect((await api(page, "/rest/v1/submissions?select=id")).data).toHaveLength(1);
   });
 });

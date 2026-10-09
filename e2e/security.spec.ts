@@ -4,7 +4,7 @@
 // are in supabase/migrations/0007_security_hardening.sql and app/server.ts.
 // Write checks run a positive control first, so a refusal is only accepted when
 // the same request shape is known to succeed.
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
+import { test, expect, reset, token, users, type Who } from "./fixtures";
 import type { APIRequestContext } from "@playwright/test";
 
 test.beforeEach(() => reset());
@@ -19,19 +19,10 @@ async function anonKey(request: APIRequestContext) {
   return (await (await request.get("/config.json")).json()).anonKey as string;
 }
 
-/** Signs in through GoTrue's token endpoint and returns the user's id and request headers. */
 async function login(request: APIRequestContext, who: Who): Promise<Client> {
-  const apikey = await anonKey(request);
-  const res = await request.post("/auth/v1/token?grant_type=password", {
-    headers: { apikey },
-    data: { email: users[who].email, password: PASSWORD },
-  });
-  expect(res.ok(), `sign in as ${who}`).toBeTruthy();
-  const body = (await res.json()) as { access_token: string; user: { id: string } };
-  return {
-    id: body.user.id,
-    headers: { apikey, authorization: `Bearer ${body.access_token}`, prefer: "return=representation" },
-  };
+  const t = await token(request, who);
+  expect(t.ok, `sign in as ${who}`).toBeTruthy();
+  return t;
 }
 
 async function select(request: APIRequestContext, c: Client, table: string, params: Record<string, string>) {

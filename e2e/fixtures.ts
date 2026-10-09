@@ -1,10 +1,14 @@
 // Shared e2e helpers. Every spec imports { test, expect } from here.
 //  - reset(): restores the documented demo data (docs/stories/README.md). Call it
 //    in beforeEach of any spec that changes data.
-//  - signIn(page, who): signs in through the real form.
+//  - signIn(page, who): signs in through the real form (replacing any signed-in user).
+//  - api(page, path), openCourse(page, code, path), coursePath(page, code): data API
+//    calls and course pages as the signed-in user.
+//  - token(request, who), client(request, who): sign in through the auth API and call
+//    the data API, for checks without a page.
 //  - scan(page): axe accessibility scan of the current page (also runs
 //    automatically at the end of every test). Results feed `mise run metrics`.
-import { test as base, expect, type Page } from "@playwright/test";
+import { test as base, expect, type APIRequestContext, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { appendFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -26,18 +30,71 @@ export function reset() {
 }
 
 export async function signIn(page: Page, who: Who, password = PASSWORD) {
+  if (page.url().startsWith("http")) await page.evaluate(() => localStorage.removeItem("scientia-auth"));
   await page.goto("/sign-in");
   await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("main")).toBeVisible();
-  await page.waitForURL((url) => !url.pathname.startsWith("/sign-in"));
+  await expect(page.getByRole("button", { name: /account menu/i })).toBeVisible();
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible();
 }
 
 export async function signOut(page: Page) {
   await page.getByRole("button", { name: /account menu/i }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).click();
   await page.waitForURL(/\/sign-in/);
+}
+
+/** Calls the data API from the page as the signed-in user; `data` is the parsed JSON body, if any. */
+export async function api(page: Page, path: string, init: { method?: string; body?: unknown } = {}) {
+  return page.evaluate(async ({ path, method, body }) => {
+    const { anonKey } = await (await fetch("/config.json")).json();
+    const token = JSON.parse(localStorage.getItem("scientia-auth")!).access_token;
+    const headers = { apikey: anonKey, authorization: `Bearer ${token}`, "content-type": "application/json" };
+    const res = await fetch(path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    const text = await res.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch {}
+    return { status: res.status, text, data };
+  }, { path, ...init });
+}
+
+export async function coursePath(page: Page, code: string) {
+  const [course] = (await api(page, `/rest/v1/courses?select=id&code=eq.${code}`)).data;
+  return `/courses/${course.id}`;
+}
+
+/** Opens a course page, e.g. openCourse(page, "BIO101", "/grading"), and returns the course id. */
+export async function openCourse(page: Page, code: string, path = "") {
+  const base = await coursePath(page, code);
+  await page.goto(base + path);
+  await expect(page.getByRole("navigation", { name: "Course" })).toBeVisible();
+  return base.slice("/courses/".length);
+}
+
+/** Signs in through the auth API; `headers` authorise data API requests as that user. */
+export async function token(request: APIRequestContext, who: Who, password = PASSWORD) {
+  const { anonKey } = await (await request.get("/config.json")).json();
+  const res = await request.post("/auth/v1/token?grant_type=password", { headers: { apikey: anonKey }, data: { email: users[who].email, password } });
+  const body = res.ok() ? await res.json() : null;
+  return {
+    ok: res.ok(),
+    anonKey: anonKey as string,
+    id: body?.user.id as string,
+    headers: { apikey: anonKey, authorization: `Bearer ${body?.access_token}`, prefer: "return=representation" },
+  };
+}
+
+/** Data API calls as a user, each expected to succeed (see "Data API checks" in docs/stories/README.md). */
+export async function client(request: APIRequestContext, who: Who) {
+  const { ok, headers } = await token(request, who);
+  expect(ok, `sign in as ${who}`).toBe(true);
+  const call = async (method: string, path: string, data?: object) => {
+    const r = await request.fetch(`/rest/v1/${path}`, { method, headers, data });
+    expect(r.ok(), `${path}: ${await r.text()}`).toBe(true);
+    return r.json();
+  };
+  return { get: (path: string) => call("GET", path), post: (path: string, data: object) => call("POST", path, data), patch: (path: string, data: object) => call("PATCH", path, data) };
 }
 
 export async function scan(page: Page) {

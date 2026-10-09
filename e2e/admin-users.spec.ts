@@ -1,19 +1,5 @@
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
+import { test, expect, reset, signIn, signOut, token, client, users, PASSWORD, type Who } from "./fixtures";
 import type { Page } from "@playwright/test";
-
-// e2e/fixtures.ts signIn() visits /signin, which is not a route (the app uses /sign-in); local copy until the fixture is fixed.
-async function signIn(page: Page, who: Who, password = PASSWORD) {
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("banner")).toContainText(users[who].name);
-}
-async function signOut(page: Page) {
-  await page.getByRole("button", { name: /account menu/i }).click();
-  await page.getByRole("menuitem", { name: "Sign out" }).click();
-  await page.waitForURL(/\/sign-in/);
-}
 
 test.beforeEach(() => reset());
 
@@ -210,14 +196,7 @@ test("@US-43 admin area is closed to other roles", async ({ page }) => {
 });
 
 test("@US-43 gradebook, grading and data API are closed to students", async ({ page }) => {
-  const { anonKey } = await (await page.request.get("/config.json")).json();
-  async function token(who: Who) {
-    const r = await page.request.post("/auth/v1/token?grant_type=password", { headers: { apikey: anonKey }, data: { email: users[who].email, password: PASSWORD } });
-    return (await r.json()).access_token as string;
-  }
-  const ingridToken = await token("ingrid");
-  const courses = await (await page.request.get("/rest/v1/courses?code=eq.BIO101&select=id", { headers: { apikey: anonKey, authorization: `Bearer ${ingridToken}` } })).json();
-  const bio = courses[0].id as string;
+  const [{ id: bio }] = await (await client(page.request, "ingrid")).get("courses?code=eq.BIO101&select=id");
 
   await signIn(page, "maya");
   for (const path of ["gradebook", "grading"]) {
@@ -227,7 +206,7 @@ test("@US-43 gradebook, grading and data API are closed to students", async ({ p
     for (const s of ["Hansen", "Reyes", "72", "Released"]) expect(text).not.toContain(s);
   }
 
-  const headers = { apikey: anonKey, authorization: `Bearer ${await token("maya")}` };
+  const { headers } = await token(page.request, "maya");
   const body = await (await page.request.get("/rest/v1/profiles?select=email,full_name", { headers })).text();
   for (const s of ["liam.hansen@", "sofia.reyes@", "noah.berg@", "priya.nair@", "ingrid.solberg@", "admin@"]) expect(body).not.toContain(s);
 
