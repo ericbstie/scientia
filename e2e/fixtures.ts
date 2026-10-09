@@ -7,9 +7,8 @@
 //    calls and course pages as the signed-in user.
 //  - token(request, who), client(request, who): sign in through the auth API and call
 //    the data API, for checks without a page.
-//  - scan(page): axe accessibility scan of the current page, plus a check that it
-//    does not scroll sideways at phone width (also runs automatically at the end
-//    of every test). Results feed `mise run metrics`.
+//  - At the end of every passing test the page gets an axe accessibility scan and
+//    fails if it scrolls sideways at phone width. Results feed `mise run metrics`.
 import { test as base, expect, type APIRequestContext, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { appendFileSync } from "node:fs";
@@ -100,7 +99,7 @@ export async function client(request: APIRequestContext, who: Who) {
   return { get: (path: string) => call("GET", path), post: (path: string, data: object) => call("POST", path, data), patch: (path: string, data: object) => call("PATCH", path, data) };
 }
 
-export async function scan(page: Page) {
+async function scan(page: Page) {
   if (page.isClosed() || !page.url().startsWith("http")) return;
   await page.waitForLoadState("networkidle").catch(() => {});
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
@@ -111,7 +110,7 @@ export async function scan(page: Page) {
     overflow: await phoneOverflow(page),
   };
   appendFileSync("e2e/.results/a11y.jsonl", JSON.stringify(line) + "\n");
-  return line.violations;
+  return line;
 }
 
 /** At phone width the page itself must not scroll sideways (tables may, inside .table-wrap). Returns the widest offender, or null. */
@@ -135,7 +134,9 @@ export const test = base.extend<{ autoScan: void }>({
   autoScan: [
     async ({ page }, use) => {
       await use();
-      if (base.info().status === "passed") await scan(page);
+      if (base.info().status !== "passed") return;
+      const line = await scan(page);
+      expect(line?.overflow ?? null, `${line?.url} scrolls sideways at 390 px wide`).toBeNull();
     },
     { auto: true },
   ],
