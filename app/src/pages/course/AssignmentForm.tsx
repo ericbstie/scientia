@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useCourse } from "../../App";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Button, Checkbox, ErrorNote, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
+import { Button, Checkbox, ErrorNote, ErrorSummary, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { loadAssignment, toLocalInput } from "./work/shared";
 
 type Errors = { title?: string; due?: string; points?: string; accepts?: string };
@@ -22,6 +23,7 @@ export function AssignmentForm() {
   const navigate = useNavigate();
   const toast = useToast();
 
+  useDocTitle(editing ? "Edit assignment" : "New assignment");
   const existing = useQuery(async () => (editing ? loadAssignment(course.id, assignmentId!) : null), [course.id, assignmentId]);
 
   const [title, setTitle] = useState("");
@@ -76,7 +78,6 @@ export function AssignmentForm() {
   if (editing && existing.loading && !existing.data) return <div className="content"><Loading /></div>;
   if (editing && !existing.error && !existing.data) return <NotFound />;
 
-  const count = Object.keys(errors).length;
   return (
     <div className="content">
       <PageHeader
@@ -84,14 +85,14 @@ export function AssignmentForm() {
         title={editing ? "Edit assignment" : "New assignment"}
       />
       <ErrorNote error={existing.error} />
-      {count > 1 && <div className="alert danger" role="alert">Fix the {count} problems below, then save again.</div>}
+      <ErrorSummary errors={[errors.title && { id: "a-title", message: errors.title }, errors.due && { id: "a-due", message: errors.due }, errors.points && { id: "a-points", message: errors.points }, errors.accepts && { id: "a-accepts", message: errors.accepts }]} />
       {saveError && <div className="alert danger" role="alert">{saveError}</div>}
       <form className="form" ref={formRef} onSubmit={(e) => save(e, editing ? null : true)} noValidate>
-        <Field id="a-title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} autoComplete="off" />
+        <Field id="a-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} autoComplete="off" />
         <TextArea id="a-instructions" label="Instructions" rows={6} value={description} onChange={(e) => setDescription(e.target.value)} />
         <div className="field-row">
-          <Field id="a-due" label="Due date and time" type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} />
-          <Field id="a-points" label="Points" type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />
+          <Field id="a-due" label="Due date and time" required type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} />
+          <Field id="a-points" label="Points" required type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />
         </div>
         <fieldset id="a-accepts" style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>
           <legend className="label" style={{ marginBottom: "var(--s2)" }}>Accepts</legend>
@@ -99,7 +100,7 @@ export function AssignmentForm() {
             <Checkbox label="File upload" checked={files} onChange={(e) => setFiles(e.target.checked)} />
             <Checkbox label="Text entry" checked={text} onChange={(e) => setText(e.target.checked)} />
           </div>
-          {errors.accepts && <span className="error-text" id="a-accepts-error" role="alert">{errors.accepts}</span>}
+          {errors.accepts && <span className="error-text" id="a-accepts-error">{errors.accepts}</span>}
         </fieldset>
         <Checkbox label="Allow late submissions" checked={late} onChange={(e) => setLate(e.target.checked)} />
         <div className="actions">

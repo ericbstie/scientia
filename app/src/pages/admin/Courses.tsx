@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { AdminNav } from "./AdminNav";
-import { Button, Dialog, Empty, ErrorNote, Field, Loading, PageHeader, useToast } from "../../ui";
+import { Button, Dialog, Empty, ErrorNote, ErrorSummary, Field, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 
@@ -11,6 +11,7 @@ const focusLater = (id: string) => requestAnimationFrame(() => document.getEleme
 
 export function AdminCourses() {
   const toast = useToast();
+  useTitle("Courses");
   const [creating, setCreating] = useState(false);
   const { data, error, loading, reload } = useQuery(async () => {
     const courses = must(await db().from("courses").select("id, code, title, enrollments(role, profiles(full_name))").order("code")) as unknown as CourseRow[];
@@ -58,6 +59,7 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
   const [errors, setErrors] = useState<{ code?: string; title?: string; teacher?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const noTeachers = teachers.length === 0;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -96,18 +98,16 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
   return (
     <form className="form" onSubmit={submit} noValidate>
       {formError && <div className="alert danger" role="alert">{formError}</div>}
-      <Field id="nc-code" label="Code" value={code} error={errors.code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
-      <Field id="nc-title" label="Title" value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} autoComplete="off" />
-      <div className="field">
-        <label htmlFor="nc-teacher">Teacher</label>
-        <select id="nc-teacher" className="select" value={teacher} onChange={(e) => setTeacher(e.target.value)} aria-invalid={!!errors.teacher || undefined} aria-describedby={errors.teacher ? "nc-teacher-error" : undefined}>
-          <option value="">Select a teacher</option>
-          {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}
-        </select>
-        {errors.teacher && <span className="error-text" id="nc-teacher-error" role="alert">{errors.teacher}</span>}
-      </div>
+      <ErrorSummary errors={[errors.code && { id: "nc-code", message: errors.code }, errors.title && { id: "nc-title", message: errors.title }, errors.teacher && { id: "nc-teacher", message: errors.teacher }]} />
+      <Field id="nc-code" label="Code" required value={code} error={errors.code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
+      <Field id="nc-title" label="Title" required value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} autoComplete="off" />
+      <Select id="nc-teacher" label="Teacher" required value={teacher} onChange={(e) => setTeacher(e.target.value)} error={errors.teacher} hint={noTeachers ? "No teachers yet. Add a teacher on the Users page first." : undefined}>
+        <option value="">Select a teacher</option>
+        {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}
+      </Select>
       <div className="actions">
-        <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
+        <Button type="submit" variant="primary" disabled={busy || noTeachers}>{busy ? "Saving…" : "Save"}</Button>
+        {noTeachers && <span className="muted">Save is unavailable until a teacher exists</span>}
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </form>

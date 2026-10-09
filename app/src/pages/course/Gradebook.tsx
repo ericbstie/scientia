@@ -4,6 +4,7 @@ import { useCourse } from "../../App";
 import { num } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
 import { Button, Empty, ErrorNote, Loading, PageHeader, Section } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { firstName, key, lastName, lateByLabel, loadTeacherData, pct1, type TeacherData } from "./work/shared";
 
 type Row = { id: string; first: string; last: string; email: string; total: string };
@@ -55,6 +56,7 @@ function download(name: string, text: string) {
 export function Gradebook() {
   const { course } = useCourse();
   const base = `/courses/${course.id}`;
+  useDocTitle("Gradebook");
   const { data, error, loading } = useQuery(() => loadTeacherData(course.id), [course.id]);
   const students = data ? sortedStudents(data) : [];
   const rows: Row[] = students.map((s) => ({ id: s.user_id, first: firstName(s.full_name), last: lastName(s.full_name), email: s.email ?? "", total: data ? totalFor(data, s.user_id) : "" }));
@@ -90,12 +92,12 @@ export function Gradebook() {
                       {data.assignments.map((a) => {
                         const sub = data.subs.find((x) => x.assignment_id === a.id && x.student_id === s.user_id);
                         const g = data.grades.find((x) => x.assignment_id === a.id && x.student_id === s.user_id);
-                        const link = (content: ReactNode) => (
-                          <Link to={`${base}/grading/${sub!.id}`} style={{ display: "block", margin: "calc(-1 * var(--s2)) calc(-1 * var(--s3))", padding: "var(--s2) var(--s3)" }}>{content}</Link>
+                        const link = (content: ReactNode, text: string) => (
+                          <Link to={`${base}/grading/${sub!.id}`} aria-label={`${s.full_name}, ${a.title}: ${text}`} style={{ display: "block", margin: "calc(-1 * var(--s2)) calc(-1 * var(--s3))", padding: "var(--s2) var(--s3)" }}>{content}</Link>
                         );
                         let cell: ReactNode;
-                        if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Draft"}</span></>);
-                        else if (sub) cell = link(lateByLabel(a.due_at, sub.submitted_at) ? "Late, not graded" : "Not graded");
+                        if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Draft"}</span></>, `${num(g.score)} ${g.released ? "Released" : "Draft"}`);
+                        else if (sub) { const t = lateByLabel(a.due_at, sub.submitted_at) ? "Late, not graded" : "Not graded"; cell = link(t, t); }
                         else if (new Date(a.due_at).getTime() < now) cell = "Missing";
                         else cell = "–";
                         return <td key={a.id} className="num">{cell}</td>;

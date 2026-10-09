@@ -4,7 +4,8 @@ import { useCourse } from "../../App";
 import { fmtDateTime } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, Loading, PageHeader, StatusBadge, useToast } from "../../ui";
+import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, Loading, PageHeader, Status, StatusBadge, useToast } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { buildQueue, lateByLabel, loadTeacherData, type QueueRow } from "./work/shared";
 
 import type { Filter } from "./work/shared";
@@ -18,6 +19,7 @@ const FILTERS: { id: Filter; label: string; empty: string }[] = [
 export function Grading() {
   const { course } = useCourse();
   const base = `/courses/${course.id}`;
+  useDocTitle("Grading");
   const toast = useToast();
   const [params] = useSearchParams();
   const active = FILTERS.find((f) => f.id === params.get("status")) ?? FILTERS[0]!;
@@ -64,7 +66,7 @@ export function Grading() {
           </Link>
         ))}
       </nav>
-      <p className="visually-hidden" aria-live="polite">{data ? `Showing ${shown.length} ${shown.length === 1 ? "submission" : "submissions"}` : ""}</p>
+      <Status>{data ? `Showing ${shown.length} ${shown.length === 1 ? "submission" : "submissions"}` : ""}</Status>
       {loading && !data ? <Loading /> : data && (
         shown.length === 0 ? (
           <Empty title={active.empty} />
@@ -92,8 +94,8 @@ export function Grading() {
                       {r.filter === "graded" && <StatusBadge status="Graded (not released)" />}
                       {r.filter === "released" && <StatusBadge status="Released" />}
                       {r.filter === "missing" && <Badge tone="danger">Missing</Badge>}
-                      {r.filter === "graded" && <Button size="small" variant="ghost" disabled={busy} onClick={() => setReleased([r], true)}>Release</Button>}
-                      {r.filter === "released" && <Button size="small" variant="ghost" onClick={() => setWithdraw(r)}>Withdraw</Button>}
+                      {r.filter === "graded" && <Button size="small" variant="ghost" disabled={busy} aria-label={`Release grade for ${r.student} on ${r.assignment}`} onClick={() => setReleased([r], true)}>Release</Button>}
+                      {r.filter === "released" && <Button size="small" variant="ghost" aria-label={`Withdraw grade for ${r.student} on ${r.assignment}`} onClick={() => setWithdraw(r)}>Withdraw</Button>}
                     </div>
                   </div>
                 </li>

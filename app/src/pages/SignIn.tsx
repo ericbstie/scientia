@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { db } from "../lib/supabase";
-import { Button, Field } from "../ui";
+import { db, isDemo } from "../lib/supabase";
+import { Button, Field, useTitle } from "../ui";
 
 export const DEMO_ACCOUNTS = [
   { label: "Student", email: "maya.okafor@scientia.test" },
@@ -11,6 +11,7 @@ export const DEMO_ACCOUNTS = [
 export const DEMO_PASSWORD = "Demo-pass-123";
 
 export function SignIn() {
+  useTitle("Sign in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -40,14 +41,14 @@ export function SignIn() {
         <div className="brand" style={{ padding: 0, marginBottom: "var(--s5)" }}>
           <span className="brand-mark" aria-hidden="true">S</span> Scientia
         </div>
-        <h1>Sign in</h1>
+        <h1>Sign in to Scientia</h1>
         {error && <div className="alert danger" role="alert">{error}</div>}
         <form className="form" onSubmit={submit}>
-          <Field label="Email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+          <Field label="Email" type="email" autoFocus autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <Field label="Password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
           <Button type="submit" variant="primary" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
-        <div className="demo-accounts muted">
+        {isDemo() && <div className="demo-accounts muted">
           <p>Demo accounts (password <code>{DEMO_PASSWORD}</code>):</p>
           <ul>
             {DEMO_ACCOUNTS.map((a) => (
@@ -58,7 +59,7 @@ export function SignIn() {
               </li>
             ))}
           </ul>
-        </div>
+        </div>}
       </div>
     </main>
   );

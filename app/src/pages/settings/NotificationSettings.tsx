@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../../lib/auth";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Checkbox, ErrorNote, Loading, PageHeader, Section, useToast } from "../../ui";
+import { Checkbox, ErrorNote, Loading, PageHeader, Section, useTitle, useToast } from "../../ui";
 import { SettingsNav } from "../personal/ui";
 
 const KINDS: [string, string][] = [
@@ -16,6 +16,7 @@ const KINDS: [string, string][] = [
 export function NotificationSettings() {
   const { profile } = useAuth();
   const toast = useToast();
+  useTitle("Notification settings");
   const [failure, setFailure] = useState<Error | null>(null);
   const { data, error, loading, setData } = useQuery(async () => {
     const rows = must(await db().from("notification_prefs").select("kind, enabled").eq("user_id", profile!.id)) as { kind: string; enabled: boolean }[];

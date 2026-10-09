@@ -3,7 +3,7 @@ import { useAuth } from "../lib/auth";
 import { db, must } from "../lib/supabase";
 import { num, studentStatus } from "../lib/format";
 import { useQuery } from "../lib/useQuery";
-import { Due, Empty, ErrorNote, Loading, PageHeader, Section, StatusBadge } from "../ui";
+import { Due, Empty, ErrorNote, Loading, PageHeader, Section, StatusBadge, useTitle } from "../ui";
 import { myCourses, publishedAssignments, type AssignmentLite, type CourseLite } from "./personal/data";
 
 type Row = AssignmentLite & { code: string; status: ReturnType<typeof studentStatus> };
@@ -12,6 +12,7 @@ type TeacherCourse = { course: CourseLite; students: number; needGrading: number
 
 export function Dashboard() {
   const { profile } = useAuth();
+  useTitle("Dashboard");
   const uid = profile!.id;
   const teacher = profile!.role === "teacher";
   const { data, error, loading } = useQuery<Data>(() => (teacher ? loadTeacher(uid) : loadStudent(uid)), [uid, teacher]);
@@ -102,7 +103,7 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
             ))}
           </ul>
         ) : (
-          <p>Nothing missing</p>
+          <Empty title="Nothing missing">Assignments you have not handed in appear here once they are past due.</Empty>
         )}
       </Section>
       <Section title="Your courses">

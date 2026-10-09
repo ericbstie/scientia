@@ -60,7 +60,7 @@ export function AnnouncementForm() {
       <PageHeader eyebrow={<Link to={`${base}/announcements`}>Announcements</Link>} title={editing ? "Edit announcement" : "New announcement"} />
       <form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail ?? q.error} />
-        <Field id="announcement-title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />
+        <Field id="announcement-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />
         <TextArea label="Message" value={message} onChange={(e) => setMessage(e.target.value)} rows={8} />
         <div className="actions">
           <Button variant="primary" type="submit" disabled={busy}>{editing ? "Save" : "Post"}</Button>

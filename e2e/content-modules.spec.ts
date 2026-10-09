@@ -80,7 +80,7 @@ test.describe("Modules", () => {
     await page.getByRole("button", { name: "Add module" }).first().click();
     const dialog = page.getByRole("dialog", { name: "Add module" });
     await dialog.getByRole("button", { name: "Add module" }).click();
-    await expect(dialog.getByRole("alert")).toHaveText("Enter a module name");
+    await expect(dialog.locator(".error-text")).toHaveText("Enter a module name");
     await expect(dialog.getByLabel("Name")).toHaveAttribute("aria-describedby", /error/);
     await expect(dialog.getByLabel("Name")).toBeFocused();
     await dialog.getByRole("button", { name: "Cancel" }).click();
@@ -140,7 +140,7 @@ test.describe("Modules", () => {
     await linkDialog.getByLabel("Title").fill("Food webs");
     await linkDialog.getByLabel("URL").fill("not a url");
     await linkDialog.getByRole("button", { name: "Add link" }).click();
-    await expect(linkDialog.getByRole("alert")).toHaveText("Enter a web address starting with http:// or https://");
+    await expect(linkDialog.locator(".error-text")).toHaveText("Enter a web address starting with http:// or https://");
     await expect(linkDialog.getByLabel("URL")).toHaveAttribute("aria-describedby", /error/);
     await linkDialog.getByLabel("URL").fill("https://example.org/food-webs");
     await linkDialog.getByRole("button", { name: "Add link" }).click();

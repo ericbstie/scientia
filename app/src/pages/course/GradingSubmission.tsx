@@ -5,6 +5,7 @@ import { fmtDateTime, num } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ErrorNote, Field, Loading, NotFound, PageHeader, Section, StatusBadge, TextArea, useToast } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { FileLinks, buildQueue, lateByLabel, loadTeacherData, useUnsavedGuard } from "./work/shared";
 
 export function GradingSubmission() {
@@ -22,6 +23,8 @@ function GradeOne({ submissionId }: { submissionId: string }) {
   const assignment = data?.assignments.find((a) => a.id === sub?.assignment_id);
   const student = data?.students.find((s) => s.user_id === sub?.student_id);
   const grade = data?.grades.find((g) => sub && g.assignment_id === sub.assignment_id && g.student_id === sub.student_id);
+
+  useDocTitle(student && assignment ? `${student.full_name}: ${assignment.title}` : undefined);
 
   // Form state starts from the saved grade; `saved` is what the database holds now.
   const [score, setScore] = useState<string | null>(null);
@@ -98,7 +101,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
         {fail && <div className="alert danger" role="alert">{fail}</div>}
         <form className="card form" onSubmit={(e) => save(e, false)} noValidate>
           <Field
-            id="g-score" label="Score" type="number" step="any" inputMode="decimal" hint={`out of ${num(assignment.points)}`}
+            id="g-score" label="Score" required type="number" step="any" inputMode="decimal" hint={`out of ${num(assignment.points)}`}
             value={score ?? ""} onChange={(e) => setScore(e.target.value)} error={scoreError}
           />
           <TextArea id="g-feedback" label="Feedback" rows={6} value={feedback ?? ""} onChange={(e) => setFeedback(e.target.value)} />

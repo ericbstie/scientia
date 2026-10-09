@@ -6,6 +6,7 @@ import { fmtDateTime, lateBy, num, studentStatus } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ButtonLink, ErrorNote, Field, Loading, NotFound, PageHeader, Section, StatusBadge, TextArea, useToast } from "../../ui";
+import { useDocTitle } from "./content/util";
 import { Facts, FileLinks, MAX_FILE_BYTES, acceptsLabel, loadAssignment, normSub, type Assignment, type FileRef, type Submission } from "./work/shared";
 
 export function AssignmentView() {
@@ -22,6 +23,7 @@ export function AssignmentView() {
 
 function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
   const { course } = useCourse();
+  useDocTitle(a.title);
   const base = `/courses/${course.id}`;
   const toast = useToast();
   const [busy, setBusy] = useState(false);
@@ -99,6 +101,7 @@ async function loadMine(a: Assignment, userId: string): Promise<Mine> {
 
 function StudentView({ a }: { a: Assignment }) {
   const { course } = useCourse();
+  useDocTitle(a.title);
   const { profile } = useAuth();
   const base = `/courses/${course.id}`;
   const { data, error, loading, reload } = useQuery(() => loadMine(a, profile!.id), [a.id, profile?.id]);

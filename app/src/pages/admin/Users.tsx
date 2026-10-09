@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { AdminNav } from "./AdminNav";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, Field, Loading, PageHeader, Select, useToast } from "../../ui";
+import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, Loading, PageHeader, Select, Status, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { useAuth } from "../../lib/auth";
@@ -23,6 +23,7 @@ const focusLater = (id: string) => requestAnimationFrame(() => document.getEleme
 
 export function AdminUsers() {
   const { profile } = useAuth();
+  useTitle("Users");
   const toast = useToast();
   const { data, error, loading, reload } = useQuery(async () => must(await db().rpc("admin_users")) as Row[]);
   const [search, setSearch] = useState("");
@@ -53,13 +54,14 @@ export function AdminUsers() {
       <AdminNav />
       <ErrorNote error={error} />
       {actionError && <div className="alert danger" role="alert">{actionError}</div>}
+      <Status>{data ? `Showing ${rows.length} ${rows.length === 1 ? "user" : "users"}` : ""}</Status>
       <div className="form" style={{ display: "flex", gap: "var(--s4)", flexWrap: "wrap", alignItems: "flex-end", marginBottom: "var(--s4)" }}>
         <Field label="Search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
         <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
           <option value="">All roles</option>
-          <option value="student">student</option>
-          <option value="teacher">teacher</option>
-          <option value="admin">admin</option>
+          <option value="student">Student</option>
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
         </Select>
       </div>
       {loading && !data ? <Loading /> : rows.length === 0 ? (
@@ -74,7 +76,7 @@ export function AdminUsers() {
                 <tr key={u.id}>
                   <th scope="row">{u.full_name}</th>
                   <td>{u.email}</td>
-                  <td>{u.role}</td>
+                  <td style={{ textTransform: "capitalize" }}>{u.role}</td>
                   <td><Badge tone={u.deactivated ? undefined : "success"}>{u.deactivated ? "Deactivated" : "Active"}</Badge></td>
                   <td>
                     <div className="actions">
@@ -150,14 +152,15 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
   return (
     <form className="form" onSubmit={submit} noValidate>
       {formError && <div className="alert danger" role="alert">{formError}</div>}
-      <Field id="nu-name" label="Name" value={name} error={errors.name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
-      <Field id="nu-email" label="Email" type="email" value={email} error={errors.email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
-      <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
-        <option value="student">student</option>
-        <option value="teacher">teacher</option>
-        <option value="admin">admin</option>
+      <ErrorSummary errors={[errors.name && { id: "nu-name", message: errors.name }, errors.email && { id: "nu-email", message: errors.email }, errors.password && { id: "nu-password", message: errors.password }]} />
+      <Field id="nu-name" label="Name" required value={name} error={errors.name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+      <Field id="nu-email" label="Email" required type="email" value={email} error={errors.email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+      <Select label="Role" required value={role} onChange={(e) => setRole(e.target.value)}>
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="admin">Admin</option>
       </Select>
-      <Field id="nu-password" label="Password" type="text" hint="At least 8 characters. Share it with the person; they can change it later." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+      <Field id="nu-password" label="Password" required type="text" hint="At least 8 characters. Share it with the person; they can change it later." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         <Button onClick={onCancel}>Cancel</Button>
@@ -190,7 +193,7 @@ function ResetForm({ user, onCancel, onDone }: { user: Row; onCancel: () => void
   return (
     <form className="form" onSubmit={submit} noValidate>
       {formError && <div className="alert danger" role="alert">{formError}</div>}
-      <Field id="rp-password" label="New password" type="text" hint="At least 8 characters." value={password} error={error} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+      <Field id="rp-password" label="New password" required type="text" hint="At least 8 characters." value={password} error={error} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         <Button onClick={onCancel}>Cancel</Button>

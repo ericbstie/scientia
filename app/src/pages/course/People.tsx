@@ -44,7 +44,7 @@ export function People() {
       {q.loading && !q.data ? <Loading /> : (
         <>
           <Section title="Teachers">
-            <ul className="list">
+            {teachers.length === 0 ? <Empty title="No teachers yet." /> : <ul className="list">
               {teachers.map((p) => (
                 <li key={p.user_id}>
                   <div className="row">
@@ -57,7 +57,7 @@ export function People() {
                   </div>
                 </li>
               ))}
-            </ul>
+            </ul>}
           </Section>
           <Section title={`${students.length} ${students.length === 1 ? "student" : "students"}`}>
             {students.length === 0 ? (
@@ -72,7 +72,7 @@ export function People() {
                         <span className="row-title">{p.full_name}</span>
                         {teacher && p.email && <div className="row-meta">{p.email}</div>}
                       </div>
-                      {teacher && <div className="row-side"><Button size="small" variant="danger" className="ghost" onClick={() => setRemoving(p)}>Remove</Button></div>}
+                      {teacher && <div className="row-side"><Button size="small" variant="danger" className="ghost" aria-label={`Remove ${p.full_name}`} onClick={() => setRemoving(p)}>Remove</Button></div>}
                     </div>
                   </li>
                 ))}
@@ -123,7 +123,7 @@ function AddForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name: st
 
   return (
     <form className="form" onSubmit={submit} noValidate>
-      <Field id="person-email" type="email" label="Email" value={email} onChange={(e) => setEmail(e.target.value)} error={error} hint="The student needs an existing Scientia account." />
+      <Field id="person-email" type="email" label="Email" required value={email} onChange={(e) => setEmail(e.target.value)} error={error} hint="The student needs an existing Scientia account." />
       <div className="actions">
         <Button variant="primary" type="submit" disabled={busy}>Add student</Button>
         <Button onClick={onCancel}>Cancel</Button>

@@ -1,12 +1,10 @@
-import { useEffect } from "react";
 import { useCourse } from "../../../App";
+import { useTitle } from "../../../ui";
 
 /** Document title: "<Page> · <COURSE> · Scientia". */
 export function useDocTitle(title: string | undefined) {
   const { course } = useCourse();
-  useEffect(() => {
-    if (title) document.title = `${title} · ${course.code} · Scientia`;
-  }, [title, course.code]);
+  useTitle(title, course.code);
 }
 
 /** After a row disappears, keep keyboard users in the page: focus the page heading. */

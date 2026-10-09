@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useCourse } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, Field, Loading, PageHeader, Section, useToast } from "../../ui";
+import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, Loading, PageHeader, Section, useToast } from "../../ui";
 import { focusField, focusHeading, useDocTitle } from "./content/util";
 
 type Item = { id: string; kind: "page" | "file" | "link"; title: string; url: string | null; file_name: string | null; file_path: string | null; position: number };
@@ -87,10 +87,10 @@ export function Modules() {
             action={teacher && (
               <div className="actions">
                 {!m.published && <Badge>Draft</Badge>}
-                <Button size="small" onClick={() => setPublished(m, !m.published)}>{m.published ? "Unpublish" : "Publish"}</Button>
-                <ButtonLink size="small" to={`${base}/modules/${m.id}/pages/new`}>Add page</ButtonLink>
-                <Button size="small" onClick={() => setDialog({ kind: "file", module: m })}>Add file</Button>
-                <Button size="small" onClick={() => setDialog({ kind: "link", module: m })}>Add link</Button>
+                <Button size="small" aria-label={`${m.published ? "Unpublish" : "Publish"} module ${m.title}`} onClick={() => setPublished(m, !m.published)}>{m.published ? "Unpublish" : "Publish"}</Button>
+                <ButtonLink size="small" aria-label={`Add page to ${m.title}`} to={`${base}/modules/${m.id}/pages/new`}>Add page</ButtonLink>
+                <Button size="small" aria-label={`Add file to ${m.title}`} onClick={() => setDialog({ kind: "file", module: m })}>Add file</Button>
+                <Button size="small" aria-label={`Add link to ${m.title}`} onClick={() => setDialog({ kind: "link", module: m })}>Add link</Button>
               </div>
             )}
           >
@@ -111,9 +111,9 @@ export function Modules() {
                         ) : (
                           <span className="row-title">{i.title}</span>
                         )}
-                        <div className="row-meta">{KIND_LABEL[i.kind]}{i.kind === "file" && i.file_name && <> · {i.file_name}</>}</div>
+                        <div className="row-meta">{KIND_LABEL[i.kind]}{i.kind === "link" && " · Opens in a new tab"}{i.kind === "file" && i.file_name && <> · {i.file_name}</>}</div>
                       </div>
-                      {teacher && <div className="row-side"><Button variant="danger" size="small" className="ghost" onClick={() => setRemoving({ mod: m, item: i })}>Delete</Button></div>}
+                      {teacher && <div className="row-side"><Button variant="danger" size="small" className="ghost" aria-label={`Delete ${KIND_LABEL[i.kind].toLowerCase()} ${i.title}`} onClick={() => setRemoving({ mod: m, item: i })}>Delete</Button></div>}
                     </div>
                   </li>
                 ))}
@@ -192,7 +192,7 @@ function ModuleForm({ position, onCancel, onDone }: { position: number; onCancel
   return (
     <form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={fail} />
-      <Field id="module-name" label="Name" value={name} onChange={(e) => setName(e.target.value)} error={error} hint="New modules are drafts until you publish them." />
+      <Field id="module-name" label="Name" required value={name} onChange={(e) => setName(e.target.value)} error={error} hint="New modules are drafts until you publish them." />
       <FormActions busy={busy} submit="Add module" onCancel={onCancel} />
     </form>
   );
@@ -235,7 +235,7 @@ function FileForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
   return (
     <form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={fail} />
-      <Field id="file-input" type="file" label="File" hint="Up to 10 MB." error={error} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError(undefined); }} />
+      <Field id="file-input" type="file" label="File" required hint="Up to 10 MB." error={error} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError(undefined); }} />
       <FormActions busy={busy} submit="Add file" onCancel={onCancel} />
     </form>
   );
@@ -267,8 +267,9 @@ function LinkForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
   return (
     <form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={fail} />
-      <Field id="link-title" label="Title" value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} />
-      <Field id="link-url" label="URL" value={url} onChange={(e) => setUrl(e.target.value)} error={errors.url} hint="Starts with http:// or https://" />
+      <ErrorSummary errors={[errors.title && { id: "link-title", message: errors.title }, errors.url && { id: "link-url", message: errors.url }]} />
+      <Field id="link-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} />
+      <Field id="link-url" label="URL" required value={url} onChange={(e) => setUrl(e.target.value)} error={errors.url} hint="Starts with http:// or https://" />
       <FormActions busy={busy} submit="Add link" onCancel={onCancel} />
     </form>
   );

@@ -104,8 +104,8 @@ test("@US-39 duplicate email and invalid fields are rejected", async ({ page }) 
   await expect(userRows(page)).toHaveCount(7);
 
   await newUser(page, { name: "Eva Lund", email: "eva.lund", password: "short12" });
-  await expect(dialog.getByText("Enter a valid email address")).toBeVisible();
-  await expect(dialog.getByText("Password must be at least 8 characters")).toBeVisible();
+  await expect(dialog.locator(".error-text", { hasText: "Enter a valid email address" })).toBeVisible();
+  await expect(dialog.locator(".error-text", { hasText: "Password must be at least 8 characters" })).toBeVisible();
   await expect(dialog.getByLabel("Email")).toHaveAccessibleDescription(/Enter a valid email address/);
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(userRows(page)).toHaveCount(7);

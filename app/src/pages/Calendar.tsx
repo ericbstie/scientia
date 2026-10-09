@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useAuth } from "../lib/auth";
 import { fmtDate } from "../lib/format";
 import { useQuery } from "../lib/useQuery";
-import { Button, Empty, ErrorNote, Loading, PageHeader } from "../ui";
+import { Button, Empty, ErrorNote, Loading, PageHeader, Status, useTitle } from "../ui";
 import { myCourses, publishedAssignments } from "./personal/data";
 
 type Item = { id: string; label: string; href: string; day: string };
@@ -29,6 +29,7 @@ const css = `
 
 export function Calendar() {
   const { profile } = useAuth();
+  useTitle("Calendar");
   const uid = profile!.id;
   const [shown, setShown] = useState(() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), 1); });
 
@@ -70,6 +71,7 @@ export function Calendar() {
       <style>{css}</style>
       <PageHeader title="Calendar" />
       <ErrorNote error={error} />
+      <Status>Showing {monthName}</Status>
       <div className="section-title">
         <h2>{monthName}</h2>
         <div className="actions">

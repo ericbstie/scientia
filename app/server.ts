@@ -124,7 +124,7 @@ const server = Bun.serve({
   development: process.env.NODE_ENV !== "production",
   routes: {
     "/healthz": () => withHeaders(new Response("ok")),
-    "/config.json": () => withHeaders(Response.json({ anonKey }, { headers: { "cache-control": "no-store" } })),
+    "/config.json": () => withHeaders(Response.json({ anonKey, demo: process.env.SEED_DEMO !== "false" }, { headers: { "cache-control": "no-store" } })),
     "/api/admin/users": { POST: async (req) => withHeaders(await createUser(req)) },
     "/api/admin/users/:id": { PATCH: async (req) => withHeaders(await updateUser(req)) },
     "/auth/v1/*": proxy("/auth/v1"),
