@@ -68,7 +68,7 @@ shadow or font is chosen. Components and pages use the system's tokens and nothi
 
 - **Lists** (`List` or our row list) for anything a person scans and opens: assignments,
   announcements, notifications, threads, queue entries, module items, roster, Upcoming and
-  Missing. Title as the link, meta line under it, status tag and date on the right.
+  Past due. Title as the link, meta line under it, status tag and date on the right.
 - **Cards** (`Card`) only for course tiles on the dashboard and for single panels that hold
   a form or a submission. Never a grid of cards for assignments or announcements. Never a
   card inside a card.
@@ -130,7 +130,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 ## Writing
 
 - Plain, direct, sentence case. Speak to the user as "you" ("Your teacher has started grading this work"). Short sentences, no exclamation marks, no emoji, no jargon (no "LMS", "asynchronous", "instance").
-- Name things as the stories do: Modules, Announcements, Discussions, Grading, Gradebook, People, Dashboard, Upcoming, Missing. One term per concept; do not call a course "class" or a thread "topic".
+- Name things as the stories do: Modules, Announcements, Discussions, Grading, Gradebook, People, Dashboard, Upcoming, Past due. One term per concept; do not call a course "class" or a thread "topic".
 - Link text says where it goes ("Open the grading queue"), never "here".
 - Teachers see the same words as students wherever the object is the same.
 

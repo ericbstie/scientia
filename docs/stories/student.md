@@ -54,9 +54,9 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Evidence:** design-patterns.md#Pain points (5); pain-points.md#Pain points (1)
 
 **Acceptance criteria:**
-- Given I am signed in as Noah, When I open the dashboard, Then a "Missing" section lists Lab report 1 (BIO101, due T-7d 23:59, with a "Submit late" link) and Safety acknowledgement (BIO101, due T-14d 23:59, labelled "Closed" and with no link).
+- Given I am signed in as Noah, When I open the dashboard, Then a "Past due" section lists Lab report 1 (BIO101, due T-7d 23:59, with a "Submit late" link) and Safety acknowledgement (BIO101, due T-14d 23:59, labelled "Closed" and with no link).
 - Given Noah has missing items, When I read the dashboard, Then the first item in "Upcoming" is Photosynthesis worksheet, the second is Field journal, and no missing item appears inside "Upcoming".
-- Given I am signed in as Maya, When I open the dashboard, Then the Missing section shows "Nothing missing".
+- Given I am signed in as Maya, When I open the dashboard, Then the Past due section shows "Nothing past due".
 - Given I am signed in as Noah, When I click "Submit late" on Lab report 1, Then I land on that assignment's page with the submission form visible.
 
 ### US-5 Open a course with the standard layout

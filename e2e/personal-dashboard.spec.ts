@@ -53,10 +53,9 @@ test.describe("Dashboard", () => {
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+\/assignments\/[0-9a-f-]+$/);
   });
 
-  test("@US-4 missing and overdue work is shown apart from upcoming work", async ({ page }) => {
+  test("@US-4 past-due work is shown apart from upcoming work", async ({ page }) => {
     await signIn(page, "noah");
-    const missing = page.getByRole("region", { name: "Missing" });
-    const rows = missing.getByRole("listitem");
+    const rows = page.getByRole("region", { name: "Past due" }).getByRole("listitem");
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText("Lab report 1");
     await expect(rows.nth(0)).toContainText("BIO101");
@@ -77,9 +76,9 @@ test.describe("Dashboard", () => {
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+\/assignments\/[0-9a-f-]+$/);
   });
 
-  test("@US-4 nothing missing", async ({ page }) => {
+  test("@US-4 nothing past due", async ({ page }) => {
     await signIn(page, "maya");
-    await expect(page.getByRole("region", { name: "Missing" })).toContainText("Nothing missing");
+    await expect(page.getByRole("region", { name: "Past due" })).toContainText("Nothing past due");
   });
 
   test("@US-3 student lists their courses", async ({ page }) => {
@@ -250,6 +249,6 @@ test.describe("Phone layout", () => {
     await page.setViewportSize({ width: 320, height: 640 });
     await signIn(page, "noah");
     await noHorizontalScroll(page);
-    await expect(page.getByRole("region", { name: "Missing" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Past due" })).toBeVisible();
   });
 });

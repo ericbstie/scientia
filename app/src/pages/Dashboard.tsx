@@ -74,7 +74,7 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
           <Empty title="Nothing due">New assignments appear here when your teacher publishes them.</Empty>
         )}
       </Section>
-      <Section title="Missing">
+      <Section title="Past due">
         {missing.length ? (
           <List>
             {missing.map((r) => (
@@ -91,7 +91,7 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
             ))}
           </List>
         ) : (
-          <Empty title="Nothing missing">Assignments you have not handed in appear here once they are past due.</Empty>
+          <Empty title="Nothing past due">Assignments you have not handed in appear here once their due date has passed.</Empty>
         )}
       </Section>
       <Section title="Your courses">

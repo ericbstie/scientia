@@ -389,7 +389,7 @@ test.describe("More time for one student", () => {
     await signIn(page, "noah");
     const upcoming = page.getByRole("region", { name: "Upcoming" });
     await expect(upcoming.getByRole("listitem").filter({ hasText: "Safety acknowledgement" })).toContainText(fmt(dueAt(3)));
-    await expect(page.getByRole("region", { name: "Missing" })).not.toContainText("Safety acknowledgement");
+    await expect(page.getByRole("region", { name: "Past due" })).not.toContainText("Safety acknowledgement");
     const notes = (await api(page, "/rest/v1/notifications?select=title")).data as { title: string }[];
     expect(notes.map((n) => n.title)).toContain("Due date changed: Safety acknowledgement");
 

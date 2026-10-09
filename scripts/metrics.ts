@@ -119,11 +119,14 @@ m["design.literal_sizes"] = [...sheet.matchAll(/(?:font-size|line-height|border-
 m["design.custom_css_lines"] = sheet.split("\n").filter((l) => l.trim()).length;
 
 // Blind user tests: first-pass "| Scenario | Result | ... |" table of the newest
-// docs/process/reviews/m<n>-user-test.md. Result cells start with Done, Partly or Failed.
-const userTests = walk(p("docs/process/reviews"), "-user-test.md").sort(
-  (a, b) => Number(a.match(/m(\d+)-user-test/)?.[1] ?? 0) - Number(b.match(/m(\d+)-user-test/)?.[1] ?? 0),
-);
-const ut = userTests.length ? readFileSync(userTests.at(-1)!, "utf8") : "";
+// docs/process/reviews/m<n>[-<label>]-user-test.md: highest milestone, then the file added last
+// (a milestone can have several rounds, e.g. m4-redesign-user-test.md). Result cells start with
+// Done, Partly or Failed.
+const milestone = (f: string) => Number(f.match(/\/m(\d+)[^/]*-user-test\.md$/)?.[1] ?? 0);
+const added = async (f: string) => Number((await Bun.$`git -C ${root} log --diff-filter=A --format=%ct -1 -- ${f}`.nothrow().text()).trim()) || Infinity;
+const userTests = await Promise.all(walk(p("docs/process/reviews"), "-user-test.md").map(async (f) => ({ f, key: [milestone(f), await added(f)] })));
+userTests.sort((a, b) => a.key[0] - b.key[0] || a.key[1] - b.key[1]);
+const ut = userTests.length ? readFileSync(userTests.at(-1)!.f, "utf8") : "";
 const utTable = ut.split(/^\|\s*Scenario\s*\|\s*Result\s*\|.*$/m)[1]?.split(/\n\s*\n/)[0] ?? "";
 const results = [...utTable.matchAll(/^\|[^|\n]+\|\s*\**(Done|Partly|Failed)\b/gim)].map((x) => x[1].toLowerCase());
 m["ux.blind_tasks_done_pct"] = results.length
