@@ -11,6 +11,9 @@ ANON=$(grep '^ANON_KEY=' .env.example | cut -d= -f2)
 SERVICE=$(grep '^SERVICE_ROLE_KEY=' .env.example | cut -d= -f2)
 export COMPOSE_PROJECT_NAME="scientia-$n" WEB_PORT=$((3100 + n)) DB_PORT=$((54400 + n))
 DEV_PORT=$((3200 + n))
+PIDFILE="/tmp/scientia-slot-$n.pid"
+# Stops the slot's dev server (a stale one keeps serving old code on the same port).
+stop_dev() { [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null; rm -f "$PIDFILE"; }
 case "$cmd" in
   env)
     echo "export BASE_URL=http://localhost:$DEV_PORT"
@@ -23,16 +26,17 @@ case "$cmd" in
     files=(-f docker-compose.yml)
     [ -f /root/.ccr/ca-bundle.crt ] && files+=(-f docker-compose.sandbox.yml)
     docker compose -p "$COMPOSE_PROJECT_NAME" "${files[@]}" up -d --build --wait > "/tmp/scientia-slot-$n-compose.log" 2>&1 || { tail -30 "/tmp/scientia-slot-$n-compose.log"; exit 1; }
-    pkill -f "scientia-slot-$n" 2>/dev/null || true
+    stop_dev
     # Host dev server (hot reload) that proxies to the slot's container web server.
-    (exec -a "scientia-slot-$n" env PORT=$DEV_PORT ANON_KEY="$ANON" SERVICE_ROLE_KEY="$SERVICE" \
+    env PORT=$DEV_PORT ANON_KEY="$ANON" SERVICE_ROLE_KEY="$SERVICE" \
       AUTH_URL=http://localhost:$WEB_PORT/auth/v1 REST_URL=http://localhost:$WEB_PORT/rest/v1 STORAGE_URL=http://localhost:$WEB_PORT/storage/v1 \
-      bun --hot app/server.ts > "/tmp/scientia-slot-$n.log" 2>&1 &)
+      nohup bun --hot app/server.ts > "/tmp/scientia-slot-$n.log" 2>&1 &
+    echo $! > "$PIDFILE"
     for _ in $(seq 1 50); do curl -sf "http://localhost:$DEV_PORT/healthz" >/dev/null && break; sleep 0.2; done
     echo "slot $n: app http://localhost:$DEV_PORT (log /tmp/scientia-slot-$n.log). Run: eval \"\$(scripts/slot.sh env $n)\""
     ;;
   down)
-    pkill -f "scientia-slot-$n" 2>/dev/null || true
+    stop_dev
     docker compose -p "$COMPOSE_PROJECT_NAME" down -v >/dev/null 2>&1
     ;;
 esac
