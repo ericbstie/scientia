@@ -71,7 +71,7 @@ test("@US-42 duplicate code and missing teacher are rejected", async ({ page }) 
   await dialog.getByLabel("Teacher").selectOption({ label: "Choose a teacher" });
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(dialog.locator("#nc-teacher-error")).toHaveText("Choose a teacher");
-  await expect(dialog.getByLabel("Teacher")).toHaveAccessibleDescription(/Choose a teacher$/);
+  await expect(dialog.getByLabel("Teacher")).toHaveAccessibleDescription(/^Choose a teacher/);
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByRole("table").getByRole("row")).toHaveCount(before);
   await expect(page.getByRole("row", { name: /CHE110/ })).toHaveCount(0);
@@ -100,7 +100,7 @@ test("@US-42 admin adds a student to an existing course", async ({ page, browser
   await p.getByLabel("Email").fill(users.sofia.email);
   await p.getByLabel("Password").fill(PASSWORD);
   await p.getByRole("button", { name: "Sign in" }).click();
-  await expect(p.getByRole("region", { name: "Your courses" }).getByRole("link", { name: /HIS201/ })).toBeVisible();
+  await expect(p.getByRole("region", { name: "Your courses" }).getByRole("link", { name: "Modern European History" })).toBeVisible();
   await ctx.close();
 });
 

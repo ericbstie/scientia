@@ -92,7 +92,7 @@ test.describe("Creating and changing assignments", () => {
     await page.getByRole("button", { name: "Save and publish" }).click();
     await expect(page.locator(".error-text", { hasText: "Enter a title" })).toBeVisible();
     await expect(page.locator(".error-text", { hasText: "Enter points greater than 0" })).toBeVisible();
-    await expect(page.locator(".error-text", { hasText: "Choose at least one way to submit" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Students hand in by" }).getByText("Choose at least one way to submit")).toBeVisible();
     await expect(page.getByLabel("Title")).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByLabel("Points")).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByRole("group", { name: "Students hand in by" })).toHaveAttribute("aria-describedby", /error/);
@@ -218,7 +218,7 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
 
-    await page.getByRole("link", { name: "‹ Grading" }).click();
+    await page.getByRole("link", { name: "Grading", exact: true }).first().click();
     await page.getByRole("navigation", { name: "Filter" }).getByRole("link", { name: /Graded, not released/ }).click();
     await expect(row(page, "Sofia Reyes")).toContainText("Graded (not released)");
 

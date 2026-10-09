@@ -172,7 +172,7 @@ test("@US-46 admin previews a CSV file and adds the ready rows", async ({ page }
 test("@US-46 a file without the needed columns is refused; semicolons work like commas", async ({ page }) => {
   await openUsers(page);
   const dialog = await importFile(page, ["first name,last name,email", "Astrid,Berg,astrid.berg@scientia.test"]);
-  await expect(dialog.getByText("The first row must name the columns: name, email, password and, if you need it, role.")).toBeVisible();
+  await expect(dialog.getByText("The first row must name the columns name, email and password. A role column is optional.")).toBeVisible();
   await expect(dialog.getByRole("button", { name: /^Add/ })).toHaveCount(0);
 
   await dialog.getByLabel("CSV file").setInputFiles({ name: "people.csv", mimeType: "text/csv", buffer: Buffer.from("Name;Email;Password\nAstrid Berg;astrid.berg@scientia.test;Welcome-2026\n") });

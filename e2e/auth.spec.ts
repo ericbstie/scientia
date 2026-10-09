@@ -21,7 +21,7 @@ test.describe("Signing in and out", () => {
 
   test("@US-1 returns to the page you asked for after signing in", async ({ page }) => {
     await signIn(page, "maya");
-    await page.getByRole("link", { name: /BIO101/ }).first().click();
+    await page.getByRole("link", { name: "Introduction to Biology" }).click();
     await page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: "Assignments" }).click();
     const url = page.url();
     await signOut(page);
@@ -37,7 +37,7 @@ test.describe("Signing in and out", () => {
     await signIn(page, "maya");
     await page.reload();
     await expect(page.getByRole("banner")).toContainText(users.maya.name);
-    await page.getByRole("link", { name: /HIS201/ }).first().click();
+    await page.getByRole("link", { name: "Modern European History" }).click();
     const his = page.url();
     await signOut(page);
     await page.goBack();

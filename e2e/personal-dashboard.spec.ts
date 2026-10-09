@@ -85,9 +85,9 @@ test.describe("Dashboard", () => {
   test("@US-3 student lists their courses", async ({ page }) => {
     await signIn(page, "maya");
     const courses = page.getByRole("region", { name: "Your courses" });
-    await expect(courses.getByRole("link", { name: /BIO101/ })).toBeVisible();
-    await expect(courses.getByRole("link", { name: /HIS201/ })).toBeVisible();
-    await courses.getByRole("link", { name: /HIS201/ }).click();
+    await expect(courses.getByRole("link", { name: "Introduction to Biology" })).toBeVisible();
+    await expect(courses.getByRole("link", { name: "Modern European History" })).toBeVisible();
+    await courses.getByRole("link", { name: "Modern European History" }).click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+$/);
   });
 
@@ -209,7 +209,7 @@ test.describe("Phone layout", () => {
 
   test("@US-21 the course home and the worksheet page fit a phone", async ({ page }) => {
     await signIn(page, "maya");
-    await page.getByRole("link", { name: /BIO101/ }).first().click();
+    await page.getByRole("link", { name: "Introduction to Biology" }).click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+$/);
     await noHorizontalScroll(page);
     await page.goto("/");

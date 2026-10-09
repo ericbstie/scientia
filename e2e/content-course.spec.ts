@@ -39,7 +39,7 @@ test.describe("Course layout and people", () => {
     await page.goto(await coursePath(page, "BIO101"));
     await courseNav(page).getByRole("link", { name: "People" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("People");
-    const rows = page.getByRole("listitem").filter({ has: page.locator(".row") });
+    const rows = page.getByRole("listitem").and(page.locator(".row"));
     await expect(page.getByRole("region", { name: "Teachers" })).toContainText("Dr. Ingrid Solberg");
     await expect(page.getByRole("region", { name: "Teachers" })).toContainText("Teacher");
     const students = page.getByRole("region", { name: "4 students" }).getByRole("listitem");
