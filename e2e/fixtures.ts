@@ -7,8 +7,9 @@
 //    calls and course pages as the signed-in user.
 //  - token(request, who), client(request, who): sign in through the auth API and call
 //    the data API, for checks without a page.
-//  - At the end of every passing test the page gets an axe accessibility scan and
-//    fails if it scrolls sideways at phone width. Results feed `mise run metrics`.
+//  - Every test fails if the security policy blocked anything on the page. At the end
+//    of every passing test the page gets an axe accessibility scan and fails if it
+//    scrolls sideways at phone width. Results feed `mise run metrics`.
 import { test as base, expect, type APIRequestContext, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { appendFileSync } from "node:fs";
@@ -133,8 +134,11 @@ async function phoneOverflow(page: Page) {
 export const test = base.extend<{ autoScan: void }>({
   autoScan: [
     async ({ page }, use) => {
+      const blocked: string[] = [];
+      page.on("console", (m) => { if (m.type() === "error" && m.text().includes("Content Security Policy")) blocked.push(m.text().slice(0, 120)); });
       await use();
       if (base.info().status !== "passed") return;
+      expect(blocked, "the security policy blocked part of the page").toEqual([]);
       const line = await scan(page);
       expect(line?.overflow ?? null, `${line?.url} scrolls sideways at 390 px wide`).toBeNull();
     },
