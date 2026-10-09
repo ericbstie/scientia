@@ -1,5 +1,5 @@
 // Shared UI primitives. Prefer these over ad-hoc markup so pages stay consistent.
-import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode, type ButtonHTMLAttributes, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode, type Ref, type ButtonHTMLAttributes, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes } from "react";
 import { Link, useLocation } from "react-router";
 import { fmtDateTime, relative, type StudentStatus } from "../lib/format";
 
@@ -85,7 +85,9 @@ const describedBy = (id: string, hint?: string, error?: string) =>
   [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
 
 type FieldBase = { label: string; hint?: string; error?: string };
-export function Field({ label, hint, error, id, ...rest }: FieldBase & InputHTMLAttributes<HTMLInputElement>) {
+// React 19: `ref` is a regular prop on function components.
+type WithRef<T> = { ref?: Ref<T> };
+export function Field({ label, hint, error, id, ...rest }: FieldBase & WithRef<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
@@ -98,7 +100,7 @@ export function Field({ label, hint, error, id, ...rest }: FieldBase & InputHTML
   );
 }
 
-export function TextArea({ label, hint, error, id, ...rest }: FieldBase & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextArea({ label, hint, error, id, ...rest }: FieldBase & WithRef<HTMLTextAreaElement> & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
@@ -111,7 +113,7 @@ export function TextArea({ label, hint, error, id, ...rest }: FieldBase & Textar
   );
 }
 
-export function Select({ label, hint, id, children, ...rest }: FieldBase & SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ label, hint, id, children, ...rest }: FieldBase & WithRef<HTMLSelectElement> & SelectHTMLAttributes<HTMLSelectElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (

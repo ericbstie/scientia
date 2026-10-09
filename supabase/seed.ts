@@ -98,7 +98,7 @@ export async function seed(sql: SQL) {
   await sql.begin(async (tx) => {
     // Seed exactly the documented state: no triggers (notifications, guards) while inserting.
     await tx`set local session_replication_role = replica`;
-    await tx`truncate public.courses, public.notifications, public.notification_prefs cascade`;
+    await tx`truncate public.courses, public.notifications, public.notification_prefs, public.announcement_reads cascade`;
 
     const [bio] = await tx`insert into public.courses (code, title, term, description) values
       ('BIO101', 'Introduction to Biology', 'Autumn 2026', 'Cells, energy and inheritance: the foundations of modern biology.') returning id`;
@@ -134,6 +134,8 @@ export async function seed(sql: SQL) {
     await ann(bio.id, "Welcome to BIO101", "Welcome! Start with the syllabus in Week 1. Labs begin next week.", 21, true);
     const labAnn = await ann(bio.id, "Lab report 1 marking update", "Lab reports are being marked this week. Released grades show up under Grades.", 3);
     const readAnn = await ann(his.id, "Reading list posted", "The reading list for Unit 1 is now in Modules.", 2);
+    const [welcome] = await tx`select id from public.announcements where course_id = ${bio.id} and pinned`;
+    await tx`insert into public.announcement_reads (announcement_id, user_id, read_at) values (${welcome.id}, ${u.maya}, ${ago(20)}), (${readAnn}, ${u.maya}, ${ago(1.9)})`;
 
     const asg = async (c: string, title: string, days: number, points: number, accepts: "text" | "file" | "both", allowLate: boolean, published: boolean, module: string | null, description: string) =>
       (await tx`insert into public.assignments (course_id, module_id, title, description, due_at, points, accepts_text, accepts_files, allow_late, published, created_at)
