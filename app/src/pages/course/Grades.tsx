@@ -14,13 +14,13 @@ export function Grades() {
   useDocTitle("Grades");
   const { data, error, loading } = useQuery(() => loadMyWork(course.id, profile!.id), [course.id, profile?.id]);
 
-  let total = "No released grades yet";
+  let total = "Total: none yet. Your total appears when your teacher releases a grade.";
   if (data) {
     const scored = data.assignments.filter((a) => data.grades.get(a.id)?.released && data.grades.get(a.id)?.score != null);
     if (scored.length) {
       const got = scored.reduce((s, a) => s + data.grades.get(a.id)!.score!, 0);
       const of = scored.reduce((s, a) => s + a.points, 0);
-      total = `${pct1(got, of)}% (${num(got)} of ${num(of)} points graded so far)`;
+      total = `Total: ${pct1(got, of)}% (${num(got)} of ${num(of)} points graded so far)`;
     }
   }
 

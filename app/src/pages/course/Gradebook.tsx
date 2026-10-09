@@ -96,8 +96,8 @@ export function Gradebook() {
                           <Link to={`${base}/grading/${sub!.id}`} aria-label={`${s.full_name}, ${a.title}: ${text}`} style={{ display: "block", margin: "calc(-1 * var(--s2)) calc(-1 * var(--s3))", padding: "var(--s2) var(--s3)" }}>{content}</Link>
                         );
                         let cell: ReactNode;
-                        if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Draft"}</span></>, `${num(g.score)} ${g.released ? "Released" : "Draft"}`);
-                        else if (sub) { const t = lateByLabel(a.due_at, sub.submitted_at) ? "Late, not graded" : "Not graded"; cell = link(t, t); }
+                        if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Not released"}</span></>, `${num(g.score)} ${g.released ? "Released" : "Not released"}`);
+                        else if (sub) { const t = lateByLabel(a.due_at, sub.submitted_at) ? "Late, needs grading" : "Needs grading"; cell = link(t, t); }
                         else if (new Date(a.due_at).getTime() < now) cell = "Missing";
                         else cell = "–";
                         return <td key={a.id} className="num">{cell}</td>;
@@ -110,11 +110,11 @@ export function Gradebook() {
             </div>
             <Section title="Legend">
               <dl style={{ display: "grid", gridTemplateColumns: "max-content 1fr", gap: "var(--s1) var(--s4)", margin: 0 }}>
-                <dt>Draft</dt><dd style={{ margin: 0 }}>Graded and saved, not yet released to the student.</dd>
+                <dt>Not released</dt><dd style={{ margin: 0 }}>Graded, but the student cannot see it yet. Counted in the total shown here.</dd>
                 <dt>Released</dt><dd style={{ margin: 0 }}>The student can see the score and feedback.</dd>
                 <dt>Missing</dt><dd style={{ margin: 0 }}>Past the due date and nothing was submitted. Not counted as zero.</dd>
                 <dt>Late</dt><dd style={{ margin: 0 }}>Submitted after the due date.</dd>
-                <dt>Not graded</dt><dd style={{ margin: 0 }}>Submitted, with no score yet. Not counted in the total.</dd>
+                <dt>Needs grading</dt><dd style={{ margin: 0 }}>Submitted, with no score yet. Not counted in the total.</dd>
               </dl>
             </Section>
           </>

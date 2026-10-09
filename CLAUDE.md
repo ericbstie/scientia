@@ -1,7 +1,7 @@
 # Scientia
 
-A minimal, clearly designed replacement for Blackboard: students hand in work and
-follow their courses; teachers publish material, collect work and grade.
+A learning platform: students hand in work and follow their courses; teachers
+publish material, collect work and grade.
 
 ## Run it
 
@@ -28,5 +28,8 @@ mise run metrics         # quality metrics, see docs/process/metrics.md
 - Every table has RLS. The browser only holds the anon key and the user's JWT.
 - Keep the UI minimal: use `app/src/ui/` components and the tokens in
   `app/src/styles.css`; follow `docs/design/ui-guidelines.md`.
+- Interface copy says only what the person using it needs. Never name other
+  products, internal goals or process ("minimal", "design-focused", story ids).
+  See "Copy" in `docs/design/ui-guidelines.md`.
 - Push to `main`; never deploy.
 - Process changes go through a retro (`.claude/skills/retro/SKILL.md`).

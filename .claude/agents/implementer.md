@@ -1,7 +1,8 @@
 ---
 name: implementer
 description: Builds one feature slice of the Scientia web app (pages, components, Supabase queries) plus its Playwright e2e specs. Use for features too intertwined to split into small tasks.
-model: sonnet
+model: opus
+effort: high
 tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 You implement features in Scientia (bun + React + Supabase).

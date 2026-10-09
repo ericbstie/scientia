@@ -42,7 +42,7 @@ export function AnnouncementView() {
       <PageHeader eyebrow={<Link to={`/courses/${course.id}/announcements`}>‹ Announcements</Link>} title={q.data.title} />
       <p className="muted">
         {q.data.author?.full_name} · <time dateTime={q.data.created_at}>{fmtDate(q.data.created_at)}</time>
-        {q.data.pinned && <> <Badge tone="accent">Pinned</Badge></>}
+        {q.data.pinned && <> <Badge>Pinned</Badge></>}
         {q.data.edited_at && <> <Badge>Edited</Badge></>}
       </p>
       <Prose text={q.data.body} />

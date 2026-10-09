@@ -70,7 +70,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Acceptance criteria:**
 - Given I am signed in as Maya, When I click the BIO101 course card on the dashboard, Then the course home opens with a left navigation listing, in order, Home, Modules, Assignments, Announcements, Discussions, Grades, People.
 - Given I open HIS201 as Maya, When I compare the navigation with BIO101, Then it lists the same items in the same order, and the current page is marked with `aria-current="page"`.
-- Given I am on the BIO101 course home, When it loads, Then it shows the pinned announcement "Welcome to BIO101" and the two next due assignments, Photosynthesis worksheet and Field journal.
+- Given I am on the BIO101 course home, When it loads, Then it shows up to three announcements, pinned first ("Welcome to BIO101", marked Pinned) and unread ones marked Unread, and the two next due assignments, Photosynthesis worksheet and Field journal.
 - Given I click People in BIO101, When the page loads, Then it lists Dr. Ingrid Solberg (teacher), Noah Berg, Liam Hansen, Maya Okafor and Sofia Reyes (students) by name and role, and the page text contains no "@scientia.test".
 
 ### US-6 Browse course material in modules
@@ -112,7 +112,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Acceptance criteria:**
 - Given I am signed in as Maya, When I open BIO101 Assignments, Then I see Safety acknowledgement, Lab report 1, Photosynthesis worksheet and Field journal, each with due date, points and status, and I do not see "Final project".
 - Given the list is open, When I read the statuses, Then Maya sees Safety acknowledgement "Graded", Lab report 1 "Graded", Photosynthesis worksheet "Not submitted" and Field journal "Not submitted".
-- Given I open Photosynthesis worksheet, When it loads, Then I see the instructions "Answer the five questions in the Week 2 overview in your own words.", "50 points", the due date T+2d 23:59 and a text field; and when I open Field journal I see a file input and no text field.
+- Given I open Photosynthesis worksheet, When it loads, Then I see the instructions "Read the Photosynthesis overview (Modules, Week 2), then explain in your own words where the light reactions and the Calvin cycle happen.", "50 points", the due date T+2d 23:59 and a text field; and when I open Field journal I see a file input and no text field.
 - Given I am signed in as Liam, When I read the Lab report 1 status, Then it shows "Submitted" and not "Graded", although his grade is a draft.
 
 ### US-9 Submit work as a file, text or both
@@ -170,8 +170,8 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Acceptance criteria:**
 - Given I am signed in as Maya, When I open BIO101 Grades, Then I see one row per published assignment (four rows) with released scores "10 / 10" for Safety acknowledgement and "86 / 100" for Lab report 1.
 - Given the other rows are not graded, When I read them, Then Photosynthesis worksheet and Field journal each show "Not submitted" in place of a score, never "0".
-- Given Maya's released scores, When I read the total, Then it shows "87.3% (96 of 110 points graded so far)".
-- Given I am signed in as Liam, When I open BIO101 Grades, Then Lab report 1 and Photosynthesis worksheet show "Awaiting grade" and no number such as 72, Safety acknowledgement shows "Missing", and the total shows "No released grades yet".
+- Given Maya's released scores, When I read the total, Then it shows "Total: 87.3% (96 of 110 points graded so far)".
+- Given I am signed in as Liam, When I open BIO101 Grades, Then Lab report 1 and Photosynthesis worksheet show "Awaiting grade" and no number such as 72, Safety acknowledgement shows "Missing", and the total shows "Total: none yet. Your total appears when your teacher releases a grade.".
 
 ### US-13 Read feedback on graded work
 
@@ -297,7 +297,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 
 **Acceptance criteria:**
 - Given a 390 by 844 pixel viewport, When I open the dashboard, the BIO101 course home and the Photosynthesis worksheet page as Maya, Then none of them has horizontal scroll (`scrollWidth` equals `clientWidth`).
-- Given the same viewport, When I look at the course navigation, Then it is collapsed behind a "Menu" button that opens the same seven items, reachable by keyboard.
+- Given the same viewport, When I look at the course navigation, Then it is collapsed behind a "Course pages" button that opens the same seven items, reachable by keyboard.
 - Given the same viewport, When I open the Photosynthesis worksheet page as Maya, Then the text field and the Submit button are fully visible without horizontal scrolling; and when Ingrid opens the grading view of Sofia's Lab report 1, the Score field, the Feedback field and the Save draft button are fully visible.
 - Given the same viewport, When I open the dashboard as Maya, Then Upcoming lists the same four items in the same order as on a desktop viewport.
 - Given a 320 pixel wide viewport, When I open the BIO101 Assignments list, Then the page has no horizontal scroll, no text element is clipped, and the computed font size of body text is at least 16px.

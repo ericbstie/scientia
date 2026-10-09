@@ -60,9 +60,9 @@ test.describe("Creating and changing assignments", () => {
     await expect(form.getByLabel("Instructions")).toBeVisible();
     await expect(form.getByLabel("Due date and time")).toBeVisible();
     await expect(form.getByLabel("Points")).toBeVisible();
-    await expect(form.getByRole("checkbox", { name: "File upload" })).toBeVisible();
-    await expect(form.getByRole("checkbox", { name: "Text entry" })).toBeVisible();
-    await expect(form.getByRole("checkbox", { name: "Allow late submissions" })).toBeVisible();
+    await expect(form.getByRole("checkbox", { name: "Uploading a file" })).toBeVisible();
+    await expect(form.getByRole("checkbox", { name: "Typing an answer" })).toBeVisible();
+    await expect(form.getByRole("checkbox", { name: "Accept work after the due date (marked late)" })).toBeVisible();
     await expect(form.getByRole("button")).toHaveText(["Save and publish", "Save as draft"]);
     await expect(form.locator("input, textarea, select")).toHaveCount(7);
   });
@@ -73,8 +73,8 @@ test.describe("Creating and changing assignments", () => {
     await page.getByLabel("Title").fill("Reading quiz");
     await page.getByLabel("Due date and time").fill(inputAt(10));
     await page.getByLabel("Points").fill("20");
-    await page.getByRole("checkbox", { name: "File upload" }).uncheck();
-    await page.getByRole("checkbox", { name: "Text entry" }).check();
+    await page.getByRole("checkbox", { name: "Uploading a file" }).uncheck();
+    await page.getByRole("checkbox", { name: "Typing an answer" }).check();
     await page.getByRole("button", { name: "Save as draft" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Reading quiz");
     await expect(page.getByText("Draft", { exact: true })).toBeVisible();
@@ -92,7 +92,7 @@ test.describe("Creating and changing assignments", () => {
     await page.getByLabel("Title").fill("Reading quiz");
     await page.getByLabel("Due date and time").fill(inputAt(10));
     await page.getByLabel("Points").fill("20");
-    await page.getByRole("checkbox", { name: "File upload" }).uncheck();
+    await page.getByRole("checkbox", { name: "Uploading a file" }).uncheck();
     await page.getByRole("button", { name: "Save and publish" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Reading quiz");
 
@@ -111,15 +111,15 @@ test.describe("Creating and changing assignments", () => {
     await login(page, "ingrid");
     await openCourse(page, "BIO101", "/assignments/new");
     await page.getByLabel("Points").fill("0");
-    await page.getByRole("checkbox", { name: "File upload" }).uncheck();
-    await page.getByRole("checkbox", { name: "Text entry" }).uncheck();
+    await page.getByRole("checkbox", { name: "Uploading a file" }).uncheck();
+    await page.getByRole("checkbox", { name: "Typing an answer" }).uncheck();
     await page.getByRole("button", { name: "Save and publish" }).click();
     await expect(page.locator(".error-text", { hasText: "Enter a title" })).toBeVisible();
     await expect(page.locator(".error-text", { hasText: "Enter points greater than 0" })).toBeVisible();
     await expect(page.locator(".error-text", { hasText: "Choose at least one way to submit" })).toBeVisible();
     await expect(page.getByLabel("Title")).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByLabel("Points")).toHaveAttribute("aria-describedby", /error/);
-    await expect(page.getByRole("group", { name: "Accepts" })).toHaveAttribute("aria-describedby", /error/);
+    await expect(page.getByRole("group", { name: "Students hand in by" })).toHaveAttribute("aria-describedby", /error/);
     await expect(page.getByLabel("Title")).toBeFocused();
 
     await courseNav(page, "Assignments").click();
@@ -244,7 +244,7 @@ test.describe("Grading queue, grading and releasing", () => {
 
     await page.getByLabel("Score").fill("78");
     await page.getByLabel("Feedback").fill("Good analysis, cite your sources");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
 
     await page.getByRole("link", { name: "‹ Grading" }).click();
@@ -263,11 +263,11 @@ test.describe("Grading queue, grading and releasing", () => {
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("101");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByText("Score must be between 0 and 100")).toBeVisible();
     await expect(page.getByLabel("Score")).toHaveAttribute("aria-describedby", /error/);
     await page.getByLabel("Score").fill("");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByText("Enter a score")).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Needs grading");
     await page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: "Grading" }).click();
@@ -280,12 +280,12 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("78");
     await page.getByLabel("Feedback").fill("Good analysis, cite your sources");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
     await page.getByRole("button", { name: "Next to grade" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Liam Hansen: Photosynthesis worksheet");
     await page.getByLabel("Score").fill("40");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
     await expect(page.getByRole("button", { name: "Next to grade" })).toBeDisabled();
     await expect(page.getByText("Nothing else needs grading")).toBeVisible();
@@ -332,11 +332,11 @@ test.describe("Grading queue, grading and releasing", () => {
     await openCourse(page, "BIO101", "/grading");
     await page.getByRole("link", { name: "Sofia Reyes" }).click();
     await page.getByLabel("Score").fill("78");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
     await page.getByRole("button", { name: "Next to grade" }).click();
     await page.getByLabel("Score").fill("40");
-    await page.getByRole("button", { name: "Save draft" }).click();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Graded (not released)");
     await courseNav(page, "Grading").click();
 

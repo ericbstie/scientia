@@ -85,7 +85,7 @@ Author of all three is Dr. Ingrid Solberg. No read state is seeded: every announ
 |---|---|---|---|---|---|---|---|
 | BIO101 | Safety acknowledgement | T-14d | 10 | text | not allowed (closed) | published | Confirm that you have read the lab safety rules by typing "I have read the safety rules". |
 | BIO101 | Lab report 1 | T-7d | 100 | file and text | allowed | published | Write up the cell observation lab: aim, methods, results (with a labelled table) and conclusion. Max 4 pages. |
-| BIO101 | Photosynthesis worksheet | T+2d | 50 | text | allowed | published | Answer the five questions in the Week 2 overview in your own words. |
+| BIO101 | Photosynthesis worksheet | T+2d | 50 | text | allowed | published | Read the Photosynthesis overview (Modules, Week 2), then explain in your own words where the light reactions and the Calvin cycle happen. |
 | BIO101 | Field journal | T+21d | 100 | file | allowed | published | Keep a two-week field journal of plant life near you. Upload it as one PDF. |
 | BIO101 | Final project | T+60d | 100 | file and text | allowed | draft | A short research project on a topic of your choice. Details to follow. |
 | HIS201 | Essay: the 1848 revolutions | T+5d | 100 | file and text | allowed | published | 1500 words: why did the 1848 revolutions fail? |

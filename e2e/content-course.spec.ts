@@ -29,7 +29,7 @@ const studentItems = ["Home", "Modules", "Assignments", "Announcements", "Discus
 test.describe("Course layout and people", () => {
   test.beforeEach(() => reset());
 
-  test("@US-5 every course has the same navigation and Maya's BIO101 home shows the pinned announcement and next two due", async ({ page }) => {
+  test("@US-5 every course has the same navigation and Maya's BIO101 home shows announcements and the next two due", async ({ page }) => {
     await login(page, "maya");
     const bio = await courseBase(page, "BIO101");
     const his = await courseBase(page, "HIS201");
@@ -39,8 +39,10 @@ test.describe("Course layout and people", () => {
     await expect(courseNav(page).getByRole("link", { name: /^(Home|Modules|Assignments|Announcements|Discussions|Grades|People)$/ })).toHaveText(studentItems);
     await expect(courseNav(page).locator('[aria-current="page"]')).toHaveText("Home");
 
-    const pinned = page.getByRole("region", { name: "Pinned announcement" });
-    await expect(pinned.getByRole("link", { name: "Welcome to BIO101" })).toBeVisible();
+    const anns = page.getByRole("region", { name: "Announcements" });
+    await expect(anns.getByRole("listitem").first()).toContainText("Welcome to BIO101");
+    await expect(anns.getByRole("listitem").first()).toContainText("Pinned");
+    await expect(anns.getByRole("listitem").filter({ hasText: "Lab report 1 marking update" })).toContainText("Unread");
     const due = page.getByRole("region", { name: "Next due" });
     await expect(due.getByRole("listitem")).toHaveCount(2);
     await expect(due.getByRole("listitem").nth(0)).toContainText("Photosynthesis worksheet");
@@ -88,7 +90,7 @@ test.describe("Course layout and people", () => {
     expect(new Set(labels).size).toBe(labels.length);
 
     // Every interactive control in the page content is at least 24 by 24 px and shows a focus outline.
-    const controls = page.locator("main a[href], main button");
+    const controls = page.locator("main a[href]:visible, main button:visible");
     const count = await controls.count();
     expect(count).toBeGreaterThan(0);
     for (let i = 0; i < count; i++) {

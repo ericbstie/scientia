@@ -82,10 +82,10 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Evidence:** moodle.md#Pain points (2, 13); canvas.md#Pain points (8)
 
 **Acceptance criteria:**
-- Given I open BIO101 Assignments and click New assignment, When the form opens, Then it has exactly these controls: Title, Instructions, Due date and time, Points, Accepts (File upload, Text entry), "Allow late submissions", Save as draft, Save and publish.
-- Given I fill in title "Reading quiz", due T+10d at 23:59, points 20, Text entry, and click Save as draft, When Maya opens Assignments, Then "Reading quiz" is not visible to her.
+- Given I open BIO101 Assignments and click New assignment, When the form opens, Then it has exactly these controls: Title, Instructions, Due date and time, Points, "Students hand in by" (Uploading a file, Typing an answer), "Accept work after the due date (marked late)", Save as draft, Save and publish.
+- Given I fill in title "Reading quiz", due T+10d at 23:59, points 20, Typing an answer, and click Save as draft, When Maya opens Assignments, Then "Reading quiz" is not visible to her.
 - Given I click Save and publish instead, When Maya opens her dashboard, Then "Reading quiz" is in Upcoming between Essay: the 1848 revolutions and Field journal, with 20 points.
-- Given I leave the title empty, set points to 0, and select neither File upload nor Text entry, When I save, Then I see "Enter a title", "Enter points greater than 0" and "Choose at least one way to submit", each linked to its field, and no assignment is created.
+- Given I leave the title empty, set points to 0, and select neither Uploading a file nor Typing an answer, When I save, Then I see "Enter a title", "Enter points greater than 0" and "Choose at least one way to submit", each linked to its field, and no assignment is created.
 
 ### US-28 Change an assignment after creating it
 
@@ -126,8 +126,8 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 
 **Acceptance criteria:**
 - Given I open Sofia's Lab report 1, When the grading view loads, Then I see her text "Sorry this is late. Report text: cells observed under 400x magnification.", the points possible "100", a Score field and a Feedback field.
-- Given I enter 78 and the feedback "Good analysis, cite your sources", When I click Save draft, Then the queue shows her submission as "Graded, not released", and Sofia's own Grades page still shows "Awaiting grade" for Lab report 1.
-- Given I enter 101, When I click Save draft, Then I see "Score must be between 0 and 100" and nothing is saved; with an empty Score I see "Enter a score" and nothing is saved.
+- Given I enter 78 and the feedback "Good analysis, cite your sources", When I click Save, Then the queue shows her submission as "Graded, not released", and Sofia's own Grades page still shows "Awaiting grade" for Lab report 1.
+- Given I enter 101, When I click Save, Then I see "Score must be between 0 and 100" and nothing is saved; with an empty Score I see "Enter a score" and nothing is saved.
 - Given I have saved Sofia's grade, When I click "Next to grade", Then I land on Liam's Photosynthesis worksheet.
 - Given I type 80 in Score on Sofia's Lab report 1 and click Grading in the course navigation, When the in-app dialog "Discard unsaved changes?" appears and I click "Stay on this page", Then the Score field still shows 80 and I am still on the grading view.
 
@@ -155,9 +155,9 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 
 **Acceptance criteria:**
 - Given I open BIO101 Gradebook, When it loads, Then rows, sorted by last name ascending, are Noah Berg, Liam Hansen, Maya Okafor, Sofia Reyes, and columns are Safety acknowledgement (10), Lab report 1 (100), Photosynthesis worksheet (50), Field journal (100), then Total.
-- Given the seed data, When I read the cells, Then Maya shows 10 and 86, Liam's Lab report 1 shows 72 with a "Draft" tag, Sofia's Lab report 1 shows "Late, not graded", and Noah's Lab report 1 shows "Missing".
+- Given the seed data, When I read the cells, Then Maya shows 10 and 86, Liam's Lab report 1 shows 72 with a "Not released" tag, Sofia's Lab report 1 shows "Late, needs grading", and Noah's Lab report 1 shows "Missing".
 - Given the totals (the teacher view includes draft grades), When I read them, Then Maya shows 87.3%, Liam shows 72.0%, and Sofia and Noah show "–"; no Missing cell is counted as zero.
-- Given the grid, When I look below it, Then a legend explains Draft, Released, Missing, Late and "Not graded".
+- Given the grid, When I look below it, Then a legend explains "Not released", Released, Missing, Late and "Needs grading".
 - Given I click Liam's Lab report 1 cell, When the page loads, Then I land on his grading view.
 
 ### US-33 Export the gradebook as CSV
@@ -212,7 +212,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Acceptance criteria:**
 - Given I click Remove next to Sofia Reyes in BIO101 People, When I confirm the dialog, Then she disappears from the roster, the Gradebook and the Grading queue.
 - Given Sofia has been removed, When she signs in and opens the recorded BIO101 course home URL, Then the page heading is "You don't have access to this course" and BIO101 is not on her dashboard.
-- Given I add Sofia back by email, When I open the Gradebook, Then her Lab report 1 cell shows "Late, not graded" again.
+- Given I add Sofia back by email, When I open the Gradebook, Then her Lab report 1 cell shows "Late, needs grading" again.
 
 ### US-37 Moderate discussions
 

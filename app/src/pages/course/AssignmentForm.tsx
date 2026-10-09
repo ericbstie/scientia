@@ -95,14 +95,14 @@ export function AssignmentForm() {
           <Field id="a-points" label="Points" required type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />
         </div>
         <fieldset id="a-accepts" style={{ border: 0, padding: 0, margin: 0 }} aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>
-          <legend className="label" style={{ marginBottom: "var(--s2)" }}>Accepts</legend>
+          <legend className="label" style={{ marginBottom: "var(--s2)" }}>Students hand in by</legend>
           <div className="stack" style={{ display: "grid", gap: "var(--s2)" }}>
-            <Checkbox label="File upload" checked={files} onChange={(e) => setFiles(e.target.checked)} />
-            <Checkbox label="Text entry" checked={text} onChange={(e) => setText(e.target.checked)} />
+            <Checkbox label="Uploading a file" checked={files} onChange={(e) => setFiles(e.target.checked)} />
+            <Checkbox label="Typing an answer" checked={text} onChange={(e) => setText(e.target.checked)} />
           </div>
           {errors.accepts && <span className="error-text" id="a-accepts-error">{errors.accepts}</span>}
         </fieldset>
-        <Checkbox label="Allow late submissions" checked={late} onChange={(e) => setLate(e.target.checked)} />
+        <Checkbox label="Accept work after the due date (marked late)" checked={late} onChange={(e) => setLate(e.target.checked)} />
         <div className="actions">
           {editing ? (
             <Button type="submit" variant="primary" disabled={busy}>Save</Button>

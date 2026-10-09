@@ -24,10 +24,11 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Evidence:** pain-points.md#Features by area (Roles & admin); brightspace-itslearning.md#Pain points (11); enabler (no pain point)
 
 **Acceptance criteria:**
-- Given I click New user, When I enter name "Eva Lund", email eva.lund@scientia.test, role student and password "Start-pass-1" and save, Then Eva appears in the Users table as an "Active" "student", and the table has eight rows.
+- Given I click New user, When I enter name "Eva Lund", email eva.lund@scientia.test, role student and password "Start-pass-1" and save, Then I see "Eva Lund added as a student" and Eva appears in the Users table as an "Active" "student", and the table has eight rows.
 - Given Eva signs in with that password, When she lands, Then she sees the text "You are not enrolled in any course yet." and no course cards.
 - Given I enter maya.okafor@scientia.test as the email, When I save, Then I see "An account with this email already exists" and nothing is created.
 - Given I enter the email "eva.lund" and the password "short12" (7 characters), When I save, Then the email field shows "Enter a valid email address", the password field shows "Password must be at least 8 characters", and nothing is created.
+- Given I created Tomas Lind as a student by mistake, When I change "Role for Tomas Lind" to teacher in his row, Then I see "Tomas Lind is now a teacher" and he is offered as a teacher when I create a course. My own role cannot be changed.
 
 ### US-40 Deactivate and reactivate a user
 

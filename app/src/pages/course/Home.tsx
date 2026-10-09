@@ -8,7 +8,7 @@ import { Badge, ButtonLink, Due, ErrorNote, Loading, PageHeader, Section, Status
 import { useDocTitle } from "./content/util";
 
 type Asg = { id: string; title: string; due_at: string; allow_late: boolean; published: boolean };
-type Ann = { id: string; title: string; created_at: string };
+type Ann = { id: string; title: string; created_at: string; pinned?: boolean };
 
 export function CourseHome() {
   const { course, role } = useCourse();
@@ -22,8 +22,9 @@ function StudentHome() {
   const base = `/courses/${course.id}`;
   const q = useQuery(async () => {
     const now = new Date().toISOString();
-    const [pinned, upcoming] = await Promise.all([
-      db().from("announcements").select("id, title, created_at").eq("course_id", course.id).eq("pinned", true).order("created_at", { ascending: false }).limit(1),
+    const [anns, reads, upcoming] = await Promise.all([
+      db().from("announcements").select("id, title, created_at, pinned").eq("course_id", course.id).order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(3),
+      db().from("announcement_reads").select("announcement_id").eq("user_id", profile!.id),
       db().from("assignments").select("id, title, due_at, allow_late, published").eq("course_id", course.id).gte("due_at", now).order("due_at").limit(2),
     ]);
     const next = must(upcoming) as Asg[];
@@ -35,7 +36,8 @@ function StudentHome() {
         ])
       : [{ data: [], error: null }, { data: [], error: null }];
     return {
-      pinned: (must(pinned) as Ann[])[0],
+      anns: must(anns) as Ann[],
+      read: new Set((must(reads) as { announcement_id: string }[]).map((r) => r.announcement_id)),
       next,
       submitted: new Map((must(subs) as { assignment_id: string; submitted_at: string }[]).map((s) => [s.assignment_id, s.submitted_at])),
       released: new Set((must(grades) as { assignment_id: string; released: boolean }[]).filter((g) => g.released).map((g) => g.assignment_id)),
@@ -48,17 +50,23 @@ function StudentHome() {
       <ErrorNote error={q.error} />
       {q.loading && !q.data ? <Loading /> : q.data && (
         <>
-          {q.data.pinned && (
-            <Section title="Pinned announcement">
+          {q.data.anns.length > 0 && (
+            <Section title="Announcements" action={<Link to={`${base}/announcements`}>All announcements</Link>}>
               <ul className="list">
-                <li>
-                  <div className="row">
-                    <div className="row-main">
-                      <Link className="row-title" to={`${base}/announcements/${q.data.pinned.id}`}>{q.data.pinned.title}</Link>
-                      <div className="row-meta"><time dateTime={q.data.pinned.created_at}>{fmtDate(q.data.pinned.created_at)}</time></div>
+                {q.data.anns.map((a) => (
+                  <li key={a.id}>
+                    <div className="row">
+                      <div className="row-main">
+                        <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
+                        <div className="row-meta"><time dateTime={a.created_at}>{fmtDate(a.created_at)}</time></div>
+                      </div>
+                      <div className="row-side">
+                        {a.pinned && <Badge>Pinned</Badge>}
+                        {!q.data!.read.has(a.id) && <Badge tone="accent">Unread</Badge>}
+                      </div>
                     </div>
-                  </div>
-                </li>
+                  </li>
+                ))}
               </ul>
             </Section>
           )}

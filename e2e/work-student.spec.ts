@@ -5,6 +5,8 @@ import type { Page } from "@playwright/test";
 let T = Date.now();
 
 const DAY = 86400000;
+/** The Status value in the facts list of an assignment page. */
+const assignmentStatus = (page: Page) => page.locator("dt", { hasText: /^Status$/ }).locator("xpath=following-sibling::dd[1]");
 /** 23:59 UTC on the UTC date that is n days after T. */
 const dueAt = (n: number) => {
   const d = new Date(T + n * DAY);
@@ -87,7 +89,7 @@ test.describe("Assignments and submitting", () => {
   test("@US-8 assignment page shows instructions, points, due date and the right fields", async ({ page }) => {
     await login(page, "maya");
     await openAssignment(page, "Photosynthesis worksheet");
-    await expect(page.getByText("Answer the five questions in the Week 2 overview in your own words.")).toBeVisible();
+    await expect(page.getByText("Read the Photosynthesis overview (Modules, Week 2), then explain in your own words where the light reactions and the Calvin cycle happen.")).toBeVisible();
     await expect(page.getByText("50 points")).toBeVisible();
     await expect(page.getByText(fmt(dueAt(2)))).toBeVisible();
     await expect(page.getByRole("textbox", { name: "Your answer" })).toBeVisible();
@@ -111,7 +113,7 @@ test.describe("Assignments and submitting", () => {
     await page.getByRole("link", { name: "Photosynthesis worksheet" }).click(); // click 1
     await page.getByRole("textbox", { name: "Your answer" }).fill("Chlorophyll absorbs light.");
     await page.getByRole("button", { name: "Submit" }).click(); // click 2
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Submitted");
+    await expect(assignmentStatus(page)).toContainText("Submitted");
     await expect(page.getByText("Chlorophyll absorbs light.")).toBeVisible();
     const when = await page.locator("main time[datetime]").filter({ hasText: /\d{2}:\d{2}/ }).last().getAttribute("datetime");
     expect(Math.abs(new Date(when!).getTime() - Date.now())).toBeLessThan(2 * 60000);
@@ -134,7 +136,7 @@ test.describe("Assignments and submitting", () => {
     await openAssignment(page, "Essay: the 1848 revolutions", "HIS201");
     await page.getByLabel("File").setInputFiles("e2e/files/sample.pdf");
     await page.getByRole("button", { name: "Submit" }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Submitted");
+    await expect(assignmentStatus(page)).toContainText("Submitted");
     const link = page.getByRole("link", { name: "sample.pdf" });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", /.+/);
@@ -147,7 +149,7 @@ test.describe("Assignments and submitting", () => {
     await page.getByRole("button", { name: "Submit" }).click();
     await expect(page.getByText("This file is larger than the 10 MB limit")).toBeVisible();
     await expect(page.getByRole("button", { name: "Submit" })).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1 })).not.toContainText("Submitted");
+    await expect(assignmentStatus(page)).not.toContainText("Submitted");
     const r = await api(page, "GET", "/rest/v1/submissions?select=id,assignments!inner(title)&assignments.title=eq.Essay: the 1848 revolutions");
     expect(JSON.parse(r.text)).toEqual([]);
   });
@@ -200,7 +202,7 @@ test.describe("Assignments and submitting", () => {
     await expect(page.getByText("Past due")).toBeVisible();
     await page.getByRole("textbox", { name: "Your answer" }).fill("Late but complete.");
     await page.getByRole("button", { name: "Submit" }).click();
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Late");
+    await expect(assignmentStatus(page)).toContainText("Late");
     const when = await page.locator("main time[datetime]").last().getAttribute("datetime");
     expect(new Date(when!).getTime()).toBeGreaterThan(dueAt(-7).getTime());
     expect(Math.abs(new Date(when!).getTime() - Date.now())).toBeLessThan(2 * 60000);
@@ -209,7 +211,7 @@ test.describe("Assignments and submitting", () => {
   test("@US-11 a late submission says how late it is", async ({ page }) => {
     await login(page, "sofia");
     await openAssignment(page, "Lab report 1");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Late");
+    await expect(assignmentStatus(page)).toContainText("Late");
     await expect(page.getByText("Submitted 1 day late")).toBeVisible();
   });
 
@@ -252,7 +254,7 @@ test.describe("Grades and feedback", () => {
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet/ })).toContainText("Awaiting grade");
     await expect(page.getByRole("row", { name: /Safety acknowledgement/ })).toContainText("Missing");
     await expect(page.getByText("72")).toHaveCount(0);
-    await expect(page.getByText("No released grades yet")).toBeVisible();
+    await expect(page.getByText("Total: none yet. Your total appears when your teacher releases a grade.")).toBeVisible();
   });
 
   test("@US-13 student reads score, feedback and own work", async ({ page }) => {

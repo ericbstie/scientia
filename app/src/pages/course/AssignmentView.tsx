@@ -7,7 +7,7 @@ import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ButtonLink, ErrorNote, Field, Loading, NotFound, PageHeader, Section, StatusBadge, TextArea, useToast } from "../../ui";
 import { useDocTitle } from "./content/util";
-import { Facts, FileLinks, MAX_FILE_BYTES, acceptsLabel, loadAssignment, normSub, type Assignment, type FileRef, type Submission } from "./work/shared";
+import { Facts, FileLinks, MAX_FILE_BYTES, acceptsLabel, lateWorkLabel, loadAssignment, normSub, type Assignment, type FileRef, type Submission } from "./work/shared";
 
 export function AssignmentView() {
   const { course, role } = useCourse();
@@ -54,8 +54,8 @@ function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
       <Facts items={[
         ["Due date", <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>],
         ["Points", `${num(a.points)} points`],
-        ["Accepts", acceptsLabel(a)],
-        ["Late work", a.allow_late ? "Allowed" : "Not allowed"],
+        ["How to hand in", acceptsLabel(a)],
+        ["Late work", lateWorkLabel(a.allow_late)],
       ]} />
       <Section title="Instructions">
         <p className="prose">{a.description || "No instructions."}</p>
@@ -120,12 +120,14 @@ function StudentView({ a }: { a: Assignment }) {
     <div className="content">
       <PageHeader
         eyebrow={<Link to={`${base}/assignments`}>‹ Assignments</Link>}
-        title={<>{a.title} <StatusBadge status={status} /></>}
+        title={a.title}
       />
       <Facts items={[
+        ["Status", <StatusBadge status={status} />],
         ["Due date", <><time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>{pastDue && <> <Badge>Past due</Badge></>}</>],
         ["Points", `${num(a.points)} points`],
-        ["Accepts", acceptsLabel(a)],
+        ["How to hand in", acceptsLabel(a)],
+        ["Late work", lateWorkLabel(a.allow_late)],
       ]} />
       <Section title="Instructions">
         <p className="prose">{a.description || "No instructions."}</p>

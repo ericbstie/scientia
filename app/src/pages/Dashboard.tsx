@@ -92,12 +92,12 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
             {missing.map((r) => (
               <li key={r.id} className="row">
                 <div className="row-main">
-                  <span className="row-title">{r.title}</span>
+                  <Link className="row-title" to={`/courses/${r.course_id}/assignments/${r.id}`}>{r.title}</Link>
                   <div className="row-meta">{r.code} · {num(r.points)} points</div>
                 </div>
                 <div className="row-side" style={{ whiteSpace: "normal" }}>
                   <Due at={r.due_at} />{" "}
-                  {r.status === "Closed" ? <StatusBadge status="Closed" /> : <Link to={`/courses/${r.course_id}/assignments/${r.id}`}>Submit late</Link>}
+                  {r.status === "Closed" ? <span className="muted">Closed, can no longer be handed in</span> : <Link to={`/courses/${r.course_id}/assignments/${r.id}`}>Submit late</Link>}
                 </div>
               </li>
             ))}

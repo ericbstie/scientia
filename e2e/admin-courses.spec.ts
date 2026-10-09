@@ -81,7 +81,7 @@ test("@US-42 duplicate code and missing teacher are rejected", async ({ page }) 
   await dialog.getByLabel("Teacher").selectOption({ label: "Select a teacher" });
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(dialog.getByText("Choose a teacher")).toBeVisible();
-  await expect(dialog.getByLabel("Teacher")).toHaveAccessibleDescription("Choose a teacher");
+  await expect(dialog.getByLabel("Teacher")).toHaveAccessibleDescription(/Choose a teacher$/);
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(page.getByRole("table").getByRole("row")).toHaveCount(before);
   await expect(page.getByRole("row", { name: /CHE110/ })).toHaveCount(0);

@@ -74,7 +74,7 @@ test.describe("Dashboard", () => {
     await expect(rows.nth(1)).toContainText("Safety acknowledgement");
     await expect(rows.nth(1)).toContainText(fmtDue(dueAt(t0, -14)));
     await expect(rows.nth(1)).toContainText("Closed");
-    await expect(rows.nth(1).getByRole("link")).toHaveCount(0);
+    await expect(rows.nth(1).getByRole("link", { name: "Submit late" })).toHaveCount(0);
 
     const upcoming = page.getByRole("region", { name: "Upcoming" }).getByRole("listitem");
     await expect(upcoming.nth(0)).toContainText("Photosynthesis worksheet");

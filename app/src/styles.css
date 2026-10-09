@@ -140,14 +140,14 @@ h1:focus:not(:focus-visible) { outline: none; }
 .course-main { min-width: 0; }
 .course-main .content { margin: 0; }
 .course-nav-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
-.course-menu-button { display: none; }
+.btn.course-menu-button { display: none; }
 .mobile-only { display: none; }
 .initials { font-weight: 600; font-size: 0.85rem; }
 @media (max-width: 820px) {
   .course-layout { grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
   .course-nav { position: static; border-bottom: 1px solid var(--border); padding-bottom: var(--s3); }
   .course-nav-title { padding: 0; }
-  .course-menu-button { display: inline-flex; }
+  .btn.course-menu-button { display: inline-flex; }
   .course-nav ul { display: none; margin-top: var(--s3); }
   .course-nav.open ul { display: flex; }
   .mobile-only { display: inline; }

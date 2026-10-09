@@ -48,6 +48,16 @@ export function AdminUsers() {
     reload();
   }
 
+  async function setUserRole(u: Row, newRole: string) {
+    setBusy(true);
+    setActionError(null);
+    const r = await api(`/api/admin/users/${u.id}`, "PATCH", { role: newRole });
+    setBusy(false);
+    if (!r.ok) return setActionError(r.error ?? "Could not update the account. Check your connection and try again.");
+    toast(`${u.full_name} is now ${newRole === "admin" ? "an" : "a"} ${newRole}`);
+    reload();
+  }
+
   return (
     <div className="content wide">
       <PageHeader title="Users" actions={<Button variant="primary" onClick={() => setCreating(true)}>New user</Button>} />
@@ -57,7 +67,7 @@ export function AdminUsers() {
       <Status>{data ? `Showing ${rows.length} ${rows.length === 1 ? "user" : "users"}` : ""}</Status>
       <div className="form" style={{ display: "flex", gap: "var(--s4)", flexWrap: "wrap", alignItems: "flex-end", marginBottom: "var(--s4)" }}>
         <Field label="Search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} />
-        <Select label="Role" value={role} onChange={(e) => setRole(e.target.value)}>
+        <Select label="Show role" value={role} onChange={(e) => setRole(e.target.value)}>
           <option value="">All roles</option>
           <option value="student">Student</option>
           <option value="teacher">Teacher</option>
@@ -76,7 +86,15 @@ export function AdminUsers() {
                 <tr key={u.id}>
                   <th scope="row">{u.full_name}</th>
                   <td>{u.email}</td>
-                  <td style={{ textTransform: "capitalize" }}>{u.role}</td>
+                  <td>
+                    {u.id === profile?.id ? <span style={{ textTransform: "capitalize" }}>{u.role}</span> : (
+                      <select className="select" aria-label={`Role for ${u.full_name}`} value={u.role} disabled={busy} onChange={(e) => setUserRole(u, e.target.value)}>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    )}
+                  </td>
                   <td><Badge tone={u.deactivated ? undefined : "success"}>{u.deactivated ? "Deactivated" : "Active"}</Badge></td>
                   <td>
                     <div className="actions">
@@ -86,7 +104,7 @@ export function AdminUsers() {
                       ) : u.id === profile?.id ? (
                         <>
                           <Button size="small" variant="ghost" aria-label={`Deactivate ${u.full_name}`} disabled>Deactivate</Button>
-                          <span className="muted">You can't deactivate yourself</span>
+                          <span className="muted">You can't deactivate your own account</span>
                         </>
                       ) : (
                         <Button size="small" variant="ghost" aria-label={`Deactivate ${u.full_name}`} onClick={() => setDeactivating(u)}>Deactivate</Button>
@@ -101,7 +119,7 @@ export function AdminUsers() {
       )}
 
       <Dialog open={creating} onClose={() => setCreating(false)} title="New user">
-        <NewUserForm onCancel={() => setCreating(false)} onDone={(name) => { setCreating(false); toast(`${name} added`); reload(); }} />
+        <NewUserForm onCancel={() => setCreating(false)} onDone={(name, r) => { setCreating(false); toast(`${name} added as ${r === "admin" ? "an" : "a"} ${r}`); reload(); }} />
       </Dialog>
       <Dialog open={!!resetting} onClose={() => setResetting(null)} title={resetting ? `Reset password for ${resetting.full_name}` : "Reset password"}>
         {resetting && <ResetForm user={resetting} onCancel={() => setResetting(null)} onDone={() => { toast(`Password reset for ${resetting.full_name}`); setResetting(null); }} />}
@@ -120,7 +138,7 @@ export function AdminUsers() {
   );
 }
 
-function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name: string) => void }) {
+function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name: string, role: string) => void }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("student");
@@ -146,7 +164,7 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
       return focusLater("nu-email");
     }
     if (!r.ok) return setFormError(r.error ?? "Could not create the account. Check your connection and try again.");
-    onDone(name.trim());
+    onDone(name.trim(), role);
   }
 
   return (
@@ -160,7 +178,7 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
         <option value="teacher">Teacher</option>
         <option value="admin">Admin</option>
       </Select>
-      <Field id="nu-password" label="Password" required type="text" hint="At least 8 characters. Share it with the person; they can change it later." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+      <Field id="nu-password" label="Password" required type="text" hint="At least 8 characters. Give it to the person so they can sign in." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         <Button onClick={onCancel}>Cancel</Button>

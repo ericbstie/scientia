@@ -20,7 +20,7 @@ Rules for M3 implementers. Screens and routes are in `ia.md`. Use the tokens in 
 
 - At most one primary button (`variant="primary"`) per screen. It is the one thing most people came to do (Submit, Post, Save draft, New assignment). Pages that are only navigation have none.
 - Everything else is the default (secondary) button; low-value row actions (Pin, Edit, Remove) are `ghost` and `small`. Delete actions use `danger` text colour and a confirmation.
-- Buttons are verbs in sentence case: "Submit", "Save draft", "Add student". Not "OK", "Yes", "Click here".
+- Buttons are verbs in sentence case: "Submit", "Add student". Not "OK", "Yes", "Click here".
 - Navigation is a link (`ButtonLink` when it needs button styling); an action that changes data is a `Button`. A disabled button always shows the reason beside it in text.
 - Forms: labels above fields, hints under, errors under. The submit button is at the bottom left, Cancel next to it. Enter submits.
 
@@ -34,7 +34,7 @@ Status badges use exactly these words and no others. Colour only reinforces the 
 | Teacher, on a submission | Needs grading (warning), Graded (not released) (accent), Released (success) | as listed |
 
 - "Graded" appears to a student only after release. Missing is never a zero.
-- Labels that are not statuses may appear next to them, and only these: Draft, Pinned, Unread, Edited, Teacher, Active, Deactivated, "Late by 1 day", "Past due". Gradebook cell text follows US-32: score, "Draft", "Released", "Late, not graded", "Missing".
+- Labels that are not statuses may appear next to them, and only these: Draft, Pinned, Unread, Edited, Teacher, Active, Deactivated, "Late by 1 day", "Past due". Gradebook cell text follows US-32: score, "Not released", "Released", "Late, needs grading", "Needs grading", "Missing".
 - `DueBadge` must be changed to this vocabulary: drop "Due soon" and "Upcoming" (show the date instead) and say "Late", not "Submitted late".
 
 ## Dates, numbers and times
@@ -71,6 +71,13 @@ Status badges use exactly these words and no others. Colour only reinforces the 
 - Link text says where it goes ("Open the grading queue"), never "here".
 - Teachers see the same words as students wherever the object is the same.
 
+## Copy: only what the user needs
+
+- Every visible string (labels, headings, page titles, empty states, hints, errors, the `<title>`) must help the person do their task. If removing it would not confuse anyone, remove it.
+- Never mention other products (no competitor names anywhere in the interface), how or why the product was built ("minimal", "design-focused", "intuitive", "calm"), internal process (story ids, "demo data", milestones) or marketing claims.
+- Name things in the user's words, as found by blind user tests (`.claude/skills/user-test/SKILL.md`), not ours.
+- `mise run metrics` counts forbidden terms in `app/` as `copy.leaks` (target 0).
+
 ## Forbidden
 
 - Icons without a visible text label (decorative icons are `aria-hidden` and sit next to text). The bell shows the word "Notifications" and its count.
@@ -78,7 +85,7 @@ Status badges use exactly these words and no others. Colour only reinforces the 
 - A dialog opened from a dialog; a dialog used for a form with a textarea.
 - A toast as the only place an error appears.
 - Hover-only controls, tooltips holding required information, placeholder text as a label, auto-playing motion.
-- Hidden navigation: the course navigation and top bar are always visible (collapsed behind a labelled "Menu" button below 820 px only).
+- Hidden navigation: the course navigation and top bar are always visible (collapsed behind a labelled "Course pages" button below 820 px only).
 - Settings, filters, columns or fields beyond the stories.
 - Text smaller than 0.78 rem, targets smaller than 24 by 24 CSS px (aim for 44 px on touch), removing the focus outline.
 

@@ -46,8 +46,8 @@ test.describe("Gradebook", () => {
     await expect(cell("Maya Okafor", 0)).toContainText("10");
     await expect(cell("Maya Okafor", 1)).toContainText("86");
     await expect(cell("Liam Hansen", 1)).toContainText("72");
-    await expect(cell("Liam Hansen", 1)).toContainText("Draft");
-    await expect(cell("Sofia Reyes", 1)).toContainText("Late, not graded");
+    await expect(cell("Liam Hansen", 1)).toContainText("Not released");
+    await expect(cell("Sofia Reyes", 1)).toContainText("Late, needs grading");
     await expect(cell("Noah Berg", 1)).toContainText("Missing");
     await expect(cell("Maya Okafor", 4)).toHaveText("87.3%");
     await expect(cell("Liam Hansen", 4)).toHaveText("72.0%");
@@ -55,7 +55,7 @@ test.describe("Gradebook", () => {
     await expect(cell("Noah Berg", 4)).toHaveText("–");
 
     const legend = page.getByRole("region", { name: "Legend" });
-    for (const term of ["Draft", "Released", "Missing", "Late", "Not graded"]) await expect(legend.getByText(term, { exact: true })).toBeVisible();
+    for (const term of ["Not released", "Released", "Missing", "Late", "Needs grading"]) await expect(legend.getByText(term, { exact: true })).toBeVisible();
   });
 
   test("@US-32 a cell opens that submission's grading view", async ({ page }) => {

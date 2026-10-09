@@ -212,7 +212,7 @@ function CourseLayout() {
   const menuButton = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
   useEffect(() => setMenuOpen(false), [pathname]);
-  // Escape closes the open course menu and returns focus to the Menu button.
+  // Escape closes the open course menu and returns focus to the Course pages button.
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -271,7 +271,7 @@ function CourseLayout() {
               <span>{state.course.title}</span>
             </Link>
             <button type="button" ref={menuButton} className="btn small course-menu-button" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
-              Menu
+              Course pages
             </button>
           </div>
           <ul id="course-nav-items">

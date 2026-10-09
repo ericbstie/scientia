@@ -1,7 +1,8 @@
 ---
 name: analyst
 description: Synthesises research notes into user stories, feature specs and information architecture. Use when many inputs must be merged into one coherent document.
-model: sonnet
+model: opus
+effort: high
 tools: Read, Write, Edit, Glob, Grep
 ---
 You turn research into product definition for Scientia.

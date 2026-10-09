@@ -142,7 +142,7 @@ export async function seed(sql: SQL) {
         values (${c}, ${module}, ${title}, ${description}, ${dueDay(days)}, ${points}, ${accepts !== "file"}, ${accepts !== "text"}, ${allowLate}, ${published}, ${ago(30)}) returning id`)[0].id as string;
     const safety = await asg(bio.id, "Safety acknowledgement", -14, 10, "text", false, true, w1, "Confirm that you have read the lab safety rules by typing \"I have read the safety rules\".");
     const lab1 = await asg(bio.id, "Lab report 1", -7, 100, "both", true, true, w1, "Write up the cell observation lab: aim, methods, results (with a labelled table) and conclusion. Max 4 pages.");
-    const worksheet = await asg(bio.id, "Photosynthesis worksheet", 2, 50, "text", true, true, w2, "Answer the five questions in the Week 2 overview in your own words.");
+    const worksheet = await asg(bio.id, "Photosynthesis worksheet", 2, 50, "text", true, true, w2, "Read the Photosynthesis overview (Modules, Week 2), then explain in your own words where the light reactions and the Calvin cycle happen.");
     await asg(bio.id, "Field journal", 21, 100, "file", true, true, null, "Keep a two-week field journal of plant life near you. Upload it as one PDF.");
     await asg(bio.id, "Final project", 60, 100, "both", true, false, null, "A short research project on a topic of your choice. Details to follow.");
     await asg(his.id, "Essay: the 1848 revolutions", 5, 100, "both", true, true, h1, "1500 words: why did the 1848 revolutions fail?");

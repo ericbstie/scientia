@@ -106,7 +106,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
           />
           <TextArea id="g-feedback" label="Feedback" rows={6} value={feedback ?? ""} onChange={(e) => setFeedback(e.target.value)} />
           <div className="actions">
-            <Button type="submit" variant="primary" disabled={busy}>{saved.released ? "Save changes" : "Save draft"}</Button>
+            <Button type="submit" variant="primary" disabled={busy}>{saved.released ? "Save changes" : "Save"}</Button>
             <Button disabled={!nextId} onClick={() => nextId && guard.go(`${base}/grading/${nextId}`)}>Next to grade</Button>
             {!nextId && <span className="muted">Nothing else needs grading</span>}
             {saved.exists && !saved.released && <Button disabled={busy} onClick={() => save(null, true)}>Release</Button>}

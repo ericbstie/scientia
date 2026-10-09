@@ -91,30 +91,38 @@ function proxy(prefix: keyof typeof upstream) {
   };
 }
 
-/** Admin: deactivate/reactivate (bans sign-in, keeps data) or set a new password. */
+/** Admin: change role, deactivate/reactivate (bans sign-in, keeps data) or set a new password. */
 async function updateUser(req: Request & { params: { id: string } }) {
   const adminId = await requireAdmin(req);
   if (!adminId) return Response.json({ error: "Only administrators can change accounts." }, { status: 403 });
   const id = req.params.id;
   if (!uuid.test(id)) return Response.json({ error: "Unknown account." }, { status: 404 });
-  const { deactivated, password } = (await req.json()) as { deactivated?: boolean; password?: string };
+  const { deactivated, password, role } = (await req.json()) as { deactivated?: boolean; password?: string; role?: string };
   if (deactivated !== undefined && id === adminId) return Response.json({ error: "You can't deactivate your own account." }, { status: 400 });
+  if (role !== undefined && id === adminId) return Response.json({ error: "You can't change your own role." }, { status: 400 });
+  if (role !== undefined && !["student", "teacher", "admin"].includes(role)) return Response.json({ error: "Role must be student, teacher or admin." }, { status: 400 });
   if (password !== undefined && password.length < 8) return Response.json({ error: "The password must be at least 8 characters." }, { status: 400 });
   const body: Record<string, unknown> = {};
   if (password !== undefined) body.password = password;
   if (deactivated !== undefined) body.ban_duration = deactivated ? "876000h" : "none";
-  const res = await fetch(`${upstream["/auth/v1"]}/admin/users/${id}`, {
-    method: "PUT",
-    headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) return Response.json({ error: "Could not update the account. Try again." }, { status: res.status });
-  if (deactivated !== undefined) {
-    await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}`, {
+  if (Object.keys(body).length) {
+    const res = await fetch(`${upstream["/auth/v1"]}/admin/users/${id}`, {
+      method: "PUT",
+      headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) return Response.json({ error: "Could not update the account. Try again." }, { status: res.status });
+  }
+  const profile: Record<string, unknown> = {};
+  if (deactivated !== undefined) profile.deactivated = deactivated;
+  if (role !== undefined) profile.role = role;
+  if (Object.keys(profile).length) {
+    const res = await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}`, {
       method: "PATCH",
       headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-      body: JSON.stringify({ deactivated }),
+      body: JSON.stringify(profile),
     });
+    if (!res.ok) return Response.json({ error: "Could not update the account. Try again." }, { status: res.status });
   }
   return Response.json({ ok: true });
 }

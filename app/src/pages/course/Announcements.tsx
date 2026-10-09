@@ -86,7 +86,7 @@ export function Announcements() {
                     <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
                     <div className="row-meta">
                       {a.author?.full_name} · <time dateTime={a.created_at}>{fmtDate(a.created_at)}</time>
-                      {a.pinned && <> <Badge tone="accent">Pinned</Badge></>}
+                      {a.pinned && <> <Badge>Pinned</Badge></>}
                       {!teacher && !reads.has(a.id) && <> <Badge tone="accent">Unread</Badge></>}
                       {a.edited_at && <> <Badge>Edited</Badge></>}
                     </div>

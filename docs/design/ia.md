@@ -117,10 +117,10 @@ Decisions that keep the route count low:
 ### R7 `/courses/:courseId` Course home
 - **Purpose:** the course's start page.
 - **Who:** members; teacher of the course.
-- **Student regions:** eyebrow with course code; h1 course title; Pinned announcement (the pinned item, title and date, link); Next due (next two published assignments with due date and status); nothing else.
+- **Student regions:** eyebrow with course code; h1 course title; Announcements (up to three, pinned first then newest, with Pinned and Unread labels, and an "All announcements" link); Next due (next two published assignments with due date and status); nothing else.
 - **Teacher regions:** h1 course title; "N need grading" link row to the queue; Announcements (latest three, plus New announcement button); Assignments (next three by due date, plus New assignment button).
 - **Primary action:** none on the student page; on the teacher page the two section buttons are secondary.
-- **Empty state:** no pinned announcement: section omitted. No upcoming: "Nothing due in this course."
+- **Empty state:** no announcements: section omitted. No upcoming: "Nothing due in this course."
 - **Stories:** US-5, US-22, US-25, US-27, US-42.
 
 ### R8 `/courses/:courseId/modules`
@@ -256,14 +256,14 @@ Decisions that keep the route count low:
 - **Purpose:** grade one submission and move on.
 - **Who:** teacher.
 - **Regions:** eyebrow link "‹ Grading"; h1 "Sofia Reyes: Lab report 1" with state badge; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted).
-- **Primary action:** Save draft.
+- **Primary action:** Save (Release is separate).
 - **Empty state:** "Next to grade" disabled with "Nothing else needs grading" when the queue is empty.
 - **Stories:** US-29, US-30, US-31, US-32.
 
 ### R25 `/courses/:courseId/gradebook`
 - **Purpose:** whole-class grid.
 - **Who:** teacher.
-- **Regions:** h1 "Gradebook"; Export CSV (secondary); table in `.table-wrap`: rows are students sorted by last name, columns assignments (title and points) then Total; first column sticky; cells show score plus a text tag (Draft, Released), "Late, not graded", "Missing"; each graded or submitted cell links to R24; legend below (Draft, Released, Missing, Late, Not graded).
+- **Regions:** h1 "Gradebook"; Export CSV (secondary); table in `.table-wrap`: rows are students sorted by last name, columns assignments (title and points) then Total; first column sticky; cells show score plus a text tag ("Not released", Released), "Late, needs grading", "Needs grading", "Missing"; each graded or submitted cell links to R24; legend below ("Not released", Released, Missing, Late, "Needs grading").
 - **Primary action:** none.
 - **Empty state:** "No students yet. Add students on the People page."
 - **Stories:** US-32, US-33, US-36, US-43.
@@ -326,7 +326,7 @@ Shorthand: `C` = `/courses/:courseId`. R-numbers refer to the Routes section. "P
 | US-18 | R6 `/settings/notifications` | Name menu → Settings → Notifications |
 | US-19 | R5 `/settings/profile` | Name menu → Settings (opens Profile) |
 | US-20 | App shell on all routes | Tab → "Skip to main content" → main (see Keyboard & screen reader) |
-| US-21 | App shell on all routes | Same paths with the Menu button for the course navigation (see Responsive) |
+| US-21 | App shell on all routes | Same paths with the "Course pages" button for the course navigation (see Responsive) |
 | US-22 | R2 (teacher), R23 `C/grading`, R7 | Dashboard → "2 need grading" → Grading queue; or course title → Course home |
 | US-23 | R8 `C/modules` | Dashboard → course card → Modules → Add module, Publish, Unpublish |
 | US-24 | R8, R9 `C/modules/:moduleId/pages/new`, R10 | Modules → module → Add page / Add file / Add link → Save; Delete → confirm |
@@ -335,7 +335,7 @@ Shorthand: `C` = `/courses/:courseId`. R-numbers refer to the Routes section. "P
 | US-27 | R19 `C/assignments/new` | Dashboard → course card → New assignment → Save and publish (or Save as draft) |
 | US-28 | R20 (teacher), R21 `C/assignments/:assignmentId/edit` | Assignments → row → Edit, Publish or Unpublish |
 | US-29 | R23 `C/grading` | Dashboard → "2 need grading" → queue → filter links |
-| US-30 | R24 `C/grading/:submissionId` | Queue → row → Score, Feedback → Save draft → Next to grade |
+| US-30 | R24 `C/grading/:submissionId` | Queue → row → Score, Feedback → Save → Next to grade |
 | US-31 | R23, R24 | Dashboard → "2 need grading" → Release all graded (N) → confirm; or row Release, Withdraw |
 | US-32 | R25 `C/gradebook`, R24 | Course nav Gradebook → cell → grading view |
 | US-33 | R25, R29 `C/gradebook.csv` | Gradebook → Export CSV |
@@ -370,7 +370,7 @@ How each count is reached:
 - **Submit an assignment (2):** Upcoming row → Submit.
 - **Read latest feedback (2):** Notifications bell → "Grade released" item, which opens the assignment with score and feedback. Via Grades it is 3.
 - **Post an announcement (3):** teacher course card → New announcement on Course home → Post.
-- **Grade the next submission (3):** "N need grading" on the course card → first row → Save draft.
+- **Grade the next submission (3):** "N need grading" on the course card → first row → Save.
 - **Release grades (3):** "N need grading" on the course card → Release all graded (N) → confirm in the dialog.
 - **Create an assignment (3):** course card → New assignment on Course home → Save and publish.
 - **Find a course's material (3):** course card → Modules → item.
@@ -380,7 +380,7 @@ How each count is reached:
 Breakpoint: 820 px (matches `styles.css`). Also checked at 390 px and 320 px. No page may scroll horizontally.
 
 - **Top bar** keeps every label (Calendar, Notifications with count, name menu, Admin) and wraps to a second row instead of dropping items.
-- **Course navigation** leaves the left column. A "Menu" button at the top of `main` opens the same seven or eight items in a slide-in panel (`.sidebar.open` with `.scrim`). Menu has `aria-expanded`; the panel traps focus, closes on Escape or scrim click, and returns focus to Menu.
+- **Course navigation** leaves the left column. A "Course pages" button beside the course title expands the same seven or eight items inline (a disclosure, not a modal). Menu has `aria-expanded` and `aria-controls`; Escape closes it and returns focus to Menu. (Changed in M3 from a slide-in panel: an inline disclosure needs no focus trap and keeps the page context visible.)
 - **Layout:** `.main` padding drops to 16 px; `.split` is already one column below 1080 px; page-header actions wrap under the title; list rows allow the side text (`row-side`) to wrap under the title.
 - **Targets:** buttons, links in lists and form controls are at least 44 px tall (24 px is the floor of US-20).
 - **Calendar:** month grid becomes a day-by-day list of days that have items.
@@ -410,7 +410,7 @@ Breakpoint: 820 px (matches `styles.css`). Also checked at 390 px and 320 px. No
 
 **Dialogs:** native `<dialog>` via the `Dialog` primitive. On open, focus goes to the first field; for a confirm dialog without fields, to Cancel (never the destructive button). Tab is contained; Escape or Cancel closes. On close, focus returns to the control that opened it; if that control no longer exists, apply the delete rule above. One dialog at a time; a dialog never opens another.
 
-**Menus:** the name menu and course Menu are disclosure buttons with `aria-expanded`; Escape closes and returns focus to the button; items are plain links and buttons in tab order.
+**Menus:** the name menu and "Course pages" button are disclosure buttons with `aria-expanded`; Escape closes and returns focus to the button; items are plain links and buttons in tab order.
 
 **Status and colour:** every status is text in a badge; colour only reinforces it. Required and invalid fields are conveyed in text, not colour. Focus outline is the 2 px `--focus` ring, never removed.
 

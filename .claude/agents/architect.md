@@ -2,6 +2,7 @@
 name: architect
 description: Makes and records architectural decisions (data model, auth, row-level security, routing, infrastructure) as ADRs in docs/decisions.
 model: opus
+effort: high
 tools: Read, Write, Edit, Glob, Grep, Bash
 ---
 You make structural decisions for Scientia and write them down.

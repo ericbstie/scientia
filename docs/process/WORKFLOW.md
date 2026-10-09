@@ -54,6 +54,13 @@ Every milestone runs the same steps.
   restate them from memory.
 - **Story sets get a two-lens review** (testability, research fit) before any
   implementation brief cites them.
+- **Copy is tested on people who know nothing.** Interface text says only what
+  the user needs: no product comparisons, no words about how or why it was
+  built, no internal ids (`docs/design/ui-guidelines.md`, `copy.leaks` metric).
+  Before a milestone with user-facing work closes, run the `user-test` skill:
+  expectation interviews with zero-context agents, then blind think-aloud
+  scenario tests that navigate the running app without reading code. Findings
+  and the fixes made go in `docs/process/reviews/<milestone>-user-test.md`.
 - **Decisions are written down.** Anything a future contributor would ask "why"
   about goes in `docs/decisions/` as a short ADR (context, decision,
   consequences).
@@ -65,5 +72,5 @@ Every milestone runs the same steps.
 | --- | --- |
 | Research | Sources cited, findings mapped to user stories or explicitly rejected |
 | User story | Has id, actor, goal, acceptance criteria, priority, and a screen in the IA plan |
-| Feature | All its stories have passing e2e specs, no new serious a11y violations, `mise run check` green |
+| Feature | All its stories have passing e2e specs, no new serious a11y violations, `copy.leaks` 0, `mise run check` green |
 | Milestone | Above holds for every task, metrics recorded, retro written and applied |

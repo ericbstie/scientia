@@ -55,7 +55,8 @@ test("@US-38 admin lands on the Users table with seven accounts and can search a
     await expect(row).toHaveCount(1);
     const cells = row.getByRole("cell");
     await expect(cells.nth(0)).toHaveText(users[who].email);
-    await expect(cells.nth(1)).toHaveText(role);
+    if (who === "admin") await expect(cells.nth(1)).toHaveText(role); // your own role is not editable
+    else await expect(cells.nth(1).getByRole("combobox", { name: `Role for ${users[who].name}` })).toHaveValue(role);
     await expect(cells.nth(2)).toHaveText("Active");
   }
 
@@ -64,7 +65,7 @@ test("@US-38 admin lands on the Users table with seven accounts and can search a
   await expect(userRows(page).first()).toContainText("Maya Okafor");
 
   await page.getByLabel("Search").fill("");
-  await page.getByLabel("Role").selectOption("teacher");
+  await page.getByLabel("Show role").selectOption("teacher");
   await expect(userRows(page)).toHaveCount(1);
   await expect(userRows(page).first()).toContainText("Dr. Ingrid Solberg");
 
@@ -78,9 +79,22 @@ test("@US-39 admin creates a user", async ({ page }) => {
   await expect(page.getByRole("dialog")).toBeHidden();
   await expect(userRows(page)).toHaveCount(8);
   const eva = rowOf(page, "Eva Lund");
-  await expect(eva.getByRole("cell").nth(1)).toHaveText("student");
+  await expect(page.getByRole("status").filter({ hasText: "Eva Lund added as a student" })).toBeVisible();
+  await expect(eva.getByRole("combobox", { name: "Role for Eva Lund" })).toHaveValue("student");
   await expect(eva.getByRole("cell").nth(2)).toHaveText("Active");
+});
 
+test("@US-39 admin corrects the role of an account", async ({ page }) => {
+  await openUsers(page);
+  await newUser(page, { name: "Tomas Lind", email: "tomas.lind@scientia.test", password: "Start-pass-1" });
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await rowOf(page, "Tomas Lind").getByRole("combobox", { name: "Role for Tomas Lind" }).selectOption("teacher");
+  await expect(page.getByRole("status").filter({ hasText: "Tomas Lind is now a teacher" })).toBeVisible();
+  await page.reload();
+  await expect(rowOf(page, "Tomas Lind").getByRole("combobox", { name: "Role for Tomas Lind" })).toHaveValue("teacher");
+  await page.getByRole("navigation", { name: "Admin" }).getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("button", { name: "New course" }).click();
+  await expect(page.getByRole("dialog").getByLabel("Teacher").locator("option", { hasText: "Tomas Lind" })).toHaveCount(1);
 });
 
 // Needs the Dashboard slice for the empty-state text.
@@ -133,7 +147,7 @@ test("@US-40 admin deactivates and reactivates a user", async ({ page, browser }
 
   const own = rowOf(page, "Alex Admin");
   await expect(own.getByRole("button", { name: /Deactivate/ })).toBeDisabled();
-  await expect(own).toContainText("You can't deactivate yourself");
+  await expect(own).toContainText("You can't deactivate your own account");
 });
 
 test("@US-41 admin resets a password", async ({ page, browser }) => {

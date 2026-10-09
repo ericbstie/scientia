@@ -82,6 +82,16 @@ if (ia && ia.includes("Click budget")) {
   m["ux.max_clicks_to_core_task"] = clicks.length ? Math.max(...clicks) : null;
 } else m["ux.max_clicks_to_core_task"] = null;
 
+// Copy leaks: terms that must never appear in interface code (see ui-guidelines.md "Copy")
+const forbidden = /\b(blackboard|canvas lms|instructure|moodle|google classroom|brightspace|itslearning|competitor|design[- ]focused|focused on design|minimal(ist)? ui|intuitive|user stor(y|ies)|milestone)\b/gi;
+let leaks = 0;
+for (const f of [...walk(p("app/src"), ".tsx"), ...walk(p("app/src"), ".ts"), p("app/index.html")]) {
+  // Strings and JSX text only: drop comment lines.
+  const code = readFileSync(f, "utf8").split("\n").filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join("\n");
+  leaks += (code.match(forbidden) ?? []).length;
+}
+m["copy.leaks"] = leaks;
+
 // Process health
 const briefs = walk(p("docs/process/briefs"), ".md").filter((f) => !f.endsWith("TEMPLATE.md"));
 m["process.briefs"] = briefs.length;

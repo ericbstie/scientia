@@ -5,6 +5,7 @@
   "a11y.serious": { "max": 0 },
   "bundle.js_kb_gz": { "max": 250 },
   "ux.max_clicks_to_core_task": { "max": 3 },
+  "copy.leaks": { "max": 0 },
   "process.briefs_with_criteria_pct": { "min": 100 },
   "process.retro_changes": { "min": 1 }
 }

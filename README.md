@@ -2,9 +2,8 @@
 
 Utdanningsinstitusjoners og studenters portal for innleveringer, emneplanlegging og informasjon.
 
-A calm, minimal learning platform: students see what is due, hand in work and read
-feedback; teachers publish material, collect submissions and grade. Built as a
-better-designed alternative to Blackboard and Canvas.
+A learning platform: students see what is due, hand in work and read feedback;
+teachers publish material, collect submissions and grade.
 
 ## Quick start
 

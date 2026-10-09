@@ -101,7 +101,7 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
       <ErrorSummary errors={[errors.code && { id: "nc-code", message: errors.code }, errors.title && { id: "nc-title", message: errors.title }, errors.teacher && { id: "nc-teacher", message: errors.teacher }]} />
       <Field id="nc-code" label="Code" required value={code} error={errors.code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
       <Field id="nc-title" label="Title" required value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} autoComplete="off" />
-      <Select id="nc-teacher" label="Teacher" required value={teacher} onChange={(e) => setTeacher(e.target.value)} error={errors.teacher} hint={noTeachers ? "No teachers yet. Add a teacher on the Users page first." : undefined}>
+      <Select id="nc-teacher" label="Teacher" required value={teacher} onChange={(e) => setTeacher(e.target.value)} error={errors.teacher} hint={noTeachers ? "No teachers yet. Add a teacher on the Users page first." : "Only accounts with the teacher role are listed."}>
         <option value="">Select a teacher</option>
         {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}
       </Select>

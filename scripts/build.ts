@@ -1,5 +1,8 @@
 // Production bundle into dist/ (used for the bundle-size metric; the server bundles on start).
-const result = await Bun.build({ entrypoints: ["app/index.html"], outdir: "dist", minify: true, sourcemap: "none", define: { "process.env.NODE_ENV": JSON.stringify("production") } });
+import { rmSync } from "node:fs";
+
+rmSync("dist", { recursive: true, force: true });
+const result = await Bun.build({ entrypoints: ["app/index.html"], outdir: "dist", minify: true, splitting: true, sourcemap: "none", define: { "process.env.NODE_ENV": JSON.stringify("production") } });
 if (!result.success) {
   for (const log of result.logs) console.error(log);
   process.exit(1);
