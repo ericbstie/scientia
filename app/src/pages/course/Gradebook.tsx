@@ -13,16 +13,17 @@ function view(d: TeacherData) {
   return { students: [...d.students].sort(byLastName), sub: (a: string, s: string) => subs.get(key(a, s)), grade: (a: string, s: string) => grades.get(key(a, s)) };
 }
 
-/** Total percent of graded work (drafts included in the teacher view), one decimal, or "" when nothing is graded. */
+/** Percent of graded work (drafts included in the teacher view), one decimal or "" when nothing is graded, and how many assignments it covers. Ungraded work is not a zero. */
 function totalFor(d: TeacherData, studentId: string) {
-  let got = 0, of = 0;
+  let got = 0, of = 0, graded = 0;
   for (const g of d.grades) {
     const a = d.assignments.find((x) => x.id === g.assignment_id);
     if (g.student_id !== studentId || g.score == null || !a) continue;
     got += g.score;
     of += a.points;
+    graded++;
   }
-  return of > 0 ? pct(got, of) : "";
+  return { pct: of > 0 ? pct(got, of) : "", graded };
 }
 
 function csvCell(v: string) {
@@ -34,7 +35,7 @@ function buildCsv(d: TeacherData) {
   const { students, grade } = view(d);
   const lines = students.map((s) => {
     const cells = d.assignments.map((a) => String(grade(a.id, s.user_id)?.score ?? ""));
-    return [lastName(s.full_name), firstName(s.full_name), s.email ?? "", ...cells, totalFor(d, s.user_id)];
+    return [lastName(s.full_name), firstName(s.full_name), s.email ?? "", ...cells, totalFor(d, s.user_id).pct];
   });
   return [header, ...lines].map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
 }
@@ -81,7 +82,9 @@ export function Gradebook() {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((s) => (
+                  {students.map((s) => {
+                    const total = totalFor(data, s.user_id);
+                    return (
                     <tr key={s.user_id}>
                       <th scope="row">{s.full_name}</th>
                       {data.assignments.map((a) => {
@@ -97,9 +100,10 @@ export function Gradebook() {
                         else cell = "–";
                         return <td key={a.id} className="num">{cell}</td>;
                       })}
-                      <td className="num">{totalFor(data, s.user_id) ? `${totalFor(data, s.user_id)}%` : "–"}</td>
+                      <td className="num">{total.pct ? `${total.pct}%` : "–"} <span className="muted">{total.graded} of {data.assignments.length} graded</span></td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

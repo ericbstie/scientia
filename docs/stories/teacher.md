@@ -156,7 +156,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Acceptance criteria:**
 - Given I open BIO101 Gradebook, When it loads, Then rows, sorted by last name ascending, are Noah Berg, Liam Hansen, Maya Okafor, Sofia Reyes, and columns are Safety acknowledgement (10), Lab report 1 (100), Photosynthesis worksheet (50), Field journal (100), then Total.
 - Given the seed data, When I read the cells, Then Maya shows 10 and 86, Liam's Lab report 1 shows 72 with a "Not released" tag, Sofia's Lab report 1 shows "Late, needs grading", and Noah's Lab report 1 shows "Missing".
-- Given the totals (the teacher view includes draft grades), When I read them, Then Maya shows 87.3%, Liam shows 72.0%, and Sofia and Noah show "–"; no Missing cell is counted as zero.
+- Given the totals (the teacher view includes draft grades), When I read them, Then Maya shows "87.3% 2 of 4 graded", Liam "72.0% 1 of 4 graded", and Sofia and Noah "– 0 of 4 graded"; only graded work counts, and no Missing cell is counted as zero.
 - Given the grid, When I look below it, Then a legend explains "Not released", Released, Missing, Late and "Needs grading".
 - Given I click Liam's Lab report 1 cell, When the page loads, Then I land on his grading view.
 

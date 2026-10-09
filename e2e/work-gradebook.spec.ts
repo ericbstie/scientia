@@ -27,10 +27,10 @@ test.describe("Gradebook", () => {
     await expect(cell("Liam Hansen", 1)).toContainText("Not released");
     await expect(cell("Sofia Reyes", 1)).toContainText("Late, needs grading");
     await expect(cell("Noah Berg", 1)).toContainText("Missing");
-    await expect(cell("Maya Okafor", 4)).toHaveText("87.3%");
-    await expect(cell("Liam Hansen", 4)).toHaveText("72.0%");
-    await expect(cell("Sofia Reyes", 4)).toHaveText("–");
-    await expect(cell("Noah Berg", 4)).toHaveText("–");
+    await expect(cell("Maya Okafor", 4)).toHaveText("87.3% 2 of 4 graded");
+    await expect(cell("Liam Hansen", 4)).toHaveText("72.0% 1 of 4 graded");
+    await expect(cell("Sofia Reyes", 4)).toHaveText("– 0 of 4 graded");
+    await expect(cell("Noah Berg", 4)).toHaveText("– 0 of 4 graded");
 
     const legend = page.getByRole("region", { name: "Legend" });
     for (const term of ["Not released", "Released", "Missing", "Late", "Needs grading"]) await expect(legend.getByText(term, { exact: true })).toBeVisible();

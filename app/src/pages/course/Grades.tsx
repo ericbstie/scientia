@@ -19,7 +19,7 @@ export function Grades() {
     if (scored.length) {
       const got = scored.reduce((s, a) => s + data.grades.get(a.id)!.score!, 0);
       const of = scored.reduce((s, a) => s + a.points, 0);
-      total = `Graded so far: ${num(got)} of ${num(of)} points (${pct(got, of)}%)`;
+      total = `Graded so far: ${num(got)} of ${num(of)} points (${pct(got, of)}%) from ${scored.length} of ${data.assignments.length} assignments`;
     }
   }
 

@@ -211,7 +211,7 @@ test.describe("Grades and feedback", () => {
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet/ })).toContainText("Not submitted");
     await expect(page.getByRole("row", { name: /Field journal/ })).toContainText("Not submitted");
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet|Field journal/ }).first()).not.toContainText(/(^|\s)0(\s|$)/);
-    await expect(page.getByText("Graded so far: 96 of 110 points (87.3%)")).toBeVisible();
+    await expect(page.getByText("Graded so far: 96 of 110 points (87.3%) from 2 of 4 assignments")).toBeVisible();
   });
 
   test("@US-12 grades that are not released stay hidden", async ({ page }) => {
