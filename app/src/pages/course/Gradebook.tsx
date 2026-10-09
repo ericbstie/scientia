@@ -93,8 +93,8 @@ export function Gradebook() {
                         );
                         let cell: ReactNode;
                         if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Not released"}</span></>, `${num(g.score)} ${g.released ? "Released" : "Not released"}`);
-                        else if (sub) { const t = lateBy(a.due_at, sub.submitted_at) ? "Late, needs grading" : "Needs grading"; cell = link(t, t); }
-                        else if (new Date(a.due_at).getTime() < now) cell = "Missing";
+                        else if (sub) { const t = lateBy(data.dueFor(a, s.user_id), sub.submitted_at) ? "Late, needs grading" : "Needs grading"; cell = link(t, t); }
+                        else if (new Date(data.dueFor(a, s.user_id)).getTime() < now) cell = "Missing";
                         else cell = "–";
                         return <td key={a.id} className="num">{cell}</td>;
                       })}

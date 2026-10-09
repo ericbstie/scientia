@@ -52,7 +52,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
   if (!sub || !assignment || !student || saved === null) return <NotFound />;
 
   const state = !saved.exists ? "Needs grading" : saved.released ? "Released" : "Graded (not released)";
-  const late = lateBy(assignment.due_at, sub.submitted_at);
+  const late = lateBy(data!.dueFor(assignment, sub.student_id), sub.submitted_at);
 
   async function save(e: FormEvent | null, release: boolean) {
     e?.preventDefault();

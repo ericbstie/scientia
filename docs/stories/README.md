@@ -1,8 +1,8 @@
 # User stories for Milestone 3
 
-These 44 stories are the product's committed scope: 43 from Milestone 3 (M3), then US-44. Each one is written so a Playwright test can check it in a browser against the seeded demo data below. Product reasoning is in `docs/research/synthesis.md`. The demo data is produced by `supabase/seed.ts`, which is the source of truth: this file describes it and must match it.
+These 45 stories are the product's committed scope: 43 from Milestone 3 (M3), then US-44 and US-45. Each one is written so a Playwright test can check it in a browser against the seeded demo data below. Product reasoning is in `docs/research/synthesis.md`. The demo data is produced by `supabase/seed.ts`, which is the source of truth: this file describes it and must match it.
 
-Files: `student.md` (US-1 to US-21), `teacher.md` (US-22 to US-37), `admin.md` (US-38 to US-44).
+Files: `student.md` (US-1 to US-21), `teacher.md` (US-22 to US-37, US-45), `admin.md` (US-38 to US-44).
 
 Priorities: P0 must ship in M3, P1 should ship in M3. Anything P2 or later lives in the "Later" list of the synthesis and has no story id.
 

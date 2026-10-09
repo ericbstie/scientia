@@ -1,4 +1,4 @@
-// Stories US-27 to US-31: creating and changing assignments, the grading queue, grading and releasing.
+// Stories US-27 to US-31 and US-45: creating and changing assignments, the grading queue, grading and releasing, and more time for one student.
 import { test, expect, reset, signIn, signOut, api, openCourse } from "./fixtures";
 import type { Page } from "@playwright/test";
 
@@ -338,5 +338,69 @@ test.describe("Grading queue, grading and releasing", () => {
     await signIn(page, "maya");
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("Awaiting grade");
+  });
+});
+
+test.describe("More time for one student", () => {
+  const giveMoreTime = async (page: Page, title: string, student: string, n: number) => {
+    await openCourse(page, "BIO101", "/assignments");
+    await page.getByRole("link", { name: title, exact: true }).click();
+    await page.getByRole("button", { name: "Give more time" }).click();
+    const dialog = page.getByRole("dialog", { name: "Give more time" });
+    await dialog.getByLabel("Student").selectOption({ label: student });
+    await dialog.getByLabel("New due date and time").fill(inputAt(n));
+    await dialog.getByRole("button", { name: "Save" }).click();
+    return dialog;
+  };
+
+  test("@US-45 more time for Sofia lifts her Late flag until it is removed", async ({ page }) => {
+    await signIn(page, "ingrid");
+    const dialog = await giveMoreTime(page, "Lab report 1", "Sofia Reyes", -8);
+    await expect(dialog.getByText("Choose a time after the usual due date")).toBeVisible();
+    await dialog.getByLabel("New due date and time").fill(inputAt(-5));
+    await dialog.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByRole("status").filter({ hasText: `Sofia Reyes has until ${fmt(dueAt(-5))}` })).toBeVisible();
+    const more = page.getByRole("region", { name: "More time" });
+    await expect(more.getByRole("listitem")).toHaveCount(1);
+    await expect(more.getByRole("listitem")).toContainText("Sofia Reyes");
+    await expect(more.getByRole("listitem")).toContainText(fmt(dueAt(-5)));
+    const assignment = page.url();
+
+    await page.getByRole("link", { name: "Open grading queue" }).click();
+    await expect(row(page, "Sofia Reyes")).toContainText("Lab report 1");
+    await expect(row(page, "Sofia Reyes")).not.toContainText("Late");
+
+    await page.goto(assignment);
+    await more.getByRole("button", { name: "Remove extra time for Sofia Reyes" }).click();
+    await expect(more).toContainText("Everyone has the same due date.");
+    await page.getByRole("link", { name: "Open grading queue" }).click();
+    await expect(row(page, "Sofia Reyes")).toContainText("Late by 1 day");
+  });
+
+  test("@US-45 Noah gets more time on a closed assignment and hands it in", async ({ page }) => {
+    await signIn(page, "ingrid");
+    await giveMoreTime(page, "Safety acknowledgement", "Noah Berg", 3);
+    await expect(page.getByRole("status").filter({ hasText: "Noah Berg has until" })).toBeVisible();
+
+    await signIn(page, "noah");
+    const upcoming = page.getByRole("region", { name: "Upcoming" });
+    await expect(upcoming.getByRole("listitem").filter({ hasText: "Safety acknowledgement" })).toContainText(fmt(dueAt(3)));
+    await expect(page.getByRole("region", { name: "Missing" })).not.toContainText("Safety acknowledgement");
+    const notes = (await api(page, "/rest/v1/notifications?select=title")).data as { title: string }[];
+    expect(notes.map((n) => n.title)).toContain("Due date changed: Safety acknowledgement");
+
+    await upcoming.getByRole("link", { name: "Safety acknowledgement" }).click();
+    await page.getByRole("textbox", { name: "Your answer" }).fill("I have read the safety rules");
+    await page.getByRole("button", { name: "Submit" }).click();
+    await expect(page.locator("dt", { hasText: /^Status$/ }).locator("xpath=following-sibling::dd[1]")).toContainText("Submitted");
+  });
+
+  test("@US-45 students cannot give themselves more time", async ({ page }) => {
+    await signIn(page, "maya");
+    const [lab] = (await api(page, "/rest/v1/assignments?select=id&title=eq.Lab report 1")).data;
+    const me = await page.evaluate(() => JSON.parse(localStorage.getItem("scientia-auth")!).user.id as string);
+    const res = await api(page, "/rest/v1/extensions", { method: "POST", body: { assignment_id: lab.id, student_id: me, due_at: dueAt(30).toISOString() } });
+    expect(res.status).toBe(403);
+    expect((await api(page, "/rest/v1/extensions?select=due_at")).data).toEqual([]);
   });
 });

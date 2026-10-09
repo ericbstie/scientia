@@ -226,3 +226,19 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 - Given I open the thread "Question about the lab report" as Ingrid, When I click Delete on Maya's reply and confirm, Then the reply is replaced by "This post was removed by a teacher" for everyone, including Liam.
 - Given I am signed in as Maya, When I view Liam's post, Then there is no Delete button on it.
 - Given I delete the whole thread "Question about the lab report" and confirm, When I return to the list, Then the thread and its replies are gone.
+
+### US-45 Give a student more time
+
+**As a** teacher **I want** to give one student a later due date on one assignment **so that** an agreed extension is not marked late or missing.
+
+**Priority:** P1
+
+**Evidence:** gap-analysis.md (rank 4, per-student due dates and extensions)
+
+**Acceptance criteria:**
+- Given I open Lab report 1 as Ingrid, When I click Give more time, choose Sofia Reyes, enter T-5d and save, Then I see "Sofia Reyes has until" and the date, More time lists Sofia Reyes with that date, and her Lab report 1 row in the grading queue no longer says "Late by 1 day".
+- Given I give Noah Berg more time on Safety acknowledgement until T+3d, When Noah signs in, Then his dashboard lists Safety acknowledgement under Upcoming with the new date and not under Missing, he has the notification "Due date changed: Safety acknowledgement", and he can hand in "I have read the safety rules".
+- Given I enter a date before the usual due date, When I save, Then I see "Choose a time after the usual due date" and nothing is saved.
+- Given I click Remove next to Sofia Reyes, Then her Lab report 1 row says "Late by 1 day" again.
+- Given I am signed in as Maya, When I insert a row for myself into `/rest/v1/extensions`, Then the request is refused.
+

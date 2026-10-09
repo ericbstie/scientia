@@ -25,7 +25,7 @@ function StudentHome() {
     const [anns, reads, upcoming] = await Promise.all([
       db().from("announcements").select("id, title, created_at, pinned").eq("course_id", course.id).order("pinned", { ascending: false }).order("created_at", { ascending: false }).limit(3),
       db().from("announcement_reads").select("announcement_id").eq("user_id", profile!.id),
-      db().from("assignments").select("id, title, due_at, allow_late, published").eq("course_id", course.id).gte("due_at", now).order("due_at").limit(2),
+      db().from("assignments").select("id, title, due_at:my_due_at, allow_late, published").eq("course_id", course.id).gte("my_due_at", now).order("my_due_at").limit(2),
     ]);
     const next = must(upcoming) as Asg[];
     const ids = next.map((a) => a.id);
@@ -102,7 +102,7 @@ function TeacherHome() {
     const now = new Date().toISOString();
     const [anns, asgs, work] = await Promise.all([
       db().from("announcements").select("id, title, created_at").eq("course_id", course.id).order("created_at", { ascending: false }).limit(3),
-      db().from("assignments").select("id, title, due_at, allow_late, published").eq("course_id", course.id).gte("due_at", now).order("due_at").limit(3),
+      db().from("assignments").select("id, title, due_at:my_due_at, allow_late, published").eq("course_id", course.id).gte("my_due_at", now).order("my_due_at").limit(3),
       loadTeacherData(course.id),
     ]);
     return { anns: must(anns) as Ann[], asgs: must(asgs) as Asg[], needs: needsGrading(work) };

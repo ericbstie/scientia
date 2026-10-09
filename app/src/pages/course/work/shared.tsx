@@ -13,7 +13,7 @@ export type Submission = { id: string; assignment_id: string; student_id: string
 export type Grade = { assignment_id: string; student_id: string; score: number | null; feedback: string; released: boolean; graded_at: string };
 export type Student = { user_id: string; full_name: string; email: string | null };
 
-const normAssignment = (a: any): Assignment => ({ ...a, points: Number(a.points) });
+const normAssignment = ({ my_due_at, ...a }: any): Assignment => ({ ...a, due_at: my_due_at ?? a.due_at, points: Number(a.points) });
 const normGrade = (g: any): Grade => ({ ...g, score: g.score == null ? null : Number(g.score) });
 
 export function normSub(s: any): Submission {
@@ -24,13 +24,13 @@ const rowsOf = <T,>(res: { data: T[] | null; error: { message: string } | null }
 
 export async function loadAssignment(courseId: string, id: string): Promise<Assignment | null> {
   if (!isUuid(id)) return null;
-  const { data, error } = await db().from("assignments").select("*").eq("id", id).eq("course_id", courseId).maybeSingle();
+  const { data, error } = await db().from("assignments").select("*, my_due_at").eq("id", id).eq("course_id", courseId).maybeSingle();
   if (error) throw new Error(error.message);
   return data ? normAssignment(data) : null;
 }
 
 export async function loadAssignments(courseId: string, publishedOnly: boolean): Promise<Assignment[]> {
-  let q = db().from("assignments").select("*").eq("course_id", courseId).order("due_at", { ascending: true });
+  let q = db().from("assignments").select("*, my_due_at").eq("course_id", courseId).order("my_due_at", { ascending: true });
   if (publishedOnly) q = q.eq("published", true);
   return rowsOf(await q).map(normAssignment);
 }
@@ -49,7 +49,7 @@ export async function loadMyWork(courseId: string, userId: string) {
   };
 }
 
-async function loadStudents(courseId: string): Promise<Student[]> {
+export async function loadStudents(courseId: string): Promise<Student[]> {
   const [people, enrol] = await Promise.all([
     db().rpc("course_people", { c: courseId }),
     db().from("enrollments").select("user_id, created_at").eq("course_id", courseId),
@@ -62,19 +62,31 @@ async function loadStudents(courseId: string): Promise<Student[]> {
 
 /** Everything the teacher screens need for one course. */
 export async function loadTeacherData(courseId: string) {
-  const [assignments, students, subs, grades] = await Promise.all([
+  const [assignments, students, subs, grades, extensions] = await Promise.all([
     loadAssignments(courseId, true),
     loadStudents(courseId),
     db().from("submissions").select("*, assignments!inner(course_id)").eq("assignments.course_id", courseId),
     db().from("grades").select("*, assignments!inner(course_id)").eq("assignments.course_id", courseId),
+    loadExtensions(courseId),
   ]);
+  const extended = new Map(extensions.map((e) => [key(e.assignment_id, e.student_id), e.due_at]));
   return {
     assignments,
     students,
     subs: rowsOf(subs).map(normSub),
     grades: rowsOf(grades).map(normGrade),
+    /** The due date for one student: theirs if they were given more time, else the assignment's. */
+    dueFor: (a: Assignment, studentId: string) => latest(a.due_at, extended.get(key(a.id, studentId))),
   };
 }
+
+export type Extension = { assignment_id: string; student_id: string; due_at: string };
+export async function loadExtensions(courseId: string, assignmentId?: string): Promise<Extension[]> {
+  let q = db().from("extensions").select("assignment_id, student_id, due_at, assignments!inner(course_id)").eq("assignments.course_id", courseId);
+  if (assignmentId) q = q.eq("assignment_id", assignmentId);
+  return rowsOf(await q);
+}
+const latest = (a: string, b: string | undefined) => (b && new Date(b) > new Date(a) ? b : a);
 export type TeacherData = Awaited<ReturnType<typeof loadTeacherData>>;
 
 export const key = (assignmentId: string, studentId: string) => `${assignmentId}:${studentId}`;
@@ -185,15 +197,15 @@ export function buildQueue(d: TeacherData): QueueRow[] {
     const g = grade.get(key(s.assignment_id, s.student_id));
     rows.push({
       id: s.id, filter: !g ? "needs-grading" : g.released ? "released" : "graded", studentId: s.student_id, student: who,
-      assignmentId: a.id, assignment: a.title, due: a.due_at, submittedAt: s.submitted_at, submissionId: s.id,
+      assignmentId: a.id, assignment: a.title, due: d.dueFor(a, s.student_id), submittedAt: s.submitted_at, submissionId: s.id,
     });
   }
   const now = Date.now();
   for (const a of d.assignments) {
-    if (new Date(a.due_at).getTime() >= now) continue;
     for (const st of d.students) {
-      if (submitted.has(key(a.id, st.user_id))) continue;
-      rows.push({ id: `m:${key(a.id, st.user_id)}`, filter: "missing", studentId: st.user_id, student: st.full_name, assignmentId: a.id, assignment: a.title, due: a.due_at });
+      const due = d.dueFor(a, st.user_id);
+      if (submitted.has(key(a.id, st.user_id)) || new Date(due).getTime() >= now) continue;
+      rows.push({ id: `m:${key(a.id, st.user_id)}`, filter: "missing", studentId: st.user_id, student: st.full_name, assignmentId: a.id, assignment: a.title, due });
     }
   }
   const order = new Map(d.students.map((s, i) => [s.user_id, i]));

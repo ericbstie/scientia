@@ -9,8 +9,8 @@ export async function myCourses(userId: string): Promise<CourseLite[]> {
   return rows.filter((r) => r.courses).map((r) => ({ ...r.courses!, role: r.role })).sort((a, b) => a.code.localeCompare(b.code));
 }
 
-/** Published assignments of the given courses, soonest first. */
+/** Published assignments of the given courses, soonest first, with the signed-in student's own due dates. */
 export async function publishedAssignments(courseIds: string[]): Promise<AssignmentLite[]> {
   if (!courseIds.length) return [];
-  return must(await db().from("assignments").select("id, course_id, title, due_at, points, allow_late").in("course_id", courseIds).eq("published", true).order("due_at")) as AssignmentLite[];
+  return must(await db().from("assignments").select("id, course_id, title, due_at:my_due_at, points, allow_late").in("course_id", courseIds).eq("published", true).order("my_due_at")) as AssignmentLite[];
 }
