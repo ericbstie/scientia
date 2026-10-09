@@ -33,7 +33,10 @@ They must not read, list or search any files. Prompt:
 
 Scenarios to cover each time: student finds what is due and hands in work;
 student reads feedback and grades (as Maya, the only demo student with a released grade); student who has missed work; teacher posts an
-announcement and adds material; teacher grades and releases; admin creates an
+announcement and adds material (if the announcement says marks are out, the task
+releases Lab report 1 first: Liam's grade is not released in the seed); teacher
+grades and releases (the comment must fit the work: Liam's Photosynthesis
+worksheet is a one-sentence typed answer); admin creates an
 account and a course; one scenario with `--phone`.
 
 ## 3. Act on it
