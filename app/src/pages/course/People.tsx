@@ -142,7 +142,21 @@ function AddForm({ onClose, onAdded }: { onClose: () => void; onAdded: (who: str
 
   return (
     <form className="form" onSubmit={submit} noValidate>
-      <TextArea id="person-email" label="Email" required rows={3} inputMode="email" value={emails} onChange={(e) => setEmails(e.target.value)} error={error} hint="One address, or several on separate lines. Each person needs an existing Scientia account." />
+      <TextArea
+        id="person-email"
+        label="Email"
+        required
+        rows={3}
+        inputMode="email"
+        value={emails}
+        onChange={(e) => setEmails(e.target.value)}
+        onKeyDown={(e) => {
+          // Enter adds, as in every other form; Shift+Enter starts a new line for a list.
+          if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); if (!busy) e.currentTarget.form?.requestSubmit(); }
+        }}
+        error={error}
+        hint="One address, or several on separate lines (Shift+Enter for a new line). Each person needs an existing Scientia account."
+      />
       {error?.includes("the Users page") && <Paragraph><TextLink to="/admin/users">Open Users</TextLink></Paragraph>}
       <div className="actions">
         <Button variant="primary" type="submit" disabled={busy}>Add student</Button>

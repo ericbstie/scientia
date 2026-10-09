@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useParams } from "react-router";
 import { Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
@@ -212,6 +212,7 @@ function StudentView({ a }: { a: Assignment }) {
       />
       <Facts items={[
         ["Status", <StatusBadge status={status} />],
+        ...(released?.score != null ? [["Score", <strong>{num(released.score)} / {num(a.points)}</strong>] as [string, ReactNode]] : []),
         ["Due date", <><time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>{pastDue && !sub && <> <Badge>Past due</Badge></>}</>],
         ["Points", `${num(a.points)} points`],
         ["How to hand in", acceptsLabel(a)],
@@ -245,11 +246,10 @@ function StudentView({ a }: { a: Assignment }) {
           />
         )}
       </Section>
-      {released && (
+      {released?.feedback && (
         <Section title="Feedback">
           <Panel>
-            {released.score != null && <Paragraph className="figure">{num(released.score)} / {num(a.points)}</Paragraph>}
-            {released.feedback && <Paragraph className="prose">{released.feedback}</Paragraph>}
+            <Paragraph className="prose">{released.feedback}</Paragraph>
           </Panel>
         </Section>
       )}

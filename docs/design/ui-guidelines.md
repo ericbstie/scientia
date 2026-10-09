@@ -86,7 +86,7 @@ shadow or font is chosen. Components and pages use the system's tokens and nothi
 - A header with two actions puts the secondary one (Export CSV, Import users) immediately left of the primary one.
 - Buttons are verbs in sentence case: "Submit", "Add student". Not "OK", "Yes", "Click here".
 - Navigation is a `Link` (a button-styled link when it needs button looks); an action that changes data is a `Button`. A disabled button always shows the reason beside it in text.
-- Forms: labels above fields, hints under, errors under. Every field is required unless its label says "Optional" beside it; "Required" is never printed. The submit button is at the bottom left, Cancel next to it. Enter submits. Forms use `noValidate` and the app's own errors, never the browser's bubbles. Dates and prices are never pre-filled with a guess the person did not see.
+- Forms: labels above fields, hints under, errors under. Every field is required unless its label says "Optional" beside it; "Required" is never printed. The submit button is at the bottom left, Cancel next to it. Enter submits (in a box that takes a list, Shift+Enter starts a new line and the hint says so). Forms use `noValidate` and the app's own errors, never the browser's bubbles. Dates and prices are never pre-filled with a guess the person did not see.
 
 ## Status vocabulary
 
@@ -104,7 +104,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 
 - Format `ddd D MMM, HH:mm`, 24-hour, viewer's time zone: `Fri 17 Oct, 23:59`. Date only: `Fri 17 Oct`. Add the year only when it is not the current year (`Fri 17 Oct 2027, 23:59`).
 - Relative text ("in 2 days", "7 days ago") may follow in muted text, never replace the date. Always render in `<time dateTime>`.
-- Scores are `86 / 100`; percentages one decimal (`87.3%`); no score is shown as an en dash only inside a gradebook cell, elsewhere as words ("Awaiting grade").
+- Scores are `86 / 100` and always sit beside the label "Score" (a fact on the assignment page, a column in tables); percentages one decimal (`87.3%`); no score is shown as an en dash only inside a gradebook cell, elsewhere as words ("Awaiting grade").
 - Points read "50 points" in text, "(50)" only in table headers and CSV.
 
 ## Empty states

@@ -269,6 +269,7 @@ test.describe("Grades and feedback", () => {
     await signIn(page, "maya");
     await openCourse(page, "BIO101", "/grades");
     await page.getByRole("link", { name: "Lab report 1" }).click();
+    await expect(page.getByRole("term").filter({ hasText: "Score" })).toBeVisible();
     await expect(page.getByText("86 / 100")).toBeVisible();
     await expect(page.getByText("Clear methods section. Add units to Table 2 and cite the microscope model.")).toBeVisible();
     await expect(page.getByText("My lab report is attached.")).toBeVisible();

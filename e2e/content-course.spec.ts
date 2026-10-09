@@ -129,10 +129,14 @@ test.describe("Course layout and people", () => {
     await dialog.getByRole("button", { name: "Cancel" }).click();
     await expect(page.getByRole("region", { name: "4 students" })).toBeVisible();
 
-    // Emails match case-insensitively.
+    // Enter adds one address; Shift+Enter starts a new line in the same box. Emails match case-insensitively.
     await page.getByRole("button", { name: "Add student" }).first().click();
-    await dialog.getByLabel("Email").fill("PRIYA.NAIR@scientia.test");
-    await dialog.getByRole("button", { name: "Add student" }).click();
+    const box = dialog.getByLabel("Email");
+    await box.fill("one@scientia.test");
+    await box.press("Shift+Enter");
+    await expect(box).toHaveValue("one@scientia.test\n");
+    await box.fill("PRIYA.NAIR@scientia.test");
+    await box.press("Enter");
     await expect(page.getByRole("region", { name: "5 students" })).toContainText("Priya Nair");
     await expect(students).toHaveCount(1);
 
