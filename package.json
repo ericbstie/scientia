@@ -1,0 +1,11 @@
+{
+  "name": "scientia",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot app/server.ts",
+    "build": "bun run scripts/build.ts",
+    "e2e": "playwright test",
+    "metrics": "bun run scripts/metrics.ts"
+  }
+}

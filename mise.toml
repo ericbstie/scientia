@@ -1,0 +1,43 @@
+# Toolchain and task runner. `mise install` then `mise run <task>`.
+[tools]
+bun = "1.4.2"
+
+[env]
+COMPOSE_PROJECT_NAME = "scientia"
+
+[tasks.install]
+description = "Install JS dependencies"
+run = "bun install"
+
+[tasks.up]
+description = "Start the full stack (Supabase + web) with Docker"
+run = "docker compose up --build -d --wait"
+
+[tasks.down]
+description = "Stop the stack and remove volumes"
+run = "docker compose down -v"
+
+[tasks.dev]
+description = "Run the web app with hot reload against a running stack (needs `mise run up`)"
+run = "bun --hot app/server.ts"
+
+[tasks.build]
+description = "Production build of the web app"
+run = "bun run scripts/build.ts"
+
+[tasks.typecheck]
+description = "Type-check the project"
+run = "bunx tsc --noEmit"
+
+[tasks.e2e]
+description = "Run Playwright e2e tests against the running stack"
+run = "bunx playwright test"
+
+[tasks.metrics]
+description = "Collect quality metrics into metrics/history.jsonl and compare with targets"
+run = "bun run scripts/metrics.ts"
+
+[tasks.check]
+description = "Everything a contributor runs before pushing"
+depends = ["typecheck", "e2e"]
+run = "bun run scripts/metrics.ts"
