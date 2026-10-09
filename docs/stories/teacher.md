@@ -210,7 +210,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Evidence:** pain-points.md#Features by area (Roles & admin); enabler (no pain point)
 
 **Acceptance criteria:**
-- Given I click Remove next to Sofia Reyes in BIO101 People, When I confirm the dialog, Then she disappears from the roster, the Gradebook and the Grading queue.
+- Given I click Remove next to Sofia Reyes in BIO101 People, When I confirm the dialog, Then she disappears from the roster, the Gradebook and the Grading queue, and the "need grading" count on my dashboard and the course home drops from 2 to 1.
 - Given Sofia has been removed, When she signs in and opens the recorded BIO101 course home URL, Then the page heading is "You don't have access to this course" and BIO101 is not on her dashboard.
 - Given I add Sofia back by email, When I open the Gradebook, Then her Lab report 1 cell shows "Late, needs grading" again.
 

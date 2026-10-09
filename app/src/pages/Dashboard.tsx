@@ -5,6 +5,7 @@ import { num, studentStatus } from "../lib/format";
 import { useQuery } from "../lib/useQuery";
 import { Due, Empty, ErrorNote, Loading, PageHeader, Section, StatusBadge, useTitle } from "../ui";
 import { myCourses, publishedAssignments, type AssignmentLite, type CourseLite } from "./personal/data";
+import { loadTeacherData, needsGrading } from "./course/work/shared";
 
 type Row = AssignmentLite & { code: string; status: ReturnType<typeof studentStatus> };
 type Data = Awaited<ReturnType<typeof loadTeacher>> | Awaited<ReturnType<typeof loadStudent>>;
@@ -43,25 +44,11 @@ async function loadStudent(uid: string) {
 
 async function loadTeacher(uid: string) {
   const courses = (await myCourses(uid)).filter((c) => c.role === "teacher");
-  const ids = courses.map((c) => c.id);
-  const out: TeacherCourse[] = [];
-  if (ids.length) {
-    const enrol = must(await db().from("enrollments").select("course_id").in("course_id", ids).eq("role", "student")) as { course_id: string }[];
-    const assignments = must(await db().from("assignments").select("id, course_id").in("course_id", ids)) as { id: string; course_id: string }[];
-    const aids = assignments.map((a) => a.id);
-    const subs = aids.length ? (must(await db().from("submissions").select("assignment_id, student_id").in("assignment_id", aids)) as { assignment_id: string; student_id: string }[]) : [];
-    const graded = aids.length ? (must(await db().from("grades").select("assignment_id, student_id").in("assignment_id", aids).not("score", "is", null)) as { assignment_id: string; student_id: string }[]) : [];
-    const gradedKeys = new Set(graded.map((g) => `${g.assignment_id}/${g.student_id}`));
-    const courseOf = new Map(assignments.map((a) => [a.id, a.course_id]));
-    for (const c of courses) {
-      out.push({
-        course: c,
-        students: enrol.filter((e) => e.course_id === c.id).length,
-        needGrading: subs.filter((s) => courseOf.get(s.assignment_id) === c.id && !gradedKeys.has(`${s.assignment_id}/${s.student_id}`)).length,
-      });
-    }
-  }
-  return { teacherCourses: out };
+  const teacherCourses: TeacherCourse[] = await Promise.all(courses.map(async (course) => {
+    const d = await loadTeacherData(course.id);
+    return { course, students: d.students.length, needGrading: needsGrading(d) };
+  }));
+  return { teacherCourses };
 }
 
 function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; upcoming: Row[]; missing: Row[] }) {

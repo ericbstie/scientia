@@ -184,6 +184,11 @@ test.describe("Course layout and people", () => {
     await dialog.getByRole("button", { name: "Remove" }).click();
     await expect(page.getByRole("region", { name: "3 students" })).toBeVisible();
     await expect(page.getByText("Sofia Reyes")).toHaveCount(0);
+    // Her ungraded Lab report 1 leaves every "need grading" count, not only the queue.
+    await page.goto("/");
+    await expect(page.locator(".course-card", { hasText: "BIO101" })).toContainText("1 need grading");
+    await page.goto(bio);
+    await expect(page.getByRole("link", { name: "1 need grading" })).toBeVisible();
 
     await login(page, "sofia");
     await page.goto(bio);

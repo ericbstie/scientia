@@ -171,6 +171,9 @@ export type QueueRow = {
   due: string; submittedAt?: string; submissionId?: string;
 };
 
+/** Submissions waiting for a first grade: the count on the dashboard, the course home and the queue's first tab. */
+export const needsGrading = (d: TeacherData) => buildQueue(d).filter((r) => r.filter === "needs-grading").length;
+
 /** Queue rows per filter, in the order the stories ask for. */
 export function buildQueue(d: TeacherData): QueueRow[] {
   const name = new Map(d.students.map((s) => [s.user_id, s.full_name]));

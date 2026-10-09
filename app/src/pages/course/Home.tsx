@@ -5,6 +5,7 @@ import { fmtDate, studentStatus } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ButtonLink, Due, ErrorNote, Loading, PageHeader, Section, StatusBadge, Empty } from "../../ui";
+import { loadTeacherData, needsGrading } from "./work/shared";
 
 type Asg = { id: string; title: string; due_at: string; allow_late: boolean; published: boolean };
 type Ann = { id: string; title: string; created_at: string; pinned?: boolean };
@@ -99,17 +100,12 @@ function TeacherHome() {
   const base = `/courses/${course.id}`;
   const q = useQuery(async () => {
     const now = new Date().toISOString();
-    const [anns, asgs, subs, grades, people] = await Promise.all([
+    const [anns, asgs, work] = await Promise.all([
       db().from("announcements").select("id, title, created_at").eq("course_id", course.id).order("created_at", { ascending: false }).limit(3),
       db().from("assignments").select("id, title, due_at, allow_late, published").eq("course_id", course.id).gte("due_at", now).order("due_at").limit(3),
-      db().from("submissions").select("assignment_id, student_id, assignments!inner(course_id, published)").eq("assignments.course_id", course.id).eq("assignments.published", true),
-      db().from("grades").select("assignment_id, student_id, assignments!inner(course_id)").eq("assignments.course_id", course.id),
-      db().from("enrollments").select("user_id").eq("course_id", course.id).eq("role", "student"),
+      loadTeacherData(course.id),
     ]);
-    const students = new Set((must(people) as { user_id: string }[]).map((p) => p.user_id));
-    const graded = new Set((must(grades) as { assignment_id: string; student_id: string }[]).map((g) => `${g.assignment_id}/${g.student_id}`));
-    const needs = (must(subs) as { assignment_id: string; student_id: string }[]).filter((s) => students.has(s.student_id) && !graded.has(`${s.assignment_id}/${s.student_id}`)).length;
-    return { anns: must(anns) as Ann[], asgs: must(asgs) as Asg[], needs };
+    return { anns: must(anns) as Ann[], asgs: must(asgs) as Asg[], needs: needsGrading(work) };
   }, [course.id]);
 
   return (
