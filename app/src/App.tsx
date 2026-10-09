@@ -2,6 +2,7 @@
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { BrowserRouter, Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { clearDrafts } from "./lib/draft";
 import { db, isUuid } from "./lib/supabase";
 import { BrandMark, Loading, NoAccess, NotFound, ToastProvider, useTitle } from "./ui";
 import { SignIn } from "./pages/SignIn";
@@ -184,6 +185,7 @@ function AccountMenu({ name }: { name: string }) {
   }, [open]);
 
   async function signOut() {
+    clearDrafts();
     await db().auth.signOut();
     navigate("/sign-in", { replace: true });
   }

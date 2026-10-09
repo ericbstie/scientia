@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
+import { readDraft, writeDraft } from "../../lib/draft";
 import { byLastName, fmtDateTime, lateBy, num, studentStatus, toLocalInput } from "../../lib/format";
 import { db, MAX_UPLOAD_BYTES } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
@@ -261,7 +262,11 @@ function StudentView({ a }: { a: Assignment }) {
 
 function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; userId: string; existing: Submission | null; onCancel?: () => void; onDone: () => void }) {
   const toast = useToast();
-  const [text, setText] = useState(existing?.body ?? "");
+  const submitted = existing?.body ?? "";
+  // A draft left on this device that differs from what was handed in comes back (I-001).
+  const [draft] = useState(() => { const d = readDraft(userId, a.id); return d !== null && d !== submitted ? d : null; });
+  const [restored, setRestored] = useState(draft !== null);
+  const [text, setText] = useState(draft ?? submitted);
   const [file, setFile] = useState<File | null>(null);
   const [textError, setTextError] = useState<string>();
   const [fileError, setFileError] = useState<string>();
@@ -302,6 +307,7 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
         ? await db().from("submissions").update({ body, files }).eq("id", existing.id)
         : await db().from("submissions").insert({ assignment_id: a.id, body, files });
       if (res.error) throw res.error;
+      writeDraft(userId, a.id, "");
       toast("Submitted");
       setFile(null);
       setInputKey((k) => k + 1);
@@ -319,7 +325,10 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
       <ErrorNote error={fail} />
       {Date.now() > new Date(a.due_at).getTime() && <p className="muted">The due date has passed. Your work will be marked late.</p>}
       {a.accepts_text && (
-        <TextArea id="sub-text" label="Your answer" rows={8} value={text} onChange={(e) => setText(e.target.value)} error={textError} />
+        <TextArea
+          id="sub-text" label="Your answer" rows={8} value={text} error={textError} hint={restored ? "Restored your unsent answer." : undefined}
+          onChange={(e) => { setText(e.target.value); setRestored(false); writeDraft(userId, a.id, e.target.value === submitted ? "" : e.target.value); }}
+        />
       )}
       {a.accepts_files && (
         <Field

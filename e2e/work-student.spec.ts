@@ -130,6 +130,45 @@ test.describe("Assignments and submitting", () => {
     await expect(field).toHaveValue("Chlorophyll absorbs light.");
   });
 
+  test("@US-9 a typed answer survives a reload until it is submitted or the student signs out", async ({ page }) => {
+    const field = page.getByRole("textbox", { name: "Your answer" });
+    const hint = page.getByText("Restored your unsent answer.");
+    await signIn(page, "maya");
+    await openAssignment(page, "Photosynthesis worksheet");
+    await field.fill("Chlorophyll absorbs red and blue light.");
+    await page.reload();
+    await expect(field).toHaveValue("Chlorophyll absorbs red and blue light.");
+    await expect(field).toHaveAccessibleDescription("Restored your unsent answer.");
+    await field.fill("Chlorophyll absorbs red and blue light, so leaves look green.");
+    await expect(hint).toHaveCount(0);
+
+    // The draft is Maya's only: another student on this browser starts empty.
+    await signIn(page, "noah");
+    await openAssignment(page, "Photosynthesis worksheet");
+    await expect(field).toHaveValue("");
+    await expect(hint).toHaveCount(0);
+
+    // Submitting forgets it.
+    await signIn(page, "maya");
+    await openAssignment(page, "Photosynthesis worksheet");
+    await expect(field).toHaveValue("Chlorophyll absorbs red and blue light, so leaves look green.");
+    await page.getByRole("button", { name: "Submit" }).click();
+    await expect(assignmentStatus(page)).toContainText("Submitted");
+    await page.reload();
+    await page.getByRole("button", { name: "Edit submission" }).click();
+    await expect(field).toHaveValue("Chlorophyll absorbs red and blue light, so leaves look green.");
+    await expect(hint).toHaveCount(0);
+
+    // Sign out forgets an unsent edit.
+    await field.fill("A change I never sent.");
+    await signOut(page);
+    await signIn(page, "maya");
+    await openAssignment(page, "Photosynthesis worksheet");
+    await page.getByRole("button", { name: "Edit submission" }).click();
+    await expect(field).toHaveValue("Chlorophyll absorbs red and blue light, so leaves look green.");
+    await expect(hint).toHaveCount(0);
+  });
+
   test("@US-10 resubmit while grading has not started", async ({ page }) => {
     await signIn(page, "liam");
     await openAssignment(page, "Photosynthesis worksheet");

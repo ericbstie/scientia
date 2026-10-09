@@ -129,6 +129,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 - Given I open Essay: the 1848 revolutions as Maya, When I attach `sample.pdf` and click Submit, Then the status is "Submitted" and `sample.pdf` is shown as a downloadable link.
 - Given I attach `too-large.bin` (11 MB), When I click Submit, Then I see the error "This file is larger than the 10 MB limit" and nothing is submitted.
 - Given I type "Chlorophyll absorbs light." in Photosynthesis worksheet and the submit request fails (the test aborts it), When the error appears, Then the text field still holds "Chlorophyll absorbs light." and the message says "Your work was not saved. Try again."
+- Given I type an answer in Photosynthesis worksheet and the page reloads before I submit, When it opens again, Then the field holds my text with the hint "Restored your unsent answer.", which goes once I type. The text is kept on this device for me only: another student signing in on the same browser sees an empty box, and it is forgotten when I submit, when I click Sign out, or after 30 days.
 
 ### US-10 Resubmit before grading starts
 
