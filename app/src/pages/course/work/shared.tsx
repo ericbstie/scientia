@@ -13,12 +13,9 @@ export type Submission = { id: string; assignment_id: string; student_id: string
 export type Grade = { assignment_id: string; student_id: string; score: number | null; feedback: string; released: boolean; graded_at: string };
 export type Student = { user_id: string; full_name: string; email: string | null };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normAssignment = (a: any): Assignment => ({ ...a, points: Number(a.points) });
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const normGrade = (g: any): Grade => ({ ...g, score: g.score == null ? null : Number(g.score) });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normSub(s: any): Submission {
   return { ...s, files: Array.isArray(s.files) ? s.files : [] };
 }
@@ -99,7 +96,6 @@ export function FileLinks({ files }: { files: FileRef[] }) {
       if (live && data) setUrls(Object.fromEntries(data.filter((d) => d.signedUrl).map((d) => [d.path ?? "", d.signedUrl as string])));
     });
     return () => { live = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paths]);
   if (!files.length) return null;
   return (
