@@ -9,4 +9,4 @@ description: Run the end-of-milestone retrospective for Scientia, using metrics 
 3. For each brief, note: did the first report meet the acceptance criteria? If not, why: vague brief, wrong model, missing input, or tooling?
 4. Write `docs/retros/m<n>.md` from `docs/process/retro-template.md`.
 5. Apply the changes in the same commit: edit `docs/process/*.md`, `.claude/agents/*.md`, `.claude/skills/**`, `scripts/metrics.ts` or `metrics/targets.json`. At least one change, or a written reason for none.
-6. Commit as `retro(m<n>): <one-line summary>` so `process.retro_changes` can count the touched files.
+6. Commit only the retro and process files, separately from product work, as `retro(m<n>): <one-line summary>` so `process.retro_changes` can count them: `git add docs/retros docs/process .claude scripts/metrics.ts metrics/targets.json && git commit -m "retro(m<n>): …"`. Never `git add -A` here (in M2 that folded the retro into a product commit).
