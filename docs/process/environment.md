@@ -10,6 +10,9 @@ Facts about the machines agents run on that cost time to rediscover.
     the normal names. `scripts/pull-images.sh` does this for every image in
     `docker-compose.yml`.
   - The Docker daemon may need starting: `dockerd > /tmp/dockerd.log 2>&1 &`.
+    After a daemon restart the stacks come back on their own, but PostgREST can start
+    before the database and answer 503 until restarted (`docker restart <project>-rest-1`),
+    and the slot's hot-reload dev server is gone (run `scripts/slot.sh up <n>` again).
 - **Playwright browsers**: if a preinstalled Chromium exists, set
   `PW_CHROMIUM_PATH` to it; otherwise `bunx playwright install chromium`.
 - In the Claude cloud sandbox: `export PW_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`.
