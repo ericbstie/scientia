@@ -19,9 +19,6 @@ const fmt = (d: Date) => {
   return `${p.weekday} ${p.day} ${p.month}${year}, ${p.hour}:${p.minute}`;
 };
 
-/** Local copy: the shared signOut waits for /signin but the route is /sign-in. */
-/** Calls the data API as the signed-in user. */
-/** Reaches a course without the dashboard: looks the id up through the data API. */
 async function openAssignment(page: Page, title: string, code = "BIO101") {
   await openCourse(page, code, "/assignments");
   await page.getByRole("link", { name: title, exact: true }).click();

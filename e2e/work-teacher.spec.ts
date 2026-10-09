@@ -17,7 +17,6 @@ const fmt = (d: Date) => {
 /** Value for a datetime-local input: 23:59 on the UTC date n days after T. */
 const inputAt = (n: number) => dueAt(n).toISOString().slice(0, 16);
 
-/** Local copy: the shared signOut waits for /signin but the route is /sign-in. */
 const row = (page: Page, text: string) => page.getByRole("listitem").filter({ hasText: text });
 const courseNav = (page: Page, name: string) => page.getByRole("navigation", { name: "Course" }).getByRole("link", { name });
 

@@ -24,7 +24,6 @@ test("@US-42 admin creates a course and assigns its teacher", async ({ page }) =
   await expect(row).toContainText(users.ingrid.name);
 });
 
-// Needs the Dashboard, Modules and Assignments slices.
 test("@US-42 the assigned teacher sees the new course", async ({ page, browser }) => {
   await openCourses(page);
   await page.getByRole("button", { name: "New course" }).click();

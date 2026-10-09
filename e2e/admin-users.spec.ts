@@ -94,7 +94,6 @@ test("@US-39 admin corrects the role of an account", async ({ page }) => {
   await expect(page.getByRole("dialog").getByLabel("Teacher").locator("option", { hasText: "Tomas Lind" })).toHaveCount(1);
 });
 
-// Needs the Dashboard slice for the empty-state text.
 test("@US-39 a new user signs in and sees the empty dashboard", async ({ page, browser }) => {
   await openUsers(page);
   await newUser(page, { name: "Eva Lund", email: "eva.lund@scientia.test", role: "student", password: "Start-pass-1" });

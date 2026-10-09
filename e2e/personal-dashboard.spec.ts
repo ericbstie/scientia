@@ -2,7 +2,6 @@
 import { test, expect, reset, signIn, users, PASSWORD } from "./fixtures";
 import type { Page } from "@playwright/test";
 
-// Own sign-in helper: goes straight to /sign-in and waits for the dashboard.
 /** The date "T+Nd 23:59 UTC" for the moment t0, as the stories define it. */
 const dueAt = (t0: number, days: number) => {
   const d = new Date(t0);
