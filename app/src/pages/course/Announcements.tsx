@@ -1,5 +1,115 @@
-import { PageHeader } from "../../ui";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
+import { useCourse } from "../../App";
+import { useAuth } from "../../lib/auth";
+import { fmtDate } from "../../lib/format";
+import { db, must } from "../../lib/supabase";
+import { useQuery } from "../../lib/useQuery";
+import { Badge, Button, ButtonLink, Confirm, Empty, ErrorNote, Loading, PageHeader, useToast } from "../../ui";
+import { splitBody } from "./content/meta";
+import { focusHeading, readAnnouncements, useDocTitle, linkTarget } from "./content/util";
+
+export type AnnouncementRow = { id: string; title: string; body: string; pinned: boolean; created_at: string; author: { full_name: string } | null };
 
 export function Announcements() {
-  return <div className="content"><PageHeader title="Announcements" /></div>;
+  const { course, role } = useCourse();
+  const { profile } = useAuth();
+  const teacher = role === "teacher";
+  const toast = useToast();
+  const navigate = useNavigate();
+  const { hash } = useLocation();
+  const base = `/courses/${course.id}`;
+  useDocTitle("Announcements");
+  const [removing, setRemoving] = useState<AnnouncementRow | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<Error | null>(null);
+  const [reads] = useState(() => readAnnouncements(profile!.id));
+
+  const q = useQuery(async () =>
+    must(
+      await db()
+        .from("announcements")
+        .select("id, title, body, pinned, created_at, author:profiles!author_id(full_name)")
+        .eq("course_id", course.id)
+        .order("pinned", { ascending: false })
+        .order("created_at", { ascending: false }),
+    ) as unknown as AnnouncementRow[],
+  [course.id]);
+
+  // Notifications link to /announcements#<id>: open that announcement.
+  useEffect(() => {
+    const id = hash.replace(/^#/, "");
+    if (id && q.data?.some((a) => a.id === id)) navigate(`${base}/announcements/${id}`, { replace: true });
+  }, [hash, q.data, base, navigate]);
+
+  async function togglePin(a: AnnouncementRow) {
+    setActionError(null);
+    try {
+      must(await db().from("announcements").update({ pinned: !a.pinned }).eq("id", a.id).select("id"));
+      await q.reload();
+    } catch (e) { setActionError(e as Error); }
+  }
+
+  async function remove() {
+    if (!removing) return;
+    setBusy(true);
+    setActionError(null);
+    try {
+      must(await db().from("announcements").delete().eq("id", removing.id).select("id"));
+      setRemoving(null);
+      toast("Announcement deleted");
+      await q.reload();
+      focusHeading();
+    } catch (e) { setActionError(e as Error); setRemoving(null); }
+    setBusy(false);
+  }
+
+  const list = q.data ?? [];
+  return (
+    <div className="content">
+      <PageHeader title="Announcements" actions={teacher && <ButtonLink variant="primary" to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
+      <ErrorNote error={q.error ?? actionError} />
+      {q.loading && !q.data ? <Loading /> : list.length === 0 ? (
+        <Empty title="No announcements yet." action={teacher && <ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
+      ) : (
+        <ul className="list">
+          {list.map((a) => {
+            const { meta } = splitBody(a.body);
+            return (
+              <li key={a.id}>
+                <div className="row">
+                  <div className="row-main">
+                    <Link className="row-title" style={linkTarget} to={`${base}/announcements/${a.id}`}>{a.title}</Link>
+                    <div className="row-meta">
+                      {a.author?.full_name} · <time dateTime={a.created_at}>{fmtDate(a.created_at)}</time>
+                      {a.pinned && <> <Badge tone="accent">Pinned</Badge></>}
+                      {!teacher && !reads.has(a.id) && <> <Badge tone="accent">Unread</Badge></>}
+                      {meta.edited && <> <Badge>Edited</Badge></>}
+                    </div>
+                  </div>
+                  {teacher && (
+                    <div className="row-side actions">
+                      <Button size="small" className="ghost" onClick={() => togglePin(a)}>{a.pinned ? "Unpin" : "Pin"}</Button>
+                      <ButtonLink size="small" variant="ghost" to={`${base}/announcements/${a.id}/edit`}>Edit</ButtonLink>
+                      <Button size="small" variant="danger" className="ghost" onClick={() => setRemoving(a)}>Delete</Button>
+                    </div>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <Confirm
+        open={!!removing}
+        title={`Delete the announcement "${removing?.title ?? ""}"?`}
+        confirmLabel="Delete"
+        onConfirm={remove}
+        onCancel={() => setRemoving(null)}
+        busy={busy}
+      >
+        Students will no longer see it. This cannot be undone.
+      </Confirm>
+    </div>
+  );
 }
