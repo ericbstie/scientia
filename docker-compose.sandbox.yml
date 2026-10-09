@@ -1,0 +1,14 @@
+# Only for sandboxes behind a TLS-inspecting proxy: passes the proxy CA to the image build.
+#   EXTRA_CA_FILE=/path/to/ca.crt docker compose -f docker-compose.yml -f docker-compose.sandbox.yml up --build
+services:
+  migrate:
+    build:
+      context: .
+      secrets: [extra_ca]
+  web:
+    build:
+      context: .
+      secrets: [extra_ca]
+secrets:
+  extra_ca:
+    file: ${EXTRA_CA_FILE:-/root/.ccr/ca-bundle.crt}
