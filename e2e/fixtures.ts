@@ -1,7 +1,8 @@
 // Shared e2e helpers. Every spec imports { test, expect } from here.
 //  - reset(): restores the documented demo data (docs/stories/README.md). Call it
 //    in beforeEach of any spec that changes data.
-//  - signIn(page, who): signs in through the real form (replacing any signed-in user).
+//  - signIn(page, who): signs in (replacing any signed-in user) and opens the dashboard.
+//    It uses the auth API, not the form, which auth.spec.ts covers.
 //  - api(page, path), openCourse(page, code, path), coursePath(page, code): data API
 //    calls and course pages as the signed-in user.
 //  - token(request, who), client(request, who): sign in through the auth API and call
@@ -30,11 +31,11 @@ export function reset() {
 }
 
 export async function signIn(page: Page, who: Who, password = PASSWORD) {
-  if (page.url().startsWith("http")) await page.evaluate(() => localStorage.removeItem("scientia-auth"));
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
+  const { ok, session } = await token(page.request, who, password);
+  expect(ok, `sign in as ${who}`).toBe(true);
+  if (!page.url().startsWith("http")) await page.goto("/config.json");
+  await page.evaluate((s) => localStorage.setItem("scientia-auth", s), JSON.stringify(session));
+  await page.goto("/");
   await expect(page.getByRole("button", { name: /account menu/i })).toBeVisible();
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible();
 }
@@ -79,6 +80,7 @@ export async function token(request: APIRequestContext, who: Who, password = PAS
   const body = res.ok() ? await res.json() : null;
   return {
     ok: res.ok(),
+    session: body,
     anonKey: anonKey as string,
     id: body?.user.id as string,
     headers: { apikey: anonKey, authorization: `Bearer ${body?.access_token}`, prefer: "return=representation" },
