@@ -40,8 +40,8 @@ If the logo is cropped out, these still identify it:
   structure, shadow only on what floats (menus, dialogs, toasts). Dark is the same
   design in the system's dark scheme.
 - Inter with the system's type scale and heading weights.
-- The page header: a "‹ Parent" link above, the title, at most one plain sentence, the
-  actions on the right.
+- The page header: a back link to the parent above (the system's breadcrumb with one
+  link), the title, at most one plain sentence, the actions on the right.
 - Words in status tags, never colour alone, from one shared vocabulary.
 - Dates as `Fri 17 Oct, 23:59` everywhere, scores as `86 / 100`.
 - Buttons that are verbs in sentence case.
@@ -56,7 +56,7 @@ system's CSS and is never edited by hand.
 | Role | Input | Used for |
 | --- | --- | --- |
 | `accent` | our deep blue `#1f4f8a` (becomes `base-default`) | the primary colour, see below |
-| `neutral` | a warm grey, starting from `#55554f`, so surfaces keep the off-white feel | page, panels, text, borders, anything that is not a signal |
+| `neutral` | a warm grey, `#5e5646`; the system lightens its neutral scale, so the page lands on `#f4f3f2`, just off neutral, and that is accepted | page, panels, text, borders, anything that is not a signal |
 | `success`, `warning`, `danger`, `info` | the system's defaults | status tags, alerts, delete actions, only with words |
 | `brand1`, `brand2` | not used | a second or third colour would dilute the one signal |
 
@@ -65,11 +65,19 @@ input in the theme. Do not patch a token.
 
 How the system is used, everywhere:
 
-- Set `data-color="accent"` once on the root so every component inherits the primary
-  colour, `data-color-scheme="auto"` so dark follows the person's device, and
-  `data-size="md"` so there is one size. `sm` only inside rows and table cells.
-  Elements that must differ (`data-color="danger"` on a delete action, a status tag)
-  say so on themselves.
+- Set `data-color="accent"` and `data-color-scheme="auto"` once on the root, so every
+  component inherits the primary colour and dark follows the person's device. Do not set
+  `data-size` on the root: on `<html>` it rescales every `rem` (20 px body text), and
+  `md`, the theme's default, is already the one size. `data-size="sm"` only inside rows
+  and table cells. Elements that must differ (`data-color="danger"` on a delete action,
+  a status tag) say so on themselves.
+- A panel (list, table, form, empty state) is a neutral surface whose content goes back to
+  `data-color="accent"`, so borders and fills stay calm and the links and buttons inside
+  stay blue.
+- Links are the system's `Link`: accent text, underlined. Two system behaviours are kept
+  and not reset: a visited link takes the system's darker colour, and a card whose
+  heading holds a link is a linked card (the whole card opens, the title in the card's
+  text colour, underlined). Course cards are the one place a link is not accent text.
 - Colour comes from `--ds-color-<role>-<group>-<variant>` tokens, or the unprefixed
   `--ds-color-…` ones that follow the nearest `data-color`. Radius, shadow, size, line
   height and font weight come from `--ds-border-radius-*`, `--ds-shadow-*`,
@@ -122,9 +130,8 @@ at on the running app (light, dark, 390 px wide) before a change lands.
    state from their own props. No override of a component's colour, size, radius,
    shadow or type; no `!important`; no selector that reaches into a component's
    internals; no `style` attribute.
-   *Check: `design.inline_styles` 0. To add when the redesign lands: `design.overrides`
-   (`!important` and selectors on a component's own classes or data attributes, target
-   0) and `design.custom_css_lines`, ratcheted down to what is measured then.*
+   *Check: `design.inline_styles`, `design.overrides` and `design.literal_sizes` 0;
+   `design.custom_css_lines` at or under its ceiling, which is ratcheted down.*
 2. **One primary colour, used where you look.** The accent goes where the table above
    says and nowhere else. Status colours appear only in tags, alerts and delete
    actions, always with words.
