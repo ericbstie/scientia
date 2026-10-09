@@ -9,6 +9,9 @@
     "metrics": "bun run scripts/metrics.ts"
   },
   "dependencies": {
+    "@digdir/designsystemet-css": "1.23.0",
+    "@digdir/designsystemet-react": "1.23.0",
+    "@navikt/aksel-icons": "8.19.1",
     "@supabase/auth-js": "^2.117.3",
     "@supabase/postgrest-js": "^2.117.3",
     "@supabase/storage-js": "^2.117.3",
@@ -18,6 +21,8 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@digdir/designsystemet": "1.23.0",
+    "@digdir/designsystemet-types": "1.23.0",
     "@playwright/test": "^1.64.0",
     "@types/bun": "^1.4.2",
     "@types/react": "^19.3.0",

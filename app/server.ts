@@ -118,7 +118,8 @@ const pagePath = `/_page/${crypto.randomUUID()}`;
 
 const server = Bun.serve({
   port: Number(process.env.PORT ?? 3000),
-  development: process.env.NODE_ENV !== "production",
+  // No hot module reload: its bundler breaks on a circular import inside @digdir/designsystemet-react. `bun --hot` still restarts on change.
+  development: process.env.NODE_ENV === "production" ? false : { hmr: false },
   routes: {
     "/healthz": () => withHeaders(new Response("ok")),
     "/config.json": () => withHeaders(Response.json({ anonKey, demo: process.env.SEED_DEMO !== "false" }, { headers: { "cache-control": "no-store" } })),

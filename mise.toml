@@ -41,3 +41,7 @@ run = "bun run scripts/metrics.ts"
 description = "Everything a contributor runs before pushing"
 depends = ["typecheck", "e2e"]
 run = "bun run scripts/metrics.ts"
+
+[tasks.theme]
+description = "Rebuild the Designsystemet theme in app/src/theme from designsystemet.config.json"
+run = "bunx designsystemet tokens create -y && bunx designsystemet tokens build -t .design-tokens -o app/src/theme --clean && rm app/src/theme/colors.d.ts"

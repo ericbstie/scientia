@@ -1,0 +1,7 @@
+/* Cascade order. It sits in its own file because the bundler places imported
+   rules before any other statement in the importing file.
+   reset: element defaults, so Designsystemet components win over them.
+   ds: Designsystemet theme, base and components.
+   app: Scientia layout, beats both. */
+@layer reset, ds, app;
+@layer ds.theme, ds.base, ds.components;

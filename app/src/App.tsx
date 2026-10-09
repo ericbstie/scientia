@@ -4,6 +4,8 @@ import { BrowserRouter, Link, Navigate, NavLink, Outlet, Route, Routes, useLocat
 import { AuthProvider, useAuth } from "./lib/auth";
 import { clearDrafts } from "./lib/draft";
 import { db, isUuid } from "./lib/supabase";
+import { Button, Dropdown, SkipLink, Tag } from "@digdir/designsystemet-react";
+import { BellIcon, ChevronDownIcon } from "@navikt/aksel-icons";
 import { BrandMark, Loading, NoAccess, NotFound, ToastProvider, useTitle } from "./ui";
 import { SignIn } from "./pages/SignIn";
 
@@ -131,7 +133,7 @@ function Shell() {
 
   return (
     <UnreadContext.Provider value={{ unread, refreshUnread }}>
-      <a href="#main" className="skip-link">Skip to main content</a>
+      <SkipLink href="#main">Skip to main content</SkipLink>
       <header className="topbar">
         <div className="topbar-inner">
           <Link to="/" className="brand" aria-label="Scientia, go to dashboard"><BrandMark /><span className="brand-name">Scientia</span></Link>
@@ -146,7 +148,7 @@ function Shell() {
                 <NavLink to="/" end className="nav-link">Dashboard</NavLink>
                 <NavLink to="/calendar" className="nav-link">Calendar</NavLink>
                 <NavLink to="/notifications" className="nav-link bell" aria-label={unread ? `Notifications, ${unread} unread` : "Notifications"}>
-                  <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>Notifications
+                  <BellIcon aria-hidden /><span className="bell-label">Notifications</span>
                   {unread > 0 && <span className="count" aria-hidden="true" data-testid="unread-count">{unread}</span>}
                 </NavLink>
               </>
@@ -166,23 +168,11 @@ function Shell() {
 
 function AccountMenu({ name }: { name: string }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const list = useRef<HTMLUListElement>(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   useEffect(() => setOpen(false), [pathname]);
-  useEffect(() => {
-    if (!open) return;
-    ref.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
-    const close = (e: MouseEvent | KeyboardEvent) => {
-      if (e instanceof KeyboardEvent ? e.key === "Escape" : !ref.current?.contains(e.target as Node)) {
-        setOpen(false);
-        if (e instanceof KeyboardEvent) ref.current?.querySelector<HTMLElement>("button")?.focus();
-      }
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", close);
-    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
-  }, [open]);
+  useEffect(() => { if (open) requestAnimationFrame(() => list.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus()); }, [open]);
 
   async function signOut() {
     clearDrafts();
@@ -191,17 +181,16 @@ function AccountMenu({ name }: { name: string }) {
   }
 
   return (
-    <div className="menu" ref={ref}>
-      <button className="nav-link" aria-haspopup="menu" aria-expanded={open} aria-label={`Account menu for ${name}`} onClick={() => setOpen(!open)}>
-        {name} <span aria-hidden="true">▾</span>
-      </button>
-      {open && (
-        <div className="menu-list" role="menu" aria-label="Account">
-          <Link role="menuitem" to="/settings/profile">Settings</Link>
-          <button role="menuitem" onClick={signOut}>Sign out</button>
-        </div>
-      )}
-    </div>
+    <>
+      {/* The trigger is part of our top bar; the menu is Designsystemet's dropdown, opened through popovertarget. */}
+      <button type="button" className="nav-link account" popoverTarget="account-menu" aria-haspopup="menu" aria-expanded={open} aria-label={`Account menu for ${name}`}><span>{name}</span><ChevronDownIcon aria-hidden /></button>
+      <Dropdown id="account-menu" placement="bottom-end" open={open} onOpen={() => setOpen(true)} onClose={() => setOpen(false)}>
+        <Dropdown.List role="menu" aria-label="Account" ref={list}>
+          <Dropdown.Item role="none"><Dropdown.Button asChild role="menuitem"><Link to="/settings/profile">Settings</Link></Dropdown.Button></Dropdown.Item>
+          <Dropdown.Item role="none"><Dropdown.Button role="menuitem" onClick={signOut}>Sign out</Dropdown.Button></Dropdown.Item>
+        </Dropdown.List>
+      </Dropdown>
+    </>
   );
 }
 
@@ -279,12 +268,12 @@ function CourseLayout() {
         <nav className={`course-nav ${menuOpen ? "open" : ""}`} aria-label="Course">
           <div className="course-nav-head">
             <Link to={base} className="course-nav-title">
-              <span className="nav-course-code">{state.course.code}</span>
+              <Tag data-color="accent" data-size="sm">{state.course.code}</Tag>
               <span>{state.course.title}</span>
             </Link>
-            <button type="button" ref={menuButton} className="btn small course-menu-button" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
+            <Button type="button" ref={menuButton} variant="secondary" className="course-menu" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
               Course pages
-            </button>
+            </Button>
           </div>
           <ul id="course-nav-items">
             {items.map(([label, to]) => (
