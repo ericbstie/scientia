@@ -25,6 +25,9 @@ services:
     volumes:
       - ./supabase/init/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
       - db-data:/var/lib/postgresql/data
+    ports:
+      # Local only: lets `bun run supabase/reset.ts` (e2e) reach the database.
+      - "127.0.0.1:${DB_PORT:-54322}:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
       interval: 3s
@@ -113,6 +116,7 @@ services:
       <<: *secrets
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-scientia-local-db-password}@db:5432/postgres
       AUTH_URL: http://auth:9999
+      STORAGE_URL: http://storage:5000
       SEED_DEMO: ${SEED_DEMO:-true}
 
   web:
@@ -122,6 +126,7 @@ services:
       migrate: { condition: service_completed_successfully }
     environment:
       ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzkxNTA0MDAwLCJleHAiOjIxMDY4NjQwMDB9.2NBkUj6pIlehmICc3ObpZY916qsoIzqcG17aKxiMS8o}
+      SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3OTE1MDQwMDAsImV4cCI6MjEwNjg2NDAwMH0.s0rb0ojBrHRW8_8NpndT3SYhtCuLRit_WIAzuflYCeg}
       AUTH_URL: http://auth:9999
       REST_URL: http://rest:3000
       STORAGE_URL: http://storage:5000

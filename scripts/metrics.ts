@@ -54,7 +54,8 @@ if (report) {
 }
 
 // Accessibility (written by e2e/fixtures.ts)
-const a11y = read(p("e2e/.results/a11y.json"));
+const a11yRaw = read(p("e2e/.results/a11y.jsonl"));
+const a11y = a11yRaw && `[${a11yRaw.trim().split("\n").filter(Boolean).join(",")}]`;
 if (a11y) {
   const scans: { url: string; violations: { id: string; impact: string; nodes: number }[] }[] = JSON.parse(a11y);
   m["a11y.pages_scanned"] = new Set(scans.map((s) => s.url)).size;

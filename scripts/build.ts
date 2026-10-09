@@ -5,3 +5,4 @@ if (!result.success) {
   process.exit(1);
 }
 for (const o of result.outputs) console.log(o.path.replace(process.cwd() + "/", ""), `${(o.size / 1024).toFixed(1)} KB`);
+export {};

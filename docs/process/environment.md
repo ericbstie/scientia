@@ -12,3 +12,7 @@ Facts about the machines agents run on that cost time to rediscover.
   - The Docker daemon may need starting: `dockerd > /tmp/dockerd.log 2>&1 &`.
 - **Playwright browsers**: if a preinstalled Chromium exists, set
   `PW_CHROMIUM_PATH` to it; otherwise `bunx playwright install chromium`.
+- In the Claude cloud sandbox: `export PW_CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`.
+- **Parallel agents**: never share one stack. `scripts/slot.sh up <n>` starts an isolated
+  stack plus a hot-reloading dev server; `eval "$(scripts/slot.sh env <n>)"` then
+  `bunx playwright test <spec>` runs against it. `scripts/slot.sh down <n>` when done.

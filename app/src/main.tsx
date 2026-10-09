@@ -1,2 +1,6 @@
 import { createRoot } from "react-dom/client";
-createRoot(document.getElementById("root")!).render(<h1>Scientia</h1>);
+import { initSupabase } from "./lib/supabase";
+import { App } from "./App";
+
+await initSupabase();
+createRoot(document.getElementById("root")!).render(<App />);
