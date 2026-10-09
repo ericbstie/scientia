@@ -11,7 +11,7 @@
 //    of every passing test the page gets an axe accessibility scan and fails if it
 //    scrolls sideways at phone width. Results feed `mise run metrics`.
 import { test as base, expect, type APIRequestContext, type Page } from "@playwright/test";
-import AxeBuilder from "@axe-core/playwright";
+import axe from "axe-core";
 import { appendFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
@@ -100,16 +100,17 @@ export async function client(request: APIRequestContext, who: Who) {
   return { get: (path: string) => call("GET", path), post: (path: string, data: object) => call("POST", path, data), patch: (path: string, data: object) => call("PATCH", path, data) };
 }
 
+// axe-core runs in the page itself: the app has no frames, so @axe-core/playwright's
+// cross-frame pass (a blank page per scan) only cost time, about 0.4 s a test.
 async function scan(page: Page) {
   if (page.isClosed() || !page.url().startsWith("http")) return;
   await page.waitForLoadState("networkidle").catch(() => {});
-  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
-  const line = {
-    url: page.url(),
-    test: base.info().title,
-    violations: results.violations.map((v) => ({ id: v.id, impact: v.impact ?? "minor", nodes: v.nodes.length, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) })),
-    overflow: await phoneOverflow(page),
-  };
+  await page.evaluate(axe.source);
+  const violations = await page.evaluate(async (tags) => {
+    const { violations } = await (window as unknown as { axe: typeof axe }).axe.run(document, { runOnly: { type: "tag", values: tags }, resultTypes: ["violations"] });
+    return violations.map((v) => ({ id: v.id, impact: v.impact ?? "minor", nodes: v.nodes.length, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) }));
+  }, ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]);
+  const line = { url: page.url(), test: base.info().title, violations, overflow: await phoneOverflow(page) };
   appendFileSync("e2e/.results/a11y.jsonl", JSON.stringify(line) + "\n");
   return line;
 }

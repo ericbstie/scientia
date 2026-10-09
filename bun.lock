@@ -17,13 +17,13 @@
         "react-router": "^7.13.0",
       },
       "devDependencies": {
-        "@axe-core/playwright": "^4.13.0",
         "@digdir/designsystemet": "1.23.0",
         "@digdir/designsystemet-types": "1.23.0",
         "@playwright/test": "^1.64.0",
         "@types/bun": "^1.4.2",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
+        "axe-core": "4.13.0",
         "typescript": "^5.9.0",
       },
     },
@@ -32,8 +32,6 @@
     "@digdir/designsystemet-react@1.23.0": "patches/@digdir%2Fdesignsystemet-react@1.23.0.patch",
   },
   "packages": {
-    "@axe-core/playwright": ["@axe-core/playwright@4.13.0", "", { "dependencies": { "axe-core": "~4.13.0" }, "peerDependencies": { "playwright-core": ">= 1.0.0" } }, "sha512-6YLx+kxXu5GJceG4ozFg+33a2EMTdjYwWGloJ3sb9Kta5pp+ZNS53uxGVog5JetIY8s++P5UrtX+cri+u0VAVg=="],
-
     "@bundled-es-modules/deepmerge": ["@bundled-es-modules/deepmerge@4.3.2", "", { "dependencies": { "deepmerge": "^4.3.1" } }, "sha512-q8doe7ndrY2IolUOFIn0A0++JBX38pMhN7kFhTF4cnjIcILf6X6H2yWczInyv8ZFdR0lrE8088X8XS5efxXz8A=="],
 
     "@bundled-es-modules/glob": ["@bundled-es-modules/glob@13.0.6", "", { "dependencies": { "buffer": "^6.0.3", "events": "^3.3.0", "glob": "^13.0.6", "path": "^0.12.7", "stream": "^0.0.3", "string_decoder": "^1.3.0", "url": "^0.11.4" } }, "sha512-x9nR2e1pt8LF0yLPC6yz/aUoiN7qJJwZ1znLxIXCxGyH+8BI+yO/sklBdn1+QbUyWXQBM+CjfZz3IhqtgIoDVg=="],
