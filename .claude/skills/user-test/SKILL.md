@@ -32,7 +32,7 @@ They must not read, list or search any files. Prompt:
 > unnecessary, odd, or not meant for you, (4) words you expected but did not find.
 
 Scenarios to cover each time: student finds what is due and hands in work;
-student reads feedback and grades; student who has missed work; teacher posts an
+student reads feedback and grades (as Maya, the only demo student with a released grade); student who has missed work; teacher posts an
 announcement and adds material; teacher grades and releases; admin creates an
 account and a course; one scenario with `--phone`.
 

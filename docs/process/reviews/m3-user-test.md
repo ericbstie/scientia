@@ -75,3 +75,12 @@ interface. `copy.leaks` is 0.
 The two retests ran at the same time on one database, so the teacher saw Noah's new
 late submission appear mid-test; the gradebook "inconsistencies" the teacher reported
 came from that, not from the app.
+
+## 5. Retest after admin course management (2026-10-09, `b09e093`)
+
+| Scenario | Before | After |
+| --- | --- | --- |
+| Admin: new teacher, course, enrol a student | Failed | Done: account as teacher, course with that teacher, student added from the course's People page; the student sees the course and the teacher sees the student. One finding: the unknown-email error told the admin to ask an administrator (#25, fixed) |
+
+A retest does not change `ux.blind_tasks_done_pct`; the next full first pass does.
+The feedback scenario must use Maya, the only student with a released grade.
