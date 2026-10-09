@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
@@ -136,6 +137,7 @@ function AddForm({ onClose, onAdded }: { onClose: () => void; onAdded: (who: str
   return (
     <form className="form" onSubmit={submit} noValidate>
       <TextArea id="person-email" label="Email" required rows={3} inputMode="email" value={emails} onChange={(e) => setEmails(e.target.value)} error={error} hint="One address, or several on separate lines. Each person needs an existing Scientia account." />
+      {error?.includes("the Users page") && <p><Link to="/admin/users">Open Users</Link></p>}
       <div className="actions">
         <Button variant="primary" type="submit" disabled={busy}>Add student</Button>
         <Button onClick={onClose}>Cancel</Button>
