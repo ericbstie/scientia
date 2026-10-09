@@ -9,10 +9,10 @@ import { buildQueue, loadTeacherData, type QueueRow } from "./work/shared";
 
 import type { Filter } from "./work/shared";
 const FILTERS: { id: Filter; label: string; empty: string }[] = [
-  { id: "needs-grading", label: "Needs grading", empty: "Nothing needs grading." },
-  { id: "graded", label: "Graded, not released", empty: "No unreleased grades." },
-  { id: "released", label: "Released", empty: "No grades released yet." },
-  { id: "missing", label: "Missing", empty: "No missing work." },
+  { id: "needs-grading", label: "Needs grading", empty: "Nothing needs grading" },
+  { id: "graded", label: "Graded, not released", empty: "No unreleased grades" },
+  { id: "released", label: "Released", empty: "No grades released yet" },
+  { id: "missing", label: "Missing", empty: "No missing work" },
 ];
 
 export function Grading() {

@@ -27,7 +27,7 @@ export function Discussions() {
       <PageHeader title="Discussions" actions={<ButtonLink variant="primary" to={`${base}/discussions/new`}>New thread</ButtonLink>} />
       <ErrorNote error={q.error} />
       {q.loading && !q.data ? <Loading /> : list.length === 0 ? (
-        <Empty title="No threads yet. Start the first one." />
+        <Empty title="No threads yet">Start the first one.</Empty>
       ) : (
         <ul className="list">
           {list.map((t) => {

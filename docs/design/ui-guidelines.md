@@ -10,6 +10,15 @@ Rules for M3 implementers. Screens and routes are in `ia.md`. Use the tokens in 
 - Every page starts with `PageHeader`: optional eyebrow (a "‹ Parent" back link, never the course code, which the course navigation already shows), one h1, optional subtitle, actions on the right. One h1 per page, h2 for sections, no skipped levels.
 - Breakpoint is 820 px. Content stays one column below it.
 
+## Brand
+
+One accent colour on warm neutral surfaces, one typeface, one mark. Nothing else carries the identity.
+
+- Name and mark: "Scientia" with the S mark (`BrandMark`) in the top bar and on the sign-in card. The mark is the accent colour with the on-accent colour for the letter, so it follows light and dark.
+- Colour: the accent (`--accent`, deep blue in light, pale blue in dark) is for the one primary action, links, the current page and the unread count. Status colours (success, warning, danger) appear only in badges, alerts and delete actions, and always with words.
+- Typeface: Inter at the five sizes in the type scale. Headings are semi-bold, never larger than `--fs-xl`.
+- Tone: plain and direct (see Writing). No exclamation marks, emoji, illustrations or decorative motion anywhere.
+
 ## Tokens
 
 `app/src/styles.css` is the only place a colour, size, radius or shadow is defined. Components and pages use the tokens and nothing else.

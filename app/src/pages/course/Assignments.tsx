@@ -25,7 +25,7 @@ export function Assignments() {
         data.assignments.length === 0 ? (
           role === "teacher"
             ? <Empty title="No assignments yet" action={newButton}>Students see an assignment as soon as you publish it.</Empty>
-            : <Empty title="No assignments yet.">Your teacher's assignments appear here when they are published.</Empty>
+            : <Empty title="No assignments yet">Your teacher's assignments appear here when they are published.</Empty>
         ) : (
           <ul className="list">
             {data.assignments.map((a) => {

@@ -72,7 +72,7 @@ function StudentHome() {
           )}
           <Section title="Next due">
             {q.data.next.length === 0 ? (
-              <Empty title="Nothing due in this course." />
+              <Empty title="Nothing due in this course" />
             ) : (
               <ul className="list">
                 {q.data.next.map((a) => (
@@ -114,7 +114,7 @@ function TeacherHome() {
       <ErrorNote error={q.error} />
       {q.loading && !q.data ? <Loading /> : q.data && (
         <>
-          <ul className="list section">
+          <ul className="list spaced">
             <li>
               <div className="row">
                 <div className="row-main">
@@ -126,7 +126,7 @@ function TeacherHome() {
           </ul>
           <Section title="Announcements" action={<ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>}>
             {q.data.anns.length === 0 ? (
-              <Empty title="No announcements yet.">Post one to tell your students what is happening.</Empty>
+              <Empty title="No announcements yet">Post one to tell your students what is happening.</Empty>
             ) : (
               <ul className="list">
                 {q.data.anns.map((a) => (
@@ -144,7 +144,7 @@ function TeacherHome() {
           </Section>
           <Section title="Assignments" action={<ButtonLink to={`${base}/assignments/new`}>New assignment</ButtonLink>}>
             {q.data.asgs.length === 0 ? (
-              <Empty title="Nothing due in this course." />
+              <Empty title="Nothing due in this course" />
             ) : (
               <ul className="list">
                 {q.data.asgs.map((a) => (

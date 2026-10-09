@@ -74,7 +74,7 @@ export function Announcements() {
       <PageHeader title="Announcements" actions={teacher && <ButtonLink variant="primary" to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
       <ErrorNote error={q.error ?? actionError} />
       {q.loading && !q.data ? <Loading /> : list.length === 0 ? (
-        <Empty title="No announcements yet." action={teacher && <ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
+        <Empty title="No announcements yet" action={teacher && <ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
       ) : (
         <ul className="list">
           {list.map((a) => {

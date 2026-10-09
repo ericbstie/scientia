@@ -51,7 +51,7 @@ test.describe("Notification list", () => {
     await signIn(page, "liam");
     await expect(page.getByTestId("unread-count")).toHaveCount(0);
     await bell(page).click();
-    await expect(page.getByText("You have no notifications.")).toBeVisible();
+    await expect(page.getByText("No notifications")).toBeVisible();
     await expect(page.getByRole("button", { name: "Mark all as read" })).toHaveCount(0);
   });
 });

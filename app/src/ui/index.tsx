@@ -128,14 +128,14 @@ export const focusHeading = () => requestAnimationFrame(() => document.querySele
 const describedBy = (id: string, hint?: string, error?: string) =>
   [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(" ") || undefined;
 
-type FieldBase = { label: string; hint?: string; error?: string };
+type FieldBase = { label: string; hint?: string; error?: string; optional?: boolean };
 // React 19: `ref` is a regular prop on function components.
 type WithRef<T> = { ref?: Ref<T> };
 
-/** Label with a visible "Required" marker beside it; the control itself carries the required state for assistive tech. */
-function FieldLabel({ id, label, required }: { id: string; label: string; required?: boolean }) {
-  if (!required) return <label htmlFor={id}>{label}</label>;
-  return <div className="label-row"><label htmlFor={id}>{label}</label><span className="req" aria-hidden="true">Required</span></div>;
+/** Fields are required unless marked "Optional" beside the label; `required` on the control carries the state for assistive tech. */
+function FieldLabel({ id, label, optional }: { id: string; label: string; optional?: boolean }) {
+  if (!optional) return <label htmlFor={id}>{label}</label>;
+  return <div className="label-row"><label htmlFor={id}>{label}</label><span className="opt">Optional</span></div>;
 }
 function FieldNotes({ id, hint, error }: { id: string; hint?: string; error?: string }) {
   return (
@@ -146,36 +146,36 @@ function FieldNotes({ id, hint, error }: { id: string; hint?: string; error?: st
   );
 }
 
-export function Field({ label, hint, error, id, ...rest }: FieldBase & WithRef<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>) {
+export function Field({ label, hint, error, optional, id, ...rest }: FieldBase & WithRef<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
     <div className="field">
-      <FieldLabel id={fid} label={label} required={rest.required} />
+      <FieldLabel id={fid} label={label} optional={optional} />
       <input id={fid} className="input" aria-describedby={describedBy(fid, hint, error)} aria-invalid={!!error || undefined} {...rest} />
       <FieldNotes id={fid} hint={hint} error={error} />
     </div>
   );
 }
 
-export function TextArea({ label, hint, error, id, ...rest }: FieldBase & WithRef<HTMLTextAreaElement> & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function TextArea({ label, hint, error, optional, id, ...rest }: FieldBase & WithRef<HTMLTextAreaElement> & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
     <div className="field">
-      <FieldLabel id={fid} label={label} required={rest.required} />
+      <FieldLabel id={fid} label={label} optional={optional} />
       <textarea id={fid} className="textarea" aria-describedby={describedBy(fid, hint, error)} aria-invalid={!!error || undefined} {...rest} />
       <FieldNotes id={fid} hint={hint} error={error} />
     </div>
   );
 }
 
-export function Select({ label, hint, error, id, children, ...rest }: FieldBase & WithRef<HTMLSelectElement> & SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({ label, hint, error, optional, id, children, ...rest }: FieldBase & WithRef<HTMLSelectElement> & SelectHTMLAttributes<HTMLSelectElement>) {
   const auto = useId();
   const fid = id ?? auto;
   return (
     <div className="field">
-      <FieldLabel id={fid} label={label} required={rest.required} />
+      <FieldLabel id={fid} label={label} optional={optional} />
       <select id={fid} className="select" aria-describedby={describedBy(fid, hint, error)} aria-invalid={!!error || undefined} {...rest}>{children}</select>
       <FieldNotes id={fid} hint={hint} error={error} />
     </div>

@@ -56,7 +56,7 @@ test("@US-38 admin lands on the Users table with seven accounts and can search a
   await expect(userRows(page).first()).toContainText("Dr. Ingrid Solberg");
 
   await page.getByLabel("Search").fill("zzzz");
-  await expect(page.getByText("No users match your search.")).toBeVisible();
+  await expect(page.getByText("No users match your search")).toBeVisible();
 });
 
 test("@US-39 admin creates a user", async ({ page }) => {
@@ -100,7 +100,7 @@ test("@US-39 a new user signs in and sees the empty dashboard", async ({ page, b
   await expect(rowOf(page, "Eva Lund")).toBeVisible();
   const { p, ctx } = await tryLogin(browser, "eva.lund@scientia.test", "Start-pass-1");
   await expect(p.getByRole("banner")).toContainText("Eva Lund");
-  await expect(p.getByText("You are not enrolled in any course yet.")).toBeVisible();
+  await expect(p.getByText("No courses yet")).toBeVisible();
   await expect(p.locator(".course-card")).toHaveCount(0);
   await ctx.close();
 });

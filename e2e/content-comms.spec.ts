@@ -222,6 +222,6 @@ test.describe("Discussions", () => {
     await dialog.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Discussions");
     await expect(page.getByText("Question about the lab report")).toHaveCount(0);
-    await expect(page.getByText("No threads yet. Start the first one.")).toBeVisible();
+    await expect(page.getByText("No threads yet")).toBeVisible();
   });
 });

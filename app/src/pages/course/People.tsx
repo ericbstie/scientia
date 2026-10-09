@@ -44,7 +44,7 @@ export function People() {
       {q.loading && !q.data ? <Loading /> : (
         <>
           <Section title="Teachers">
-            {teachers.length === 0 ? <Empty title="No teachers yet." /> : <ul className="list">
+            {teachers.length === 0 ? <Empty title="No teachers yet" /> : <ul className="list">
               {teachers.map((p) => (
                 <li key={p.user_id}>
                   <div className="row">
@@ -61,7 +61,7 @@ export function People() {
           </Section>
           <Section title={`${students.length} ${students.length === 1 ? "student" : "students"}`}>
             {students.length === 0 ? (
-              <Empty title="No students yet." action={teacher && <Button onClick={() => setAdding(true)}>Add student</Button>} />
+              <Empty title="No students yet" action={teacher && <Button onClick={() => setAdding(true)}>Add student</Button>} />
             ) : (
               <ul className="list">
                 {students.map((p) => (

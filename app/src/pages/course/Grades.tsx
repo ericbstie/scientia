@@ -29,7 +29,7 @@ export function Grades() {
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && (
         data.assignments.length === 0 ? (
-          <Empty title="No assignments yet, so there are no grades." />
+          <Empty title="No grades yet">Grades appear here once your teacher publishes assignments.</Empty>
         ) : (
           <>
             <p><strong>{total}</strong></p>
@@ -48,7 +48,7 @@ export function Grades() {
                     const score = released ? `${num(g!.score)} / ${num(a.points)}` : sub ? "Awaiting grade" : pastDue ? "Missing" : "Not submitted";
                     return (
                       <tr key={a.id}>
-                        <th scope="row"><Link to={`${base}/assignments/${a.id}`}>{a.title}</Link><div className="row-meta">Due {fmtDateTime(a.due_at)}</div>{released && g!.feedback && <div className="row-meta wrap">Feedback: {g!.feedback}</div>}</th>
+                        <th scope="row"><Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link><div className="row-meta">Due {fmtDateTime(a.due_at)}</div>{released && g!.feedback && <div className="row-meta wrap">Feedback: {g!.feedback}</div>}</th>
                         <td><StatusBadge status={studentStatus(a, sub?.submitted_at, released)} /></td>
                         <td className="num">{score}</td>
                       </tr>

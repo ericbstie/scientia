@@ -47,6 +47,7 @@
   --radius-pill: 999px;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 1px 1px rgb(0 0 0 / 0.03);
   --shadow-pop: 0 12px 32px rgb(0 0 0 / 0.14);
+  --scrim: rgb(0 0 0 / 0.35);
 
   /* Sizes */
   --control: 40px;      /* buttons, inputs, nav links */
@@ -128,7 +129,7 @@ dd { margin: 0; }
 .brand:hover { color: var(--text); }
 .brand-mark { width: 28px; height: 28px; flex: none; }
 .topnav { display: flex; align-items: center; gap: 2px; flex: 1; }
-.topnav-end { display: flex; align-items: center; gap: var(--s1); margin-left: auto; }
+.topnav .bell { margin-left: auto; }
 .nav-link { display: inline-flex; align-items: center; gap: var(--s2); padding: 0 var(--s3); border-radius: var(--radius-sm); color: var(--text-2); text-decoration: none; background: none; border: 0; cursor: pointer; min-height: var(--control); }
 .nav-link:hover { background: var(--surface-2); color: var(--text); }
 .nav-link[aria-current="page"], .nav-link.active { color: var(--text); background: var(--surface-2); font-weight: 550; }
@@ -145,18 +146,16 @@ dd { margin: 0; }
 @media (max-width: 820px) {
   .topbar-inner { padding: var(--s2) var(--s3); flex-wrap: wrap; row-gap: 0; }
   .brand { margin-right: auto; }
-  .brand-name { display: none; }
-  .topnav { flex: none; }
-  .nav-label { display: none; }
-  .topnav-end { gap: 0; }
+  .menu { order: 1; }
+  .topnav { order: 2; flex: 1 0 100%; margin: 0 calc(-1 * var(--s2)); }
   .main { padding: var(--s5) var(--s4) var(--s7); }
   .row { flex-wrap: wrap; }
   .row-side { justify-content: flex-start; text-align: left; }
 }
 
-/* Required marker, text not colour */
+/* Optional marker beside a label; unmarked fields are required */
 .label-row { display: flex; align-items: baseline; gap: var(--s2); }
-.req { font-size: var(--fs-sm); color: var(--text-2); }
+.opt { font-size: var(--fs-sm); color: var(--text-3); }
 
 /* Programmatic focus on the page heading shows no ring for mouse users; keyboard users keep it. */
 h1:focus:not(:focus-visible) { outline: none; }
@@ -172,8 +171,6 @@ h1:focus:not(:focus-visible) { outline: none; }
 .course-main .content { margin: 0; }
 .course-nav-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
 .btn.course-menu-button { display: none; }
-.mobile-only { display: none; }
-.initials { font-weight: 600; font-size: var(--fs-sm); }
 @media (max-width: 820px) {
   .course-layout { grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
   .course-nav { position: static; border-bottom: 1px solid var(--border); padding-bottom: var(--s3); }
@@ -181,8 +178,6 @@ h1:focus:not(:focus-visible) { outline: none; }
   .btn.course-menu-button { display: inline-flex; }
   .course-nav ul { display: none; margin-top: var(--s3); }
   .course-nav.open ul { display: flex; }
-  .mobile-only { display: inline; }
-  .topnav .nav-link { padding: 0 var(--s2); }
 }
 
 /* Page header */
@@ -227,6 +222,7 @@ h1:focus:not(:focus-visible) { outline: none; }
 .list > li { border-top: 1px solid var(--border); }
 .list > li:first-child { border-top: 0; }
 .row { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); min-height: 56px; }
+.list.spaced { margin-bottom: var(--s6); }
 .row.top { align-items: flex-start; }
 .row-main { flex: 1 1 12rem; min-width: 0; }
 .row-title { min-height: 24px; line-height: 24px; font-weight: 550; color: var(--text); text-decoration: none; display: block; overflow: hidden; text-overflow: ellipsis; }
@@ -272,10 +268,11 @@ th .row-meta { font-weight: 400; }
 .field label, .label { font-weight: 550; font-size: var(--fs-sm); }
 .field .hint { color: var(--text-3); font-size: var(--fs-sm); }
 .input, .select, .textarea {
-  width: 100%; min-height: var(--control); padding: var(--s2) var(--s3);
+  width: 100%; min-height: var(--control); padding: var(--s2) var(--s3); line-height: 1.25;
   background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
 }
 .textarea { min-height: 120px; resize: vertical; line-height: 1.5; }
+.input[aria-invalid="true"], .select[aria-invalid="true"], .textarea[aria-invalid="true"] { border-color: var(--danger); }
 .input:focus, .select:focus, .textarea:focus { outline: 2px solid var(--focus); outline-offset: 0; border-color: var(--focus); }
 .check { display: flex; align-items: center; gap: var(--s2); }
 .check input { width: 18px; height: 18px; accent-color: var(--accent); }
@@ -330,7 +327,7 @@ td > a.fill { display: block; margin: calc(-1 * var(--s2)) calc(-1 * var(--s3));
 
 /* Dialog */
 dialog { border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s5); width: min(560px, calc(100vw - 32px)); background: var(--surface); color: var(--text); box-shadow: var(--shadow-pop); }
-dialog::backdrop { background: rgb(0 0 0 / 0.35); }
+dialog::backdrop { background: var(--scrim); }
 .dialog-body { margin-bottom: var(--s4); }
 
 /* Toast */

@@ -60,7 +60,7 @@ export function AnnouncementForm() {
       <form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail ?? q.error} />
         <Field id="announcement-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />
-        <TextArea label="Message" hint={editing ? undefined : "Students in the course are notified when you post."} value={message} onChange={(e) => setMessage(e.target.value)} rows={8} />
+        <TextArea label="Message" optional hint={editing ? undefined : "Students in the course are notified when you post."} value={message} onChange={(e) => setMessage(e.target.value)} rows={8} />
         <div className="actions">
           <Button variant="primary" type="submit" disabled={busy}>{editing ? "Save" : "Post"}</Button>
           <ButtonLink to={`${base}/announcements`}>Cancel</ButtonLink>

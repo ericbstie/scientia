@@ -112,7 +112,7 @@ export function Calendar() {
               </ul>
             )}
           </div>
-          {data && count === 0 && <Empty title="Nothing due">Nothing is due this month.</Empty>}
+          {data && count === 0 && <Empty title="Nothing due this month" />}
         </>
       )}
     </div>

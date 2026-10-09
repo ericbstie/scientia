@@ -89,7 +89,7 @@ export function AssignmentForm() {
       <ErrorNote error={saveError} />
       <form className="form" ref={formRef} onSubmit={(e) => save(e, editing ? null : true)} noValidate>
         <Field id="a-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} autoComplete="off" />
-        <TextArea id="a-instructions" label="Instructions" rows={6} value={description} onChange={(e) => setDescription(e.target.value)} />
+        <TextArea id="a-instructions" label="Instructions" optional rows={6} value={description} onChange={(e) => setDescription(e.target.value)} />
         <div className="field-row">
           <Field id="a-due" label="Due date and time" required type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} />
           <Field id="a-points" label="Points" required type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />

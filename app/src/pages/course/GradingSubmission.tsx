@@ -104,7 +104,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
             id="g-score" label="Score" required type="number" step="any" inputMode="decimal" hint={`out of ${num(assignment.points)}`}
             value={score ?? ""} onChange={(e) => setScore(e.target.value)} error={scoreError}
           />
-          <TextArea id="g-feedback" label="Feedback" rows={6} value={feedback ?? ""} onChange={(e) => setFeedback(e.target.value)} />
+          <TextArea id="g-feedback" label="Feedback" optional rows={6} value={feedback ?? ""} onChange={(e) => setFeedback(e.target.value)} />
           <div className="actions">
             <Button type="submit" variant="primary" disabled={busy}>{saved.released ? "Save changes" : "Save"}</Button>
             <Button disabled={!nextId} onClick={() => nextId && guard.go(`${base}/grading/${nextId}`)}>Next to grade</Button>

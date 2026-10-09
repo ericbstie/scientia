@@ -36,7 +36,7 @@ export function ThreadNew() {
       <form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail} />
         <Field id="thread-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />
-        <TextArea label="Message" value={message} onChange={(e) => setMessage(e.target.value)} rows={8} />
+        <TextArea label="Message" optional value={message} onChange={(e) => setMessage(e.target.value)} rows={8} />
         <div className="actions">
           <Button variant="primary" type="submit" disabled={busy}>Post</Button>
           <ButtonLink to={`${base}/discussions`}>Cancel</ButtonLink>

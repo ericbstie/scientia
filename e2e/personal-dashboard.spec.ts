@@ -177,7 +177,7 @@ test.describe("Calendar", () => {
     await signIn(page, "maya");
     await page.goto("/calendar");
     for (let i = 0; i < 6; i++) await page.getByRole("button", { name: "Previous month" }).click();
-    await expect(page.getByText("Nothing is due this month.")).toBeVisible();
+    await expect(page.getByText("Nothing due this month")).toBeVisible();
   });
 });
 

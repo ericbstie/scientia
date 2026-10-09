@@ -74,7 +74,7 @@ export function AdminUsers() {
         </Select>
       </div>
       {loading && !data ? <Loading /> : rows.length === 0 ? (
-        <Empty title="No users match your search." />
+        <Empty title="No users match your search" />
       ) : (
         <div className="table-wrap">
           <table>

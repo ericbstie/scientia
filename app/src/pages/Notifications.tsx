@@ -51,7 +51,7 @@ export function Notifications() {
       <ErrorNote error={error ?? failure} />
       <div>
         {loading && !data ? <Loading /> : data && data.length === 0 ? (
-          <Empty title="No notifications">You have no notifications.</Empty>
+          <Empty title="No notifications">New announcements, grades and replies appear here.</Empty>
         ) : (
           data && (
             <ul className="list">

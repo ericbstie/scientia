@@ -53,7 +53,7 @@ async function loadTeacher(uid: string) {
 
 function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; upcoming: Row[]; missing: Row[] }) {
   if (!courses.length)
-    return <Empty title="No courses yet">You are not enrolled in any course yet. Your teacher can add you by email, or ask an administrator.</Empty>;
+    return <Empty title="No courses yet">Your teacher can add you to a course. If you expect to see one, ask an administrator.</Empty>;
   return (
     <>
       <Section title="Upcoming">
@@ -70,7 +70,7 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
             ))}
           </ul>
         ) : (
-          <Empty title="Nothing due">Nothing due. New assignments appear here when your teacher publishes them.</Empty>
+          <Empty title="Nothing due">New assignments appear here when your teacher publishes them.</Empty>
         )}
       </Section>
       <Section title="Missing">
@@ -122,7 +122,7 @@ function TeacherView({ courses }: { courses: TeacherCourse[] }) {
           ))}
         </div>
       ) : (
-        <Empty title="No courses yet">You don't teach any course yet. An administrator creates courses and assigns teachers.</Empty>
+        <Empty title="No courses yet">An administrator creates courses and assigns teachers.</Empty>
       )}
     </Section>
   );

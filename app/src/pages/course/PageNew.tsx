@@ -69,7 +69,7 @@ export function PageNew() {
             <Button size="small" onClick={bullets}>Bulleted list</Button>
           </div>
         </div>
-        <TextArea id="page-body" label="Body" value={body} onChange={(e) => setBody(e.target.value)} hint="Bold text goes between ** **. Start a line with - for a bulleted list." rows={10} />
+        <TextArea id="page-body" label="Body" optional value={body} onChange={(e) => setBody(e.target.value)} hint="Bold text goes between ** **. Start a line with - for a bulleted list." rows={10} />
         <div className="actions">
           <Button variant="primary" type="submit" disabled={busy}>Save page</Button>
           <ButtonLink to={`${base}/modules`}>Cancel</ButtonLink>
