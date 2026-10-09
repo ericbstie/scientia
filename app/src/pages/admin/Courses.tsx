@@ -29,17 +29,17 @@ export function AdminCourses() {
         <Empty title="No courses yet" action={newButton}>Create a course and choose its teacher.</Empty>
       ) : data && (
         <div className="table-wrap">
-          <table>
+          <table className="stack-rows">
             <caption className="visually-hidden">Courses</caption>
             <thead><tr><th scope="col">Code</th><th scope="col">Title</th><th scope="col">Teacher</th><th scope="col" className="num">Students</th><th scope="col">Actions</th></tr></thead>
             <tbody>
               {data.courses.map((c) => (
                 <tr key={c.id}>
                   <th scope="row">{c.code}</th>
-                  <td>{c.title}</td>
-                  <td>{c.enrollments.filter((e) => e.role === "teacher").map((e) => e.profiles?.full_name).filter(Boolean).join(", ")}</td>
-                  <td className="num">{c.enrollments.filter((e) => e.role === "student").length}</td>
-                  <td>
+                  <td data-label="Title">{c.title}</td>
+                  <td data-label="Teacher">{c.enrollments.filter((e) => e.role === "teacher").map((e) => e.profiles?.full_name).filter(Boolean).join(", ")}</td>
+                  <td className="num" data-label="Students">{c.enrollments.filter((e) => e.role === "student").length}</td>
+                  <td data-label="Actions">
                     <div className="actions">
                       <Button size="small" variant="ghost" aria-label={`Edit ${c.code}`} onClick={() => setEditing(c)}>Edit</Button>
                       <ButtonLink size="small" variant="ghost" to={`/courses/${c.id}/people`} aria-label={`People in ${c.code}`}>People</ButtonLink>
@@ -128,7 +128,7 @@ function CourseForm({ course, teachers, codes, onCancel, onDone }: { course?: Co
       <Field id="nc-code" label="Code" required value={code} error={errors.code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
       <Field id="nc-title" label="Title" required value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} autoComplete="off" />
       <Select id="nc-teacher" label="Teacher" required value={teacher} onChange={(e) => setTeacher(e.target.value)} error={errors.teacher} hint={noTeachers ? "No teachers yet. Add a teacher on the Users page first." : "Only accounts with the teacher role are listed."}>
-        <option value="">Select a teacher</option>
+        <option value="">Choose a teacher</option>
         {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}
       </Select>
       <div className="actions">

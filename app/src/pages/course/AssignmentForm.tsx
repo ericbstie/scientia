@@ -1,19 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
+import { fmtDateTime, toLocalInput } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Button, Checkbox, ErrorNote, ErrorSummary, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
-import { toLocalInput } from "../../lib/format";
 import { loadAssignment } from "./work/shared";
 
 type Errors = { title?: string; due?: string; points?: string; accepts?: string };
-
-function defaultDue() {
-  const d = new Date(Date.now() + 7 * 86400000);
-  d.setHours(23, 59, 0, 0);
-  return toLocalInput(d);
-}
 
 export function AssignmentForm() {
   const { course } = useCourse();
@@ -28,7 +22,7 @@ export function AssignmentForm() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [due, setDue] = useState(defaultDue);
+  const [due, setDue] = useState("");
   const [points, setPoints] = useState("100");
   const [files, setFiles] = useState(true);
   const [text, setText] = useState(true);
@@ -49,7 +43,7 @@ export function AssignmentForm() {
     e?.preventDefault();
     const errs: Errors = {};
     if (!title.trim()) errs.title = "Enter a title";
-    if (!due || isNaN(new Date(due).getTime())) errs.due = "Enter a due date and time";
+    if (!due || isNaN(new Date(due).getTime())) errs.due = "Choose a due date and time";
     if (!(Number(points) > 0)) errs.points = "Enter points greater than 0";
     if (!files && !text) errs.accepts = "Choose at least one way to submit";
     setErrors(errs);
@@ -91,7 +85,7 @@ export function AssignmentForm() {
         <Field id="a-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} autoComplete="off" />
         <TextArea id="a-instructions" label="Instructions" optional rows={6} value={description} onChange={(e) => setDescription(e.target.value)} />
         <div className="field-row">
-          <Field id="a-due" label="Due date and time" required type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} />
+          <Field id="a-due" label="Due date and time" required type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} hint={due && !isNaN(new Date(due).getTime()) ? `Students see ${fmtDateTime(new Date(due))}` : undefined} />
           <Field id="a-points" label="Points" required type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />
         </div>
         <fieldset id="a-accepts" className="choices" aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>

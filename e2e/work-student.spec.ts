@@ -211,7 +211,7 @@ test.describe("Grades and feedback", () => {
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet/ })).toContainText("Not submitted");
     await expect(page.getByRole("row", { name: /Field journal/ })).toContainText("Not submitted");
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet|Field journal/ }).first()).not.toContainText(/(^|\s)0(\s|$)/);
-    await expect(page.getByText("87.3% (96 of 110 points graded so far)")).toBeVisible();
+    await expect(page.getByText("Graded so far: 96 of 110 points (87.3%)")).toBeVisible();
   });
 
   test("@US-12 grades that are not released stay hidden", async ({ page }) => {
@@ -221,7 +221,7 @@ test.describe("Grades and feedback", () => {
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet/ })).toContainText("Awaiting grade");
     await expect(page.getByRole("row", { name: /Safety acknowledgement/ })).toContainText("Missing");
     await expect(page.getByText("72")).toHaveCount(0);
-    await expect(page.getByText("Total: none yet. Your total appears when your teacher releases a grade.")).toBeVisible();
+    await expect(page.getByText("Nothing graded yet. Grades appear here when your teacher releases them.")).toBeVisible();
   });
 
   test("@US-13 student reads score, feedback and own work", async ({ page }) => {

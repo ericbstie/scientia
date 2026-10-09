@@ -32,7 +32,7 @@ One accent colour on warm neutral surfaces, one typeface, one mark. Nothing else
 
 - **List rows** (`.list` with `.row`) for anything a person scans and opens: assignments, announcements, notifications, threads, queue entries, module items, roster, Upcoming and Missing. Title as the link (`.row-title`), meta line under it, status badge and date on the right.
 - **Cards** (`.card`, `.course-card`) only for course tiles on the dashboard and for single panels that hold a form or a submission. Never a grid of cards for assignments or announcements. Never a card inside a card.
-- **Tables** (`.table-wrap` plus `table`) only when the reader compares across two dimensions or many columns: Gradebook, student Grades, Admin Users and Courses, the Calendar month grid. Numbers right-aligned (`td.num`), `th scope`, first column sticky when the table scrolls.
+- **Tables** (`.table-wrap` plus `table`) only when the reader compares across two dimensions or many columns: Gradebook, student Grades, Admin Users and Courses, the Calendar month grid. Numbers right-aligned (`td.num`), `th scope`, first column sticky when the table scrolls, a soft shadow on the side that still has content. On phones a table whose columns are all needed turns into stacked rows (`table.stack-rows`, each `td` has a `data-label`); a matrix such as the Gradebook scrolls sideways instead.
 
 ## Buttons and actions
 
@@ -40,7 +40,7 @@ One accent colour on warm neutral surfaces, one typeface, one mark. Nothing else
 - Everything else is the default (secondary) button; low-value row actions (Pin, Edit, Remove) are `ghost` and `small`. Delete actions use `danger` text colour and a confirmation.
 - Buttons are verbs in sentence case: "Submit", "Add student". Not "OK", "Yes", "Click here".
 - Navigation is a link (`ButtonLink` when it needs button styling); an action that changes data is a `Button`. A disabled button always shows the reason beside it in text.
-- Forms: labels above fields, hints under, errors under. The submit button is at the bottom left, Cancel next to it. Enter submits.
+- Forms: labels above fields, hints under, errors under. Every field is required unless its label says "Optional" beside it; "Required" is never printed. The submit button is at the bottom left, Cancel next to it. Enter submits. Forms use `noValidate` and the app's own errors, never the browser's bubbles. Dates and prices are never pre-filled with a guess the person did not see.
 
 ## Status vocabulary
 
@@ -72,7 +72,7 @@ Status badges use exactly these words and no others. Colour only reinforces the 
 - Confirm in a `Dialog` before: delete (announcement, module item, thread, post), remove a student, deactivate a user, withdraw a release, release all.
 - Title is a question naming the object ("Delete the announcement 'Field trip'?"). Body says what will happen to others ("Students will no longer see it. This cannot be undone."). Buttons: Cancel (focused) and a verb ("Delete", "Remove"), never "OK". Release all states the count.
 - Not confirmed: publish, unpublish, pin, save, submit (these are reversible or non-destructive).
-- A completed action shows a short toast ("Saved", "Announcement posted"). Toasts confirm; they never carry errors or the only copy of important information.
+- A completed action shows a short toast ("Saved", "Announcement posted"). Toasts confirm; they never carry errors or the only copy of important information. They sit at the top centre, never over a control, and do not take clicks.
 
 ## Errors
 

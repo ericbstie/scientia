@@ -15,6 +15,7 @@ export function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [missing, setMissing] = useState<{ email?: string; password?: string }>({});
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -23,8 +24,11 @@ export function SignIn() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    setBusy(true);
     setError(null);
+    const need = { email: email.trim() ? undefined : "Enter your email", password: password ? undefined : "Enter your password" };
+    setMissing(need);
+    if (need.email || need.password) return document.getElementById(need.email ? "si-email" : "si-password")?.focus();
+    setBusy(true);
     const { error } = await db().auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) {
@@ -41,9 +45,9 @@ export function SignIn() {
         <div className="brand"><BrandMark /> Scientia</div>
         <h1>Sign in</h1>
         <ErrorNote error={error} />
-        <form className="form" onSubmit={submit}>
-          <Field label="Email" type="email" autoFocus autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Field label="Password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        <form className="form" onSubmit={submit} noValidate>
+          <Field id="si-email" label="Email" type="email" autoFocus autoComplete="email" required value={email} error={missing.email} onChange={(e) => setEmail(e.target.value)} />
+          <Field id="si-password" label="Password" type="password" autoComplete="current-password" required value={password} error={missing.password} onChange={(e) => setPassword(e.target.value)} />
           <Button type="submit" variant="primary" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
         {isDemo() && <div className="demo-accounts muted">

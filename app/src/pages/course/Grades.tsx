@@ -13,13 +13,13 @@ export function Grades() {
   useDocTitle("Grades");
   const { data, error, loading } = useQuery(() => loadMyWork(course.id, profile!.id), [course.id, profile?.id]);
 
-  let total = "Total: none yet. Your total appears when your teacher releases a grade.";
+  let total = "Nothing graded yet. Grades appear here when your teacher releases them.";
   if (data) {
     const scored = data.assignments.filter((a) => data.grades.get(a.id)?.released && data.grades.get(a.id)?.score != null);
     if (scored.length) {
       const got = scored.reduce((s, a) => s + data.grades.get(a.id)!.score!, 0);
       const of = scored.reduce((s, a) => s + a.points, 0);
-      total = `Total: ${pct(got, of)}% (${num(got)} of ${num(of)} points graded so far)`;
+      total = `Graded so far: ${num(got)} of ${num(of)} points (${pct(got, of)}%)`;
     }
   }
 
@@ -44,8 +44,7 @@ export function Grades() {
                     const sub = data.subs.get(a.id);
                     const g = data.grades.get(a.id);
                     const released = !!g?.released && g.score != null;
-                    const pastDue = Date.now() > new Date(a.due_at).getTime();
-                    const score = released ? `${num(g!.score)} / ${num(a.points)}` : sub ? "Awaiting grade" : pastDue ? "Missing" : "Not submitted";
+                    const score = released ? `${num(g!.score)} / ${num(a.points)}` : sub ? "Awaiting grade" : "";
                     return (
                       <tr key={a.id}>
                         <th scope="row"><Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link><div className="row-meta">Due {fmtDateTime(a.due_at)}</div>{released && g!.feedback && <div className="row-meta wrap">Feedback: {g!.feedback}</div>}</th>

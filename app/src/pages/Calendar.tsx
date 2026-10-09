@@ -59,9 +59,9 @@ export function Calendar() {
       <div className="section-title">
         <h2>{monthName}</h2>
         <div className="actions">
-          <Button onClick={() => go(-1)}>Previous month</Button>
+          <Button onClick={() => go(-1)}>Previous<span className="visually-hidden"> month</span></Button>
           <Button onClick={() => setShown(new Date(new Date().getFullYear(), new Date().getMonth(), 1))}>Today</Button>
-          <Button onClick={() => go(1)}>Next month</Button>
+          <Button onClick={() => go(1)}>Next<span className="visually-hidden"> month</span></Button>
         </div>
       </div>
       {loading && !data ? <Loading /> : (

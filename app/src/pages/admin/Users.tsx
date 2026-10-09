@@ -77,15 +77,15 @@ export function AdminUsers() {
         <Empty title="No users match your search" />
       ) : (
         <div className="table-wrap">
-          <table>
+          <table className="stack-rows">
             <caption className="visually-hidden">Users</caption>
             <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
             <tbody>
               {rows.map((u) => (
                 <tr key={u.id}>
                   <th scope="row">{u.full_name}</th>
-                  <td>{u.email}</td>
-                  <td>
+                  <td data-label="Email">{u.email}</td>
+                  <td data-label="Role">
                     {u.id === profile?.id ? <span className="cap">{u.role}</span> : (
                       <select className="select" aria-label={`Role for ${u.full_name}`} value={u.role} disabled={busy} onChange={(e) => setUserRole(u, e.target.value)}>
                         <option value="student">Student</option>
@@ -94,8 +94,8 @@ export function AdminUsers() {
                       </select>
                     )}
                   </td>
-                  <td><Badge tone={u.deactivated ? undefined : "success"}>{u.deactivated ? "Deactivated" : "Active"}</Badge></td>
-                  <td>
+                  <td data-label="Status"><Badge tone={u.deactivated ? undefined : "success"}>{u.deactivated ? "Deactivated" : "Active"}</Badge></td>
+                  <td data-label="Actions">
                     <div className="actions">
                       <Button size="small" variant="ghost" aria-label={`Reset password for ${u.full_name}`} onClick={() => setResetting(u)}>Reset password</Button>
                       {u.deactivated ? (
