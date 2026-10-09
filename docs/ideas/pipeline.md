@@ -35,3 +35,4 @@ Role codes: S student, T teacher, A admin, All everyone.
 | I-027 | Offer a text size control in the account menu, saved for the person across devices. | All | gate1-dropped | Display personalisation is parked under Later; browser zoom already resizes text. |
 | I-028 | Show a 10-second "Undo" message after deactivating a user, unpublishing work or deleting a module item. | All | gate1-dropped | Undo for deletions is parked under Later; M3 uses confirmation dialogs. |
 | I-029 | Let a person see recently opened courses in the account menu, as a shortcut back to where they were. | All | gate1-dropped | The dashboard course cards already give one click back to each course. |
+| I-030 | Show new announcements, grades and submissions in open pages and in the notification count without a reload. | S, T | proposed | Not yet gated; the app has no live updates, so this would add a refresh mechanism. |
