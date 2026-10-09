@@ -335,6 +335,7 @@ test.describe("Grading queue, grading and releasing", () => {
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
     await page.getByRole("button", { name: "Next to grade" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Liam Hansen: Photosynthesis worksheet");
     await page.getByLabel("Score").fill("40");
     await page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
