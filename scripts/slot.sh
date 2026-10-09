@@ -33,6 +33,6 @@ case "$cmd" in
     ;;
   down)
     pkill -f "scientia-slot-$n" 2>/dev/null || true
-    docker compose -p "$COMPOSE_PROJECT_NAME" down -v >/dev/null
+    docker compose -p "$COMPOSE_PROJECT_NAME" down -v >/dev/null 2>&1
     ;;
 esac

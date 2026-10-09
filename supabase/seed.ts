@@ -7,13 +7,13 @@ import type { SQL } from "bun";
 export const DEMO_PASSWORD = "Demo-pass-123";
 
 const people = {
-  admin: { email: "admin@scientia.test", name: "Alex Admin", admin: true },
-  ingrid: { email: "ingrid.solberg@scientia.test", name: "Dr. Ingrid Solberg" },
-  maya: { email: "maya.okafor@scientia.test", name: "Maya Okafor" },
-  liam: { email: "liam.hansen@scientia.test", name: "Liam Hansen" },
-  sofia: { email: "sofia.reyes@scientia.test", name: "Sofia Reyes" },
-  noah: { email: "noah.berg@scientia.test", name: "Noah Berg" },
-  priya: { email: "priya.nair@scientia.test", name: "Priya Nair" },
+  admin: { email: "admin@scientia.test", name: "Alex Admin", role: "admin" },
+  ingrid: { email: "ingrid.solberg@scientia.test", name: "Dr. Ingrid Solberg", role: "teacher" },
+  maya: { email: "maya.okafor@scientia.test", name: "Maya Okafor", role: "student" },
+  liam: { email: "liam.hansen@scientia.test", name: "Liam Hansen", role: "student" },
+  sofia: { email: "sofia.reyes@scientia.test", name: "Sofia Reyes", role: "student" },
+  noah: { email: "noah.berg@scientia.test", name: "Noah Berg", role: "student" },
+  priya: { email: "priya.nair@scientia.test", name: "Priya Nair", role: "student" },
 } as const;
 type Person = keyof typeof people;
 
@@ -86,7 +86,7 @@ async function ensureUsers(sql: SQL): Promise<Record<Person, string>> {
       });
       ids[key] = u.id;
     }
-    await sql`update public.profiles set full_name = ${p.name}, is_admin = ${"admin" in p}, deactivated = false where id = ${ids[key]}`;
+    await sql`update public.profiles set full_name = ${p.name}, role = ${p.role}, deactivated = false where id = ${ids[key]}`;
   }
   return ids;
 }

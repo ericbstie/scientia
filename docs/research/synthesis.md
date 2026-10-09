@@ -30,7 +30,7 @@ Scientia's M3 promise: a student can see everything due, hand work in and read t
 | Quizzes | Several question types missing in Ultra | Banks, time limits, analysis | Question bank, repeat attempts | No native quiz engine | Self-marking; automatic zeros for manual questions | Self-marking; test-mode browser | **Later** |
 | Groups | Limited, no group file space | Listed; depth unverified | No groups, separate, visible modes | Up to 75 groups; creation needs paid tier | Unknown | Projects for study groups | **Later** |
 | Attendance | Available in Ultra | Unknown | Plugin only | Not native | Unknown | Not mentioned | **Later** |
-| Notifications | Activity stream plus daily emails; premature "marks available" notices | Per-type controls; noisy defaults, buried settings | Web, email, mobile per user; reported failures | Pile up per class; hard to customise | Limited; no reply push on phone | Alerts for key events; scope undocumented | **M3.** In-app only, calm defaults, per-type switches (US-16 to 18) |
+| Notifications | Activity stream plus daily emails; premature "marks available" notices | Per-type controls; noisy defaults, buried settings | Web, email, mobile per user; reported failures | Pile up per class; hard to customise | Limited; no reply push on phone | Alerts for key events; scope undocumented | **M3.** In-app only, five meaningful kinds all on by default, once per event, per-type switches (US-16 to 18) |
 | Mobile | Browser use improved in Ultra; app crashes and repeated sign-ins | Three apps; weaker than desktop | App with offline and grading; weak forum writing | Apps with offline review; slow | Weak; no number grades | Two apps; today and tomorrow view | **M3.** Responsive web (US-21). Native app and offline Later |
 | Accessibility | "Partially compliant" with WCAG 2.2 AA; keyboard and zoom gaps | Documented testing process; VPAT level unverified | WCAG 2.2 AA claimed for 4.5.7 and later; content gaps | 2019 VPAT, partial on five criteria | Auditor-verified ACR claims 2.2; partial on five criteria | 2.1 claimed; inconsistent screen reader support | **M3.** WCAG 2.2 AA target with automated checks (US-20) |
 | Integrations | Content Market, Zoom, SafeAssign, Turnitin | 1,000+ LTI tools, API, SIS | LTI, plugin directory, SCORM | Drive, Docs, Meet; LTI via Workspace | LTI, API, D2L Link | SSO, SIS, Teams, Zoom | **Not in M3** (constraint) |
@@ -47,13 +47,13 @@ Scientia's M3 promise: a student can see everything due, hand work in and read t
 7. **Unclear deadline rules and vague errors.** Split date models and "Submit failed" when a window has closed. Evidence: [pain-points.md](pain-points.md) (Pain point 10), [moodle.md](moodle.md) (Pain point 13). Design response: one due date plus an allow-late switch (US-11, 27).
 8. **Accessibility barriers.** Screen reader and keyboard failures, partial WCAG conformance. Evidence: [pain-points.md](pain-points.md) (Pain point 11), [blackboard.md](blackboard.md) (Pain point 13), [brightspace-itslearning.md](brightspace-itslearning.md) (Pain point 7). Design response: US-20.
 9. **Setting sprawl for teachers.** Simple tasks take hours; overlapping options. Evidence: [moodle.md](moodle.md) (Pain points 2, 3, 7), [canvas.md](canvas.md) (Pain point 8). Design response: a short assignment form with no extra settings (US-27).
-10. **Slowness, lost work and no undo.** Crashes, repeated sign-ins, disappearing items, no way to withdraw a mistaken release. Evidence: [blackboard.md](blackboard.md) (Pain points 4, 6, 7, 10), [brightspace-itslearning.md](brightspace-itslearning.md) (Pain point 5), [canvas.md](canvas.md) (Pain point 5). Design response: confirmations, Withdraw release (US-31), persistent sessions (US-2).
+10. **Slowness, lost work and no undo.** Crashes, repeated sign-ins, disappearing items, no way to withdraw a mistaken release. Evidence: [blackboard.md](blackboard.md) (Pain points 4, 6, 7, 10), [brightspace-itslearning.md](brightspace-itslearning.md) (Pain point 5), [canvas.md](canvas.md) (Pain point 5). Design response: confirmations, Withdraw release (US-31), persistent sessions (US-2), typed text kept when a submission fails (US-9). Slowness is only tracked through bundle size in M3; a wider performance budget is in Later.
 
 ## Five design principles
 
 1. **One predictable course, fewest clicks.** Every course has the same navigation in the same order. The common tasks (see what is due, submit, grade) take two or three clicks from the first screen.
 2. **Every deadline in one list.** If it has a due date, it is on the dashboard and calendar. Missing work is shown apart from upcoming work.
-3. **Calm by default.** In-app only. Notify once per event, never for edits, and only for things that concern the person. Everything can be switched off.
+3. **Calm by default.** In-app only. Notify once per event, never for cosmetic edits (a changed due date is a meaningful event and does notify), and only for things that concern the person. All five notification kinds (New announcement, New assignment, Due date changed, Grade released, Replies to me) are on by default: calm comes from having only five meaningful kinds, once each, in the app only, not from hiding them. Each can be switched off.
 4. **Grades students can trust.** Draft and released are separate, visible states. No automatic zeros. A released grade can be withdrawn. The same numbers appear in every view.
 5. **Accessible from the start.** WCAG 2.2 AA, keyboard-first, skip link and landmarks, automated checks in the test suite (design-patterns.md: Funka found workarounds cost more than building accessibly at the start).
 
@@ -85,6 +85,10 @@ These have no story ids. They are ideas the research supports, held back for sco
 - Display personalisation (dyslexia font, high contrast): good idea from itslearning; after WCAG baseline.
 - Onboarding starter content: only empty states in M3 (US-42).
 - Localisation (for example Norwegian): English only in M3.
+- Announcement expiry, archiving and an active-post cap (pain-points.md, Worth copying): pinning covers the M3 case.
+- Performance budget beyond bundle size (response-time targets): M3 tracks bundle size only.
+- Notification digests and per-course notification switches: M3 has one global switch per kind.
+- Public data-use and privacy notice (canvas.md Pain point 6, brightspace-itslearning.md Pain point 10): not in M3.
 
 ## Research conflicts and how we resolved them
 

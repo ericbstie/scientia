@@ -47,6 +47,13 @@ Every milestone runs the same steps.
   done. Story coverage is a tracked metric.
 - **Accessibility is not optional.** Every e2e spec runs an axe scan of the
   pages it visits; serious or critical violations fail the metric target.
+- **Contract artifacts have one owner and are code, not prose.** Demo data
+  (`supabase/seed.ts`), schema and RLS (`supabase/migrations/`), the status
+  vocabulary and date format (`app/src/lib/format.ts`, `docs/design/ui-guidelines.md`)
+  are owned by the orchestrator. Stories, designs and tests cite them; they never
+  restate them from memory.
+- **Story sets get a two-lens review** (testability, research fit) before any
+  implementation brief cites them.
 - **Decisions are written down.** Anything a future contributor would ask "why"
   about goes in `docs/decisions/` as a short ADR (context, decision,
   consequences).

@@ -27,21 +27,19 @@ async function requireAdmin(req: Request): Promise<string | null> {
 /** Admin: create a user account (email + temporary password). */
 async function createUser(req: Request) {
   if (!(await requireAdmin(req))) return Response.json({ error: "Only administrators can create users." }, { status: 403 });
-  const { email, password, full_name, is_admin } = (await req.json()) as { email: string; password: string; full_name: string; is_admin?: boolean };
+  const { email, password, full_name, role = "student" } = (await req.json()) as { email: string; password: string; full_name: string; role?: string };
+  if (!["student", "teacher", "admin"].includes(role)) return Response.json({ error: "Role must be student, teacher or admin." }, { status: 400 });
   if (!email || !password || password.length < 8) return Response.json({ error: "Email and a password of at least 8 characters are required." }, { status: 400 });
   const res = await fetch(`${upstream["/auth/v1"]}/admin/users`, {
     method: "POST",
     headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { full_name } }),
+    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { full_name, role } }),
   });
   const body = (await res.json()) as { id?: string; msg?: string; message?: string; error_description?: string };
-  if (!res.ok) return Response.json({ error: body.msg ?? body.message ?? body.error_description ?? "Could not create user." }, { status: res.status });
-  if (is_admin) {
-    await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${body.id}`, {
-      method: "PATCH",
-      headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-      body: JSON.stringify({ is_admin: true }),
-    });
+  if (!res.ok) {
+    const msg = body.msg ?? body.message ?? body.error_description ?? "";
+    if (res.status === 422 && /already/i.test(msg)) return Response.json({ error: "An account with this email already exists." }, { status: 409 });
+    return Response.json({ error: msg || "Could not create the account. Try again." }, { status: res.status });
   }
   return Response.json({ id: body.id }, { status: 201 });
 }

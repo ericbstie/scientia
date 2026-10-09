@@ -13,7 +13,7 @@ orchestrator passes to the agent it dispatches. Model choice follows one rule:
 | analyst | sonnet | Synthesising research into stories and IA | Primary research |
 | implementer | sonnet | A feature slice (pages + queries) that does not split well | Schema changes (ask architect) |
 | task-worker | haiku | Small, fully specified edits: a component, copy fixes, one e2e spec | Anything needing judgement across files |
-| reviewer | haiku | Independent read of a diff or doc against its brief; run 2–3 with different lenses (correctness, a11y, UX clarity) | Writing the fix |
+| reviewer | haiku | Independent read of a diff or doc against its brief; run 2–3 with different lenses (correctness, a11y, UX clarity, testability, research fit; security for any schema/RLS change) | Writing the fix |
 
 ## Hand-offs
 

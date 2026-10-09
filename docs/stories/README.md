@@ -138,10 +138,9 @@ The relative order of the two notifications created 2 days ago is not fixed by t
 | US-22 to US-37 | `teacher.md` | teacher | 16 |
 | US-38 to US-43 | `admin.md` | admin | 6 |
 
-## Seed changes requested
+## Seed changes requested (resolved)
 
-1. **Account roles.** `profiles` has only `is_admin`; there is no role. US-38 shows a Role (admin, teacher or student) for every account and US-39 lets an admin choose it. Once the schema has a role, the seed should set Alex = admin, Ingrid = teacher, everyone else = student (Priya has no enrolment, so her role cannot be derived).
-2. **Schema note, not a seed change.** `supabase/migrations/0001_profiles.sql` lets every signed-in user read every profile including `email`. US-5 (roster without emails) and US-43 (data API check) will fail until the app limits what students can read.
+Both were applied in `supabase/migrations/0003_roles_and_privacy.sql` (ADR 0006): accounts now have a `role` (Alex admin, Ingrid teacher, others student), and emails are only readable through `course_people()` (teachers), `enrol_by_email()` and `admin_users()` (admins).
 
 ## Review responses
 

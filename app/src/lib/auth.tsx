@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session } from "@supabase/supabase-js";
 import { db } from "./supabase";
 
-export type Profile = { id: string; email: string; full_name: string; is_admin: boolean };
+export type Profile = { id: string; email: string; full_name: string; role: "student" | "teacher" | "admin"; is_admin: boolean };
 type AuthState = { session: Session | null; profile: Profile | null; loading: boolean; refreshProfile: () => Promise<void> };
 
 const AuthContext = createContext<AuthState>({ session: null, profile: null, loading: true, refreshProfile: async () => {} });
@@ -14,8 +14,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadProfile(s: Session | null) {
     if (!s) return setProfile(null);
-    const { data } = await db().from("profiles").select("id, email, full_name, is_admin").eq("id", s.user.id).single();
-    setProfile(data as Profile | null);
+    const { data } = await db().from("profiles").select("id, full_name, role, is_admin").eq("id", s.user.id).single();
+    setProfile(data ? ({ ...data, email: s.user.email ?? "" } as Profile) : null);
   }
 
   useEffect(() => {
