@@ -12,12 +12,12 @@ Rules for M3 implementers. Screens and routes are in `ia.md`. Use the tokens in 
 
 ## Brand
 
-One accent colour on warm neutral surfaces, one typeface, one mark. Nothing else carries the identity.
+[brand.md](brand.md) holds the idea, the eight rules and the five page shapes; this file is the detail behind them. In short: one accent colour on warm neutral surfaces, one typeface, one mark. Nothing else carries the identity.
 
 - Name and mark: "Scientia" with the S mark (`BrandMark`) in the top bar and on the sign-in card. The mark is the accent colour with the on-accent colour for the letter, so it follows light and dark.
 - Colour: the accent (`--accent`, deep blue in light, pale blue in dark) is for the one primary action, links, the current page and the unread count. Status colours (success, warning, danger) appear only in badges, alerts and delete actions, and always with words.
 - Typeface: Inter at the five sizes in the type scale. Headings are semi-bold, never larger than `--fs-xl`.
-- Tone: plain and direct (see Writing). No exclamation marks, emoji, illustrations or decorative motion anywhere.
+- Tone: plain and direct (see Writing). No exclamation marks, emoji, illustrations or decorative motion anywhere. The one motion is the 120 ms colour change on hover, focus and press (`--dur`); it is off under reduced-motion.
 
 ## Tokens
 
@@ -25,7 +25,7 @@ One accent colour on warm neutral surfaces, one typeface, one mark. Nothing else
 
 - Type: five sizes, `--fs-xs` (0.78 rem, the smallest allowed) to `--fs-xl`. Controls: `--control` (40 px), `--control-sm` (32 px), `--touch` (44 px on phones). Shape: `--radius`, `--radius-sm`, `--radius-pill`. Depth: `--shadow` for panels, `--shadow-pop` for menus, dialogs and toasts.
 - No `style={{ }}` in pages and no `<style>` blocks: add a class to `styles.css` instead. Layout that only one page needs still goes there, named for what it is (`.toolbar`, `.defs`, `.choices`).
-- Typeface is Inter, shipped in `app/src/fonts/` so every browser shows the same text. The Scientia mark is `BrandMark` in `ui/`; the favicon in `index.html` is the same shape.
+- Typeface is Inter, shipped in `app/src/fonts/` so every browser shows the same text. The Scientia mark is `BrandMark` in `ui/`; the favicon and the screen shown before the app loads (`.boot` in `index.html`) are the same shape.
 - Sub-navigation inside a page (Settings, Admin, Grading filters) is always `.tabs` and `.tab`.
 
 ## Choosing list rows, cards or tables
