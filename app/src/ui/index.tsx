@@ -166,13 +166,13 @@ type FieldBase = { label: string; hint?: string; error?: string; optional?: bool
 // React 19: `ref` is a regular prop on function components.
 type WithRef<T> = { ref?: Ref<T> };
 
-/** Fields are required unless marked "Optional" beside the label (Designsystemet's blue tag);
+/** Fields are required unless marked "Optional" beside the label (a neutral tag: blue is for what you can open);
  *  `required` on the control carries the state for assistive tech. Designsystemet's Field links
  *  the label, hint and error to the control. */
 function FieldFrame({ id, label, hint, error, optional, children }: FieldBase & { id: string; children: ReactNode }) {
   return (
     <DsField>
-      {optional ? <div className="label-row"><Label htmlFor={id}>{label}</Label><Tag data-color="info" data-size="sm">Optional</Tag></div> : <Label htmlFor={id}>{label}</Label>}
+      {optional ? <div className="label-row"><Label htmlFor={id}>{label}</Label><Tag data-color="neutral" data-size="sm">Optional</Tag></div> : <Label htmlFor={id}>{label}</Label>}
       {hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}
       {children}
       {error && <ValidationMessage id={`${id}-error`} className="error-text">{error}</ValidationMessage>}

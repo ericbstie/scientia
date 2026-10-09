@@ -181,8 +181,9 @@
   }
   .table-wrap + .section { margin-top: var(--ds-size-9); }
   .table-wrap th, .table-wrap td { white-space: nowrap; }
-  .table-wrap thead th:first-child, .table-wrap tbody th[scope="row"] { position: sticky; left: 0; z-index: 1; background: var(--ds-color-neutral-surface-default); box-shadow: var(--ds-border-width-default) 0 0 var(--ds-color-neutral-border-subtle); }
-  .table-wrap thead th:first-child { background: var(--ds-color-neutral-surface-tinted); }
+  /* A sticky first column only where rows have headers (not the calendar). */
+  .table-wrap:has(th[scope="row"]) thead th:first-child, .table-wrap tbody th[scope="row"] { position: sticky; left: 0; z-index: 1; background: var(--ds-color-neutral-surface-default); box-shadow: var(--ds-border-width-default) 0 0 var(--ds-color-neutral-border-subtle); }
+  .table-wrap:has(th[scope="row"]) thead th:first-child { background: var(--ds-color-neutral-surface-tinted); }
   .sticky-total td:last-child { font-weight: var(--ds-font-weight-medium); }
   .sticky-total thead th:not(:first-child):not(:last-child) { white-space: normal; min-width: 6rem; vertical-align: bottom; }
   @media (min-width: 821px) {
