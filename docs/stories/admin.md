@@ -73,6 +73,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 - Given the new course has no content, When Ingrid opens CHE110 Modules, Then she sees "No modules yet" and an Add module button, and when she opens Assignments she sees "No assignments yet" and a New assignment button.
 - Given I enter the code BIO101, When I save, Then I see "A course with this code already exists" and no course is created.
 - Given I leave the teacher unselected, When I save, Then I see "Choose a teacher" linked to the teacher field and no course is created.
+- Given I click People on the HIS201 row, When I add sofia.reyes@scientia.test, Then I see "Sofia Reyes added", the Courses table shows 3 students for HIS201, and Sofia sees HIS201 on her dashboard.
 
 ### US-43 Keep admin and teacher tools away from other roles
 

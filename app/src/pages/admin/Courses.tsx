@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { AdminNav } from "./AdminNav";
-import { Button, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
+import { Button, ButtonLink, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 
@@ -21,7 +21,7 @@ export function AdminCourses() {
   const newButton = <Button variant="primary" onClick={() => setCreating(true)}>New course</Button>;
   return (
     <div className="content wide">
-      <PageHeader title="Courses" subtitle="The teacher of each course adds its students, on the course's People page." actions={data && data.courses.length > 0 ? newButton : undefined} />
+      <PageHeader title="Courses" subtitle="Open People on a course to add or remove its students." actions={data && data.courses.length > 0 ? newButton : undefined} />
       <AdminNav />
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && data.courses.length === 0 ? (
@@ -30,7 +30,7 @@ export function AdminCourses() {
         <div className="table-wrap">
           <table>
             <caption className="visually-hidden">Courses</caption>
-            <thead><tr><th scope="col">Code</th><th scope="col">Title</th><th scope="col">Teacher</th><th scope="col" className="num">Students</th></tr></thead>
+            <thead><tr><th scope="col">Code</th><th scope="col">Title</th><th scope="col">Teacher</th><th scope="col" className="num">Students</th><th scope="col">Actions</th></tr></thead>
             <tbody>
               {data.courses.map((c) => (
                 <tr key={c.id}>
@@ -38,6 +38,7 @@ export function AdminCourses() {
                   <td>{c.title}</td>
                   <td>{c.enrollments.filter((e) => e.role === "teacher").map((e) => e.profiles?.full_name).filter(Boolean).join(", ")}</td>
                   <td className="num">{c.enrollments.filter((e) => e.role === "student").length}</td>
+                  <td><ButtonLink size="small" variant="ghost" to={`/courses/${c.id}/people`} aria-label={`People in ${c.code}`}>People</ButtonLink></td>
                 </tr>
               ))}
             </tbody>

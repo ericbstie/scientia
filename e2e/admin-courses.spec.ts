@@ -86,3 +86,26 @@ test("@US-42 duplicate code and missing teacher are rejected", async ({ page }) 
   await expect(page.getByRole("table").getByRole("row")).toHaveCount(before);
   await expect(page.getByRole("row", { name: /CHE110/ })).toHaveCount(0);
 });
+
+test("@US-42 admin adds a student to an existing course", async ({ page, browser }) => {
+  await openCourses(page);
+  await page.getByRole("row", { name: /HIS201/ }).getByRole("link", { name: "People in HIS201" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "People" })).toBeVisible();
+  await page.getByRole("button", { name: "Add student" }).first().click();
+  const dialog = page.getByRole("dialog", { name: "Add student" });
+  await dialog.getByLabel("Email").fill(users.sofia.email);
+  await dialog.getByRole("button", { name: "Add student" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Sofia Reyes added" })).toBeVisible();
+
+  await page.goto("/admin/courses");
+  await expect(page.getByRole("row", { name: /HIS201/ }).getByRole("cell").nth(2)).toHaveText("3");
+
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  await p.goto("/sign-in");
+  await p.getByLabel("Email").fill(users.sofia.email);
+  await p.getByLabel("Password").fill(PASSWORD);
+  await p.getByRole("button", { name: "Sign in" }).click();
+  await expect(p.getByRole("region", { name: "Your courses" }).getByRole("link", { name: /HIS201/ })).toBeVisible();
+  await ctx.close();
+});
