@@ -199,8 +199,8 @@ function AccountMenu({ name }: { name: string }) {
 // ---------------------------------------------------------------------------
 // Course layout: fixed course navigation, identical in every course for a role.
 
-export type Course = { id: string; code: string; title: string; description: string; term: string; archived: boolean };
-export type CourseRole = "teacher" | "student";
+type Course = { id: string; code: string; title: string; description: string; term: string };
+type CourseRole = "teacher" | "student";
 const CourseContext = createContext<{ course: Course; role: CourseRole }>(null!);
 /** Current course and the viewer's role in it (admins act as teachers). */
 export const useCourse = () => useContext(CourseContext);
@@ -234,7 +234,7 @@ function CourseLayout() {
       const uuid = isUuid(courseId);
       const [{ data: course }, { data: enrol }] = uuid
         ? await Promise.all([
-            db().from("courses").select("id, code, title, description, term, archived").eq("id", courseId!).maybeSingle(),
+            db().from("courses").select("id, code, title, description, term").eq("id", courseId!).maybeSingle(),
             db().from("enrollments").select("role").eq("course_id", courseId!).eq("user_id", profile!.id).maybeSingle(),
           ])
         : [{ data: null }, { data: null }];

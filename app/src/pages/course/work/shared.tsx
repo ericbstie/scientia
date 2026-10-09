@@ -52,7 +52,7 @@ export async function loadMyWork(courseId: string, userId: string) {
   };
 }
 
-export async function loadStudents(courseId: string): Promise<Student[]> {
+async function loadStudents(courseId: string): Promise<Student[]> {
   const [people, enrol] = await Promise.all([
     db().rpc("course_people", { c: courseId }),
     db().from("enrollments").select("user_id, created_at").eq("course_id", courseId),

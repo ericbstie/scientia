@@ -3,12 +3,12 @@ import { useNavigate, useSearchParams } from "react-router";
 import { db, isDemo } from "../lib/supabase";
 import { Button, ErrorNote, Field, useTitle } from "../ui";
 
-export const DEMO_ACCOUNTS = [
+const DEMO_ACCOUNTS = [
   { label: "Student", email: "maya.okafor@scientia.test" },
   { label: "Teacher", email: "ingrid.solberg@scientia.test" },
   { label: "Admin", email: "admin@scientia.test" },
 ];
-export const DEMO_PASSWORD = "Demo-pass-123";
+const DEMO_PASSWORD = "Demo-pass-123";
 
 export function SignIn() {
   useTitle("Sign in");

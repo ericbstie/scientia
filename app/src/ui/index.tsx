@@ -89,7 +89,7 @@ const statusTone: Record<StudentStatus | TeacherStatus, "success" | "warning" | 
   "Not submitted": undefined, Submitted: "accent", Late: "warning", Missing: "danger", Closed: undefined, Graded: "success",
   "Needs grading": "warning", "Graded (not released)": "accent", Released: "success",
 };
-export type TeacherStatus = "Needs grading" | "Graded (not released)" | "Released";
+type TeacherStatus = "Needs grading" | "Graded (not released)" | "Released";
 
 /** Status badge using the fixed vocabulary in docs/design/ui-guidelines.md. */
 export function StatusBadge({ status }: { status: StudentStatus | TeacherStatus }) {

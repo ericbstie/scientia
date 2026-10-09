@@ -61,6 +61,6 @@ export const byLastName = <T extends { full_name: string }>(a: T, b: T) =>
 
 const pad = (n: number) => String(n).padStart(2, "0");
 /** "2026-10-09" in the viewer's time zone. */
-export const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 /** Value for <input type="datetime-local"> in the viewer's time zone. */
 export const toLocalInput = (d: Date) => `${dayKey(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
