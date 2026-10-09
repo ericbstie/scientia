@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from "react";
-import { AdminNav } from "./AdminNav";
 import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, PasswordField, Select, Status, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
@@ -62,7 +61,6 @@ export function AdminUsers() {
   return (
     <div className="content wide">
       <PageHeader title="Users" actions={<><Button onClick={() => setImporting(true)}>Import users</Button><Button variant="primary" onClick={() => setCreating(true)}>New user</Button></>} />
-      <AdminNav />
       <ErrorNote error={error} />
       <ErrorNote error={actionError} />
       <Status>{data ? `Showing ${rows.length} ${rows.length === 1 ? "user" : "users"}` : ""}</Status>

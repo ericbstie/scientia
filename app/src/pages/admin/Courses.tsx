@@ -1,5 +1,4 @@
 import { useState, type FormEvent } from "react";
-import { AdminNav } from "./AdminNav";
 import { Button, ButtonLink, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
@@ -23,7 +22,6 @@ export function AdminCourses() {
   return (
     <div className="content wide">
       <PageHeader title="Courses" subtitle="Open People on a course to add or remove its students." actions={data && data.courses.length > 0 ? newButton : undefined} />
-      <AdminNav />
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && data.courses.length === 0 ? (
         <Empty title="No courses yet" action={newButton}>Create a course and choose its teacher.</Empty>

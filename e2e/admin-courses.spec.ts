@@ -5,7 +5,7 @@ test.beforeEach(() => reset());
 
 async function openCourses(page: Page) {
   await signIn(page, "admin");
-  await page.getByRole("navigation", { name: "Admin" }).getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Courses" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Courses" })).toBeVisible();
 }
 

@@ -13,7 +13,7 @@ Three layouts, all inside one app shell. Every screen has a URL.
    - Teacher: Home, Modules, Assignments, Announcements, Discussions, Grading, Gradebook, People.
    - Under it, a course heading: course code and title (links to course Home).
 
-**Top bar** (landmark `banner`, on every page except sign-in): Scientia logo (to `/`), Calendar, Notifications (bell with unread count, links to `/notifications`), Admin (admins only), then the user's name as a menu button holding Settings and Sign out. The existing `.topbar` is mobile-only; M3 makes it permanent.
+**Top bar** (landmark `banner`, on every page except sign-in): Scientia logo (to `/`), Dashboard, Calendar, Notifications (bell with unread count, links to `/notifications`), then the user's name as a menu button holding Settings and Sign out. The existing `.topbar` is mobile-only; M3 makes it permanent.
 
 Role of `/`: student sees the student dashboard, teacher the teacher dashboard, admin is redirected to `/admin/users`.
 
@@ -55,7 +55,7 @@ Access rules shown on every protected route (US-2, US-43): signed out goes to `/
   /admin/courses                                               R28  admin
 ```
 
-29 routes: 28 screens and 1 CSV download. Two redirects (`/settings`, `/admin`). The Admin area has its own sub-navigation (`nav` labelled "Admin": Users, Courses).
+29 routes: 28 screens and 1 CSV download. Two redirects (`/settings`, `/admin`). For admins the top bar holds only Users and Courses (I-022): they have no courses, due work or notifications.
 
 Decisions that keep the route count low:
 - A form with a textarea is a page (R9, R12, R14, R16, R19, R21). A form with one to four short fields is a dialog (Add module, Add file, Add link, Add student, New user, New course, Reset password).
@@ -348,7 +348,7 @@ Shorthand: `C` = `/courses/:courseId`. R-numbers refer to the Routes section. "P
 | US-40 | R27 | Users → row Deactivate or Reactivate → confirm |
 | US-41 | R27 | Users → row Reset password → Save |
 | US-42 | R28 `/admin/courses`, then R2, R8, R18 as teacher | Admin → Courses → New course → Save; Ingrid sees the card and empty states |
-| US-43 | Guards on R23, R25, R27, R28, R29 and the users API | Direct URL as wrong role → "You don't have access" page; no Admin link in top bar |
+| US-43 | Guards on R23, R25, R27, R28, R29 and the users API | Direct URL as wrong role → "You don't have access" page; no Users or Courses link in top bar |
 
 ## Click budget
 
@@ -379,7 +379,7 @@ How each count is reached:
 
 Breakpoint: 820 px (matches `styles.css`). Also checked at 390 px and 320 px. No page may scroll horizontally.
 
-- **Top bar** keeps every label (Calendar, Notifications with count, name menu, Admin) and wraps to a second row instead of dropping items.
+- **Top bar** keeps every label (Dashboard, Calendar, Notifications with count, name menu; Users and Courses for admins) and wraps to a second row instead of dropping items.
 - **Course navigation** leaves the left column. A "Course pages" button beside the course title expands the same seven or eight items inline (a disclosure, not a modal). Menu has `aria-expanded` and `aria-controls`; Escape closes it and returns focus to Menu. (Changed in M3 from a slide-in panel: an inline disclosure needs no focus trap and keeps the page context visible.)
 - **Layout:** `.main` padding drops to 16 px; `.split` is already one column below 1080 px; page-header actions wrap under the title; list rows allow the side text (`row-side`) to wrap under the title.
 - **Targets:** buttons, links in lists and form controls are at least 44 px tall (24 px is the floor of US-20).
@@ -392,7 +392,7 @@ Breakpoint: 820 px (matches `styles.css`). Also checked at 390 px and 320 px. No
 
 ## Keyboard & screen reader
 
-**Landmarks** (one of each, every page): `header` as `banner` (top bar); `nav aria-label="Main"` inside it; on course routes `nav aria-label="Course"`; Settings and Admin sub-navigation are `nav aria-label="Settings"` and `"Admin"`; Grading filters are `nav aria-label="Filter"`; exactly one `main` with `id="main"`. Page sections inside `main` are `section` elements labelled by their h2 (the `Section` primitive). A status live region (`role="status"`) is mounted once for toasts. No other landmarks.
+**Landmarks** (one of each, every page): `header` as `banner` (top bar); `nav aria-label="Main"` inside it; on course routes `nav aria-label="Course"`; Settings sub-navigation is `nav aria-label="Settings"`; Grading filters are `nav aria-label="Filter"`; exactly one `main` with `id="main"`. Page sections inside `main` are `section` elements labelled by their h2 (the `Section` primitive). A status live region (`role="status"`) is mounted once for toasts. No other landmarks.
 
 **Skip link:** the first Tab stop on every page is "Skip to main content" (`.skip-link`), which moves focus to `main` (`tabindex="-1"`). On sign-in it targets the card.
 

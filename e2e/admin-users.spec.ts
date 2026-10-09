@@ -33,7 +33,8 @@ async function tryLogin(browser: import("@playwright/test").Browser, email: stri
 
 test("@US-38 admin lands on the Users table with seven accounts and can search and filter", async ({ page }) => {
   await openUsers(page);
-  await expect(page.getByRole("navigation", { name: "Admin" })).toBeVisible();
+  // An admin has no courses, due work or notifications, so the top bar holds only what they use.
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link")).toHaveText(["Users", "Courses"]);
   await expect(userRows(page)).toHaveCount(7);
   const expected: [Who, string][] = [["admin", "admin"], ["ingrid", "teacher"], ["maya", "student"], ["liam", "student"], ["sofia", "student"], ["noah", "student"], ["priya", "student"]];
   for (const [who, role] of expected) {
@@ -89,7 +90,7 @@ test("@US-39 admin corrects the role of an account", async ({ page }) => {
   await expect(page.getByRole("status").filter({ hasText: "Tomas Lind is now a teacher" })).toBeVisible();
   await page.reload();
   await expect(rowOf(page, "Tomas Lind").getByRole("combobox", { name: "Role for Tomas Lind" })).toHaveValue("teacher");
-  await page.getByRole("navigation", { name: "Admin" }).getByRole("link", { name: "Courses" }).click();
+  await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Courses" }).click();
   await page.getByRole("button", { name: "New course" }).click();
   await expect(page.getByRole("dialog").getByLabel("Teacher").locator("option", { hasText: "Tomas Lind" })).toHaveCount(1);
 });
@@ -236,15 +237,15 @@ test("@US-41 admin resets a password", async ({ page, browser }) => {
 
 test("@US-43 admin area is closed to other roles", async ({ page }) => {
   await signIn(page, "admin");
-  const adminLink = page.getByRole("banner").getByRole("link", { name: "Admin" });
+  const adminLink = page.getByRole("banner").getByRole("link", { name: "Users" });
   const adminUrl = new URL(await adminLink.evaluate((a) => (a as HTMLAnchorElement).href)).pathname;
   await signOut(page);
 
   await signIn(page, "maya");
-  await expect(page.getByRole("banner").getByRole("link", { name: "Admin" })).toHaveCount(0);
+  await expect(page.getByRole("banner").getByRole("link", { name: "Users" })).toHaveCount(0);
   await page.goto(adminUrl);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("You don't have access");
-  await expect(page.getByRole("banner").getByRole("link", { name: "Admin" })).toHaveCount(0);
+  await expect(page.getByRole("banner").getByRole("link", { name: "Users" })).toHaveCount(0);
   await signOut(page);
 
   await signIn(page, "ingrid");

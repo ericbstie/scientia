@@ -11,7 +11,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Evidence:** pain-points.md#Features by area (Roles & admin); moodle.md#Worth avoiding (Exposing the full role system); enabler (no pain point)
 
 **Acceptance criteria:**
-- Given I sign in as admin@scientia.test, When I land, Then I see the Admin area with a Users table of seven accounts showing name, email, role and status; every status is "Active", Alex Admin's role is "admin", Dr. Ingrid Solberg's is "teacher" and the other five are "student".
+- Given I sign in as admin@scientia.test, When I land, Then the top bar offers only Users and Courses and I see a Users table of seven accounts showing name, email, role and status; every status is "Active", Alex Admin's role is "admin", Dr. Ingrid Solberg's is "teacher" and the other five are "student".
 - Given I type "okafor" in the search box, When the table updates, Then only Maya Okafor is listed.
 - Given I choose the role filter "teacher", When the table updates, Then only Dr. Ingrid Solberg is listed.
 
@@ -112,7 +112,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Evidence:** none in the research; security baseline required by the three fixed roles (synthesis.md feature matrix, Roles & admin row)
 
 **Acceptance criteria:**
-- Given I recorded the Admin URL from Alex's top bar, When I open it as Maya, Then the page heading is "You don't have access" and the top bar has no Admin link.
+- Given I recorded the Admin URL from Alex's top bar, When I open it as Maya, Then the page heading is "You don't have access" and the top bar has no Users link.
 - Given I am signed in as Ingrid, When I open the recorded Admin URL, Then I see the same page.
 - Given I recorded the BIO101 Gradebook and Grading URLs as Ingrid, When I open each as Maya, Then the heading is "You don't have access" and the page text contains none of "Hansen", "Reyes", "72" or "Released".
 - Given I am signed in as Maya, When I request `/rest/v1/profiles?select=email,full_name`, Then the body contains none of liam.hansen@, sofia.reyes@, noah.berg@, priya.nair@, ingrid.solberg@ or admin@; and when I POST `{"email":"x@scientia.test","password":"Start-pass-1","full_name":"X"}` to `/api/admin/users`, Then the response status is 403 and the body is `{"error":"Only administrators can create users."}`.
