@@ -15,7 +15,8 @@ ad-hoc markup where a component exists.
   built from `--ds-*` tokens only.
 - Spacing only from the system's `--ds-size-*` scale. Sections are separated by the same step
   on every page.
-- Every page starts with the page header: optional "‹ Parent" back link (never the course
+- Every page starts with the page header: optional back link to the parent page (the system's
+  `Breadcrumbs` with one link, shown with its chevron; never the course
   code, which the course navigation already shows), one h1 (`Heading`), optional subtitle,
   actions on the right. One h1 per page, h2 for sections, no skipped levels.
 - Breakpoint is 820 px. Content stays one column below it.
@@ -55,7 +56,13 @@ shadow or font is chosen. Components and pages use the system's tokens and nothi
 - Typeface is Inter, shipped in `app/src/fonts/` so every browser shows the same text. The
   Scientia mark is `BrandMark` in `ui/`; the favicon and the screen shown before the app
   loads (`.boot` in `index.html`) are the same shape.
-- Sub-navigation inside a page (Settings, Admin, Grading filters) is always `Tabs`.
+- Sub-navigation between sibling pages (Settings, Grading filters) is a `nav` of links styled as
+  the system's tabs (`.tabs` / `.tab`). Each entry is a page with its own address, so it is a
+  link; the system's `Tabs` switches panels inside one page and is used only for that.
+- Neutral panels, blue content: lists, tables, form panels and empty states sit on
+  `data-color="neutral"` surfaces, and their rows, table body or content go back to
+  `data-color="accent"` so links and buttons stay blue. `List`/`Row`, `Panel`, `Empty` and the
+  tables do this already; use them rather than a bare `Card`.
 
 ## Choosing list rows, cards or tables
 

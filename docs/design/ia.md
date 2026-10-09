@@ -117,7 +117,7 @@ Decisions that keep the route count low:
 ### R7 `/courses/:courseId` Course home
 - **Purpose:** the course's start page.
 - **Who:** members; teacher of the course.
-- **Student regions:** eyebrow with course code; h1 course title; Announcements (up to three, pinned first then newest, with Pinned and Unread labels, and an "All announcements" link); Next due (next two published assignments with due date and status); nothing else.
+- **Student regions:** h1 course title with its description under it; Announcements (up to three, pinned first then newest, with Pinned and Unread labels, and an "All announcements" link); Next due (next two published assignments with due date and status); nothing else.
 - **Teacher regions:** h1 course title; "N need grading" link row to the queue; Announcements (latest three, plus New announcement button); Assignments (next three by due date, plus New assignment button).
 - **Primary action:** none on the student page; on the teacher page the two section buttons are secondary.
 - **Empty state:** no announcements: section omitted. No upcoming: "Nothing due in this course."
@@ -134,7 +134,7 @@ Decisions that keep the route count low:
 ### R9 `/courses/:courseId/modules/:moduleId/pages/new`
 - **Purpose:** write a page for a module.
 - **Who:** teacher.
-- **Regions:** eyebrow "Modules › Week 4: Ecology"; h1 "Add page"; Title; Body (formatting toolbar: Bold, Bulleted list, with text labels); Save page, Cancel.
+- **Regions:** back link "Modules"; h1 "Add page"; Title; Body (formatting toolbar: Bold, Bulleted list, with text labels); Save page, Cancel.
 - **Primary action:** Save page.
 - **Empty state:** none.
 - **Stories:** US-24.
@@ -142,7 +142,7 @@ Decisions that keep the route count low:
 ### R10 `/courses/:courseId/pages/:pageId`
 - **Purpose:** read a page.
 - **Who:** student if its module is published; teacher always.
-- **Regions:** eyebrow link "‹ Modules"; h1 title; body (`.prose` with bold and list).
+- **Regions:** back link "Modules"; h1 title; body (`.prose` with bold and list).
 - **Primary action:** none.
 - **Empty state:** none (a draft page opened by a student is "Page not found").
 - **Stories:** US-6, US-23, US-24.
@@ -158,7 +158,7 @@ Decisions that keep the route count low:
 ### R12 `/courses/:courseId/announcements/new`
 - **Purpose:** post one announcement.
 - **Who:** teacher.
-- **Regions:** eyebrow "Announcements"; h1 "New announcement"; Title; Message; Post, Cancel. Posting returns to R11 with the item at the top.
+- **Regions:** back link "Announcements"; h1 "New announcement"; Title; Message; Post, Cancel. Posting returns to R11 with the item at the top.
 - **Primary action:** Post.
 - **Empty state:** none.
 - **Stories:** US-25.
@@ -166,7 +166,7 @@ Decisions that keep the route count low:
 ### R13 `/courses/:courseId/announcements/:announcementId`
 - **Purpose:** read one announcement and mark it read.
 - **Who:** members.
-- **Regions:** eyebrow link "‹ Announcements"; h1 title; author, date, "Pinned" and "Edited" labels; body. No reply box.
+- **Regions:** back link "Announcements"; h1 title; author, date, "Pinned" and "Edited" labels; body. No reply box.
 - **Primary action:** none.
 - **Empty state:** none.
 - **Stories:** US-7, US-16, US-17.
@@ -174,7 +174,7 @@ Decisions that keep the route count low:
 ### R14 `/courses/:courseId/announcements/:announcementId/edit`
 - **Purpose:** correct an announcement (edits never notify).
 - **Who:** teacher.
-- **Regions:** eyebrow; h1 "Edit announcement"; Title; Message; Save, Cancel.
+- **Regions:** back link "Announcements"; h1 "Edit announcement"; Title; Message; Save, Cancel.
 - **Primary action:** Save.
 - **Empty state:** none.
 - **Stories:** US-26.
@@ -190,7 +190,7 @@ Decisions that keep the route count low:
 ### R16 `/courses/:courseId/discussions/new`
 - **Purpose:** start a thread.
 - **Who:** members.
-- **Regions:** eyebrow "Discussions"; h1 "New thread"; Title; Message; Post, Cancel. On success the thread is first in R15.
+- **Regions:** back link "Discussions"; h1 "New thread"; Title; Message; Post, Cancel. On success the thread is first in R15.
 - **Primary action:** Post.
 - **Empty state:** none.
 - **Stories:** US-15.
@@ -198,7 +198,7 @@ Decisions that keep the route count low:
 ### R17 `/courses/:courseId/discussions/:threadId`
 - **Purpose:** read and answer a thread.
 - **Who:** members; teacher moderates.
-- **Regions:** eyebrow link "‹ Discussions"; h1 thread title (teacher: Delete thread); posts in time order (author, "Teacher" label, time, text; teacher Delete on each post; removed post shows "This reply was deleted by a teacher"); Reply (TextArea, Reply button).
+- **Regions:** back link "Discussions"; h1 thread title (teacher: Delete thread); posts in time order (author, "Teacher" label, time, text; teacher Delete on each post; removed post shows "This reply was deleted by a teacher"); Reply (TextArea, Reply button).
 - **Primary action:** Reply.
 - **Empty state:** none (the thread has at least its first post).
 - **Stories:** US-15, US-16, US-37.
@@ -214,7 +214,7 @@ Decisions that keep the route count low:
 ### R19 `/courses/:courseId/assignments/new`
 - **Purpose:** create an assignment in one form.
 - **Who:** teacher.
-- **Regions:** eyebrow "Assignments"; h1 "New assignment"; Title; Instructions; Due date and time; Points; Accepts (checkboxes File upload, Text entry); Allow late submissions; Save and publish (primary), Save as draft, Cancel. Nothing else.
+- **Regions:** back link "Assignments"; h1 "New assignment"; Title; Instructions; Due date and time; Points; Accepts (checkboxes File upload, Text entry); Allow late submissions; Save and publish (primary), Save as draft, Cancel. Nothing else.
 - **Primary action:** Save and publish.
 - **Empty state:** none.
 - **Stories:** US-27, US-28.
@@ -222,8 +222,8 @@ Decisions that keep the route count low:
 ### R20 `/courses/:courseId/assignments/:assignmentId`
 - **Purpose:** student: know what to do and hand in work, then see status and feedback. Teacher: review the definition and publish state.
 - **Who:** student of the course; teacher of the course.
-- **Student regions:** eyebrow link "‹ Assignments"; h1 title with status badge; facts (Due date, Points, Accepts, "Past due" when relevant); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", Attempt label, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>" with no form; Feedback (score "86 / 100" and feedback text) after release.
-- **Teacher regions:** eyebrow; h1 title with Draft badge; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
+- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Due date, Points, Accepts, "Past due" when relevant); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", Attempt label, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>" with no form; Feedback (score "86 / 100" and feedback text) after release.
+- **Teacher regions:** back link "Assignments"; h1 title with Draft badge; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
 - **Primary action:** Submit (student); Publish on a draft (teacher), otherwise none.
 - **Empty state:** none.
 - **Stories:** US-3, US-4, US-8, US-9, US-10, US-11, US-13, US-14, US-17, US-28.
@@ -255,7 +255,7 @@ Decisions that keep the route count low:
 ### R24 `/courses/:courseId/grading/:submissionId`
 - **Purpose:** grade one submission and move on.
 - **Who:** teacher.
-- **Regions:** eyebrow link "‹ Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted).
+- **Regions:** back link "Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted).
 - **Primary action:** Save (Release is separate).
 - **Empty state:** "Next to grade" disabled with "Nothing else needs grading" when the queue is empty.
 - **Stories:** US-29, US-30, US-31, US-32.
