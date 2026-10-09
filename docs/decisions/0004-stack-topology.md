@@ -20,7 +20,7 @@ Run only what the product uses:
 | web | built from this repo | Serves the SPA and proxies `/auth/v1`, `/rest/v1`, `/storage/v1` |
 
 The Bun server replaces Kong as the gateway. The browser talks to one origin,
-so there is no CORS setup, and `supabase-js` is pointed at `window.location.origin`.
+so there is no CORS setup, and the Supabase clients point at `window.location.origin`.
 The anon key is served at runtime from `/config.json`, so one image works with any keys.
 Admin-only operations that need the service key (creating users) are Bun
 endpoints that verify the caller's JWT and admin flag first.

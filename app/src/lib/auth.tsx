@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session } from "@supabase/supabase-js";
+import type { Session } from "@supabase/auth-js";
 import { db } from "./supabase";
 
 export type Profile = { id: string; email: string; full_name: string; role: "student" | "teacher" | "admin"; is_admin: boolean };

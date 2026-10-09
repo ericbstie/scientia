@@ -9,7 +9,9 @@
     "metrics": "bun run scripts/metrics.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.3",
+    "@supabase/auth-js": "^2.117.3",
+    "@supabase/postgrest-js": "^2.117.3",
+    "@supabase/storage-js": "^2.117.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router": "^7.13.0"

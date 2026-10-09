@@ -1,16 +1,29 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+// The three Supabase clients the app uses (auth, data, files), without realtime and
+// edge functions, which the bundled supabase-js client would otherwise ship.
+import { AuthClient } from "@supabase/auth-js";
+import { PostgrestClient } from "@supabase/postgrest-js";
+import { StorageClient } from "@supabase/storage-js";
 
-let client: SupabaseClient;
+type Client = { auth: InstanceType<typeof AuthClient>; from: PostgrestClient["from"]; rpc: PostgrestClient["rpc"]; storage: StorageClient };
+let client: Client;
 let demo = false;
 
-/** Loads runtime config from the server and creates the Supabase client (same origin). */
+/** Loads runtime config from the server and creates the clients (same origin). */
 export async function initSupabase() {
   const { anonKey, demo: showDemo } = await (await fetch("/config.json")).json();
   demo = showDemo === true;
-  client = createClient(window.location.origin, anonKey, {
-    auth: { persistSession: true, autoRefreshToken: true, storageKey: "scientia-auth" },
-  });
-  return client;
+  const api = window.location.origin;
+  const keys = { apikey: anonKey, Authorization: `Bearer ${anonKey}` };
+  const auth = new AuthClient({ url: `${api}/auth/v1`, headers: keys, storageKey: "scientia-auth", persistSession: true, autoRefreshToken: true });
+  // Data and file requests carry the signed-in user's token (the anon key when signed out).
+  const authed = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const headers = new Headers(init?.headers);
+    headers.set("apikey", anonKey);
+    if (!headers.has("Authorization")) headers.set("Authorization", `Bearer ${(await auth.getSession()).data.session?.access_token ?? anonKey}`);
+    return fetch(input, { ...init, headers });
+  }) as typeof fetch;
+  const rest = new PostgrestClient(`${api}/rest/v1`, { fetch: authed });
+  client = { auth, from: rest.from.bind(rest), rpc: rest.rpc.bind(rest), storage: new StorageClient(`${api}/storage/v1`, {}, authed) };
 }
 
 export const db = () => client;
