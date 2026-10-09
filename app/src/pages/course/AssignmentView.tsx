@@ -1,12 +1,13 @@
 import { useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
+import { Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { readDraft, writeDraft } from "../../lib/draft";
 import { byLastName, fmtDateTime, lateBy, num, studentStatus, toLocalInput } from "../../lib/format";
 import { db, MAX_UPLOAD_BYTES } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ButtonLink, Dialog, ErrorNote, ErrorSummary, Field, focusField, Loading, NotFound, PageHeader, Section, Select, StatusBadge, TextArea, useToast } from "../../ui";
+import { Badge, Button, ButtonLink, Dialog, ErrorNote, ErrorSummary, Field, FileField, focusField, List, Loading, NotFound, PageHeader, Panel, Row, Section, Select, StatusBadge, TextArea, TextLink, useToast } from "../../ui";
 import { Facts, FileLinks, acceptsLabel, lateWorkLabel, loadAssignment, loadExtensions, loadStudents, normSub, type Assignment, type FileRef, type Student, type Submission } from "./work/shared";
 
 export function AssignmentView() {
@@ -48,7 +49,7 @@ function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
   return (
     <div className="content">
       <PageHeader
-        eyebrow={<Link to={`${base}/assignments`}>‹ Assignments</Link>}
+        back={{ to: `${base}/assignments`, label: "Assignments" }}
         title={<>{a.title} {!a.published && <Badge>Draft</Badge>}</>}
       />
       <Facts items={[
@@ -58,7 +59,7 @@ function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
         ["Late work", lateWorkLabel(a.allow_late)],
       ]} />
       <Section title="Instructions">
-        <p className="prose">{a.description || "No instructions."}</p>
+        <Paragraph className="prose">{a.description || "No instructions."}</Paragraph>
       </Section>
       {a.published && <MoreTime a={a} />}
       <ErrorNote error={err} />
@@ -72,7 +73,7 @@ function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
         ) : (
           <Button variant="primary" disabled={busy} onClick={() => setPublished(true)}>Publish</Button>
         )}
-        <Link to={`${base}/grading`}>Open grading queue</Link>
+        <TextLink to={`${base}/grading`}>Open grading queue</TextLink>
       </div>
     </div>
   );
@@ -100,22 +101,20 @@ function MoreTime({ a }: { a: Assignment }) {
   }
 
   return (
-    <Section title="More time" action={<Button size="small" onClick={() => setGiving(true)} disabled={!data}>Give more time</Button>}>
+    <Section title="More time" action={<Button onClick={() => setGiving(true)} disabled={!data}>Give more time</Button>}>
       <ErrorNote error={error ?? err} />
-      {data && (data.given.length === 0 ? <p className="muted">Everyone has the same due date.</p> : (
-        <ul className="list">
+      {data && (data.given.length === 0 ? <Paragraph className="muted">Everyone has the same due date.</Paragraph> : (
+        <List>
           {data.given.map((e) => (
-            <li key={e.student_id}>
-              <div className="row">
-                <div className="row-main">
-                  <span className="row-title">{e.full_name}</span>
-                  <div className="row-meta">Due <time dateTime={e.due_at}>{fmtDateTime(e.due_at)}</time></div>
-                </div>
-                <div className="row-side"><Button size="small" variant="ghost" aria-label={`Remove extra time for ${e.full_name}`} onClick={() => remove(e.student_id, e.full_name)}>Remove</Button></div>
+            <Row key={e.student_id}>
+              <div className="row-main">
+                <span className="row-title">{e.full_name}</span>
+                <div className="row-meta">Due <time dateTime={e.due_at}>{fmtDateTime(e.due_at)}</time></div>
               </div>
-            </li>
+              <div className="row-side"><Button variant="tertiary" aria-label={`Remove extra time for ${e.full_name}`} onClick={() => remove(e.student_id, e.full_name)}>Remove</Button></div>
+            </Row>
           ))}
-        </ul>
+        </List>
       ))}
       <Dialog open={giving} onClose={() => setGiving(false)} title="Give more time">
         {data && <MoreTimeForm a={a} students={data.students} onCancel={() => setGiving(false)} onDone={(msg) => { setGiving(false); toast(msg); reload(); }} />}
@@ -208,7 +207,7 @@ function StudentView({ a }: { a: Assignment }) {
   return (
     <div className="content">
       <PageHeader
-        eyebrow={<Link to={`${base}/assignments`}>‹ Assignments</Link>}
+        back={{ to: `${base}/assignments`, label: "Assignments" }}
         title={a.title}
       />
       <Facts items={[
@@ -219,23 +218,23 @@ function StudentView({ a }: { a: Assignment }) {
         ["Late work", lateWorkLabel(a.allow_late)],
       ]} />
       <Section title="Instructions">
-        <p className="prose">{a.description || "No instructions."}</p>
+        <Paragraph className="prose">{a.description || "No instructions."}</Paragraph>
       </Section>
       <Section title="Your submission">
         {sub && !editing ? (
-          <div className="card stack">
-            <p>
+          <Panel>
+            <Paragraph>
               <strong>Submitted{late && ` ${late} late`}</strong>
               {" "}<time dateTime={sub.submitted_at}>{fmtDateTime(sub.submitted_at)}</time>
               {" "}<span className="muted">· Attempt {sub.attempt}</span>
-            </p>
-            {sub.body && <p className="prose">{sub.body}</p>}
+            </Paragraph>
+            {sub.body && <Paragraph className="prose">{sub.body}</Paragraph>}
             <FileLinks files={sub.files} />
-            {graded && !released && <p className="muted">Your teacher has started grading this work</p>}
+            {graded && !released && <Paragraph className="muted">Your teacher has started grading this work</Paragraph>}
             {canEdit && <div><Button onClick={() => setEditing(true)}>Edit submission</Button></div>}
-          </div>
+          </Panel>
         ) : closed && !sub ? (
-          <p>Closed: this assignment stopped accepting work on <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time></p>
+          <Paragraph>Closed: this assignment stopped accepting work on <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time></Paragraph>
         ) : (
           <SubmitForm
             a={a}
@@ -248,10 +247,10 @@ function StudentView({ a }: { a: Assignment }) {
       </Section>
       {released && (
         <Section title="Feedback">
-          <div className="card stack">
-            {released.score != null && <p><strong>{num(released.score)} / {num(a.points)}</strong></p>}
-            {released.feedback && <p className="prose">{released.feedback}</p>}
-          </div>
+          <Panel>
+            {released.score != null && <Paragraph className="figure">{num(released.score)} / {num(a.points)}</Paragraph>}
+            {released.feedback && <Paragraph className="prose">{released.feedback}</Paragraph>}
+          </Panel>
         </Section>
       )}
     </div>
@@ -321,9 +320,9 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
   }
 
   return (
-    <form className="card form" onSubmit={submit} noValidate>
+    <Panel><form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={fail} />
-      {Date.now() > new Date(a.due_at).getTime() && <p className="muted">The due date has passed. Your work will be marked late.</p>}
+      {Date.now() > new Date(a.due_at).getTime() && <Paragraph className="muted">The due date has passed. Your work will be marked late.</Paragraph>}
       {a.accepts_text && (
         <TextArea
           id="sub-text" label="Your answer" rows={8} value={text} error={textError} hint={restored ? "Restored your unsent answer." : undefined}
@@ -331,8 +330,8 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
         />
       )}
       {a.accepts_files && (
-        <Field
-          id="sub-file" key={inputKey} label="File" type="file"
+        <FileField
+          id="sub-file" key={inputKey} label="File"
           hint={`One file, up to 10 MB.${existing?.files.length ? ` Your current file is ${existing.files[0]!.name}; choosing a new file replaces it.` : ""}`}
           error={fileError} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setFileError(undefined); }}
         />
@@ -341,6 +340,6 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
         <Button type="submit" variant="primary" disabled={busy}>Submit</Button>
         {onCancel && <Button onClick={onCancel}>Cancel</Button>}
       </div>
-    </form>
+    </form></Panel>
   );
 }

@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { Label } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Button, ButtonLink, ErrorNote, Field, focusField, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
+import { Button, ButtonLink, ErrorNote, Field, focusField, Loading, NotFound, PageHeader, Panel, TextArea, useToast } from "../../ui";
 
 export function PageNew() {
   const { course } = useCourse();
@@ -58,15 +59,15 @@ export function PageNew() {
   if (!q.data) return <NotFound />;
   return (
     <div className="content">
-      <PageHeader eyebrow={<Link to={`${base}/modules`}>‹ Modules</Link>} title="Add page" />
-      <form className="form" onSubmit={submit} noValidate>
+      <PageHeader back={{ to: `${base}/modules`, label: "Modules" }} title="Add page" />
+      <Panel><form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail} />
         <Field id="page-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />
-        <div className="field">
-          <span className="label" id="body-tools">Formatting</span>
-          <div className="actions" role="group" aria-labelledby="body-tools">
-            <Button size="small" onClick={bold}>Bold</Button>
-            <Button size="small" onClick={bullets}>Bulleted list</Button>
+        <div className="stack small" role="group" aria-labelledby="body-tools">
+          <Label asChild id="body-tools"><span>Formatting</span></Label>
+          <div className="actions" data-size="sm">
+            <Button onClick={bold}>Bold</Button>
+            <Button onClick={bullets}>Bulleted list</Button>
           </div>
         </div>
         <TextArea id="page-body" label="Body" optional value={body} onChange={(e) => setBody(e.target.value)} hint="Bold text goes between ** **. Start a line with - for a bulleted list." rows={10} />
@@ -74,7 +75,7 @@ export function PageNew() {
           <Button variant="primary" type="submit" disabled={busy}>Save page</Button>
           <ButtonLink to={`${base}/modules`}>Cancel</ButtonLink>
         </div>
-      </form>
+      </form></Panel>
     </div>
   );
 }

@@ -1,10 +1,10 @@
-import { Link } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDate, studentStatus } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, ButtonLink, Due, ErrorNote, Loading, PageHeader, Section, StatusBadge, Empty } from "../../ui";
+import { Card, Paragraph } from "@digdir/designsystemet-react";
+import { Badge, ButtonLink, Due, Empty, ErrorNote, List, Loading, PageHeader, Row, Section, StatusBadge, TextLink } from "../../ui";
 import { loadTeacherData, needsGrading } from "./work/shared";
 
 type Asg = { id: string; title: string; due_at: string; allow_late: boolean; published: boolean };
@@ -51,42 +51,38 @@ function StudentHome() {
       {q.loading && !q.data ? <Loading /> : q.data && (
         <>
           {q.data.anns.length > 0 && (
-            <Section title="Announcements" action={<Link to={`${base}/announcements`}>All announcements</Link>}>
-              <ul className="list">
+            <Section title="Announcements" action={<TextLink to={`${base}/announcements`}>All announcements</TextLink>}>
+              <List>
                 {q.data.anns.map((a) => (
-                  <li key={a.id}>
-                    <div className="row">
-                      <div className="row-main">
-                        <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
-                        <div className="row-meta"><time dateTime={a.created_at}>{fmtDate(a.created_at)}</time></div>
-                      </div>
-                      <div className="row-side">
-                        {a.pinned && <Badge>Pinned</Badge>}
-                        {!q.data!.read.has(a.id) && <Badge tone="accent">Unread</Badge>}
-                      </div>
+                  <Row key={a.id} tint={!q.data!.read.has(a.id)}>
+                    <div className="row-main">
+                      <TextLink className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</TextLink>
+                      <div className="row-meta"><time dateTime={a.created_at}>{fmtDate(a.created_at)}</time></div>
                     </div>
-                  </li>
+                    <div className="row-side">
+                      {a.pinned && <Badge>Pinned</Badge>}
+                      {!q.data!.read.has(a.id) && <Badge tone="accent">Unread</Badge>}
+                    </div>
+                  </Row>
                 ))}
-              </ul>
+              </List>
             </Section>
           )}
           <Section title="Next due">
             {q.data.next.length === 0 ? (
               <Empty title="Nothing due in this course" />
             ) : (
-              <ul className="list">
-                {q.data.next.map((a) => (
-                  <li key={a.id}>
-                    <div className="row">
-                      <div className="row-main">
-                        <Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link>
-                        <div className="row-meta">Due <Due at={a.due_at} /></div>
-                      </div>
-                      <div className="row-side"><StatusBadge status={studentStatus(a, q.data!.submitted.get(a.id), q.data!.released.has(a.id))} /></div>
+              <List>
+                {q.data.next.map((a, i) => (
+                  <Row key={a.id} tint={i === 0}>
+                    <div className="row-main">
+                      <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                      <div className="row-meta">Due <Due at={a.due_at} /></div>
                     </div>
-                  </li>
+                    <div className="row-side"><StatusBadge status={studentStatus(a, q.data!.submitted.get(a.id), q.data!.released.has(a.id))} /></div>
+                  </Row>
                 ))}
-              </ul>
+              </List>
             )}
           </Section>
         </>
@@ -114,51 +110,40 @@ function TeacherHome() {
       <ErrorNote error={q.error} />
       {q.loading && !q.data ? <Loading /> : q.data && (
         <>
-          <ul className="list spaced">
-            <li>
-              <div className="row">
-                <div className="row-main">
-                  <Link className="row-title" to={`${base}/grading`}>{q.data.needs} need grading</Link>
-                  <div className="row-meta">Open the grading queue</div>
-                </div>
-              </div>
-            </li>
-          </ul>
+          <Card data-color="accent" data-variant="tinted" className="section">
+            <Paragraph><TextLink to={`${base}/grading`}><span className="figure">{q.data.needs}</span> need grading</TextLink></Paragraph>
+          </Card>
           <Section title="Announcements" action={<ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>}>
             {q.data.anns.length === 0 ? (
               <Empty title="No announcements yet">Post one to tell your students what is happening.</Empty>
             ) : (
-              <ul className="list">
+              <List>
                 {q.data.anns.map((a) => (
-                  <li key={a.id}>
-                    <div className="row">
-                      <div className="row-main">
-                        <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
-                        <div className="row-meta"><time dateTime={a.created_at}>{fmtDate(a.created_at)}</time></div>
-                      </div>
+                  <Row key={a.id}>
+                    <div className="row-main">
+                      <TextLink className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</TextLink>
+                      <div className="row-meta"><time dateTime={a.created_at}>{fmtDate(a.created_at)}</time></div>
                     </div>
-                  </li>
+                  </Row>
                 ))}
-              </ul>
+              </List>
             )}
           </Section>
           <Section title="Assignments" action={<ButtonLink to={`${base}/assignments/new`}>New assignment</ButtonLink>}>
             {q.data.asgs.length === 0 ? (
               <Empty title="Nothing due in this course" />
             ) : (
-              <ul className="list">
+              <List>
                 {q.data.asgs.map((a) => (
-                  <li key={a.id}>
-                    <div className="row">
-                      <div className="row-main">
-                        <Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link>
-                        <div className="row-meta">Due <Due at={a.due_at} /></div>
-                      </div>
-                      <div className="row-side">{!a.published && <Badge>Draft</Badge>}</div>
+                  <Row key={a.id}>
+                    <div className="row-main">
+                      <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                      <div className="row-meta">Due <Due at={a.due_at} /></div>
                     </div>
-                  </li>
+                    <div className="row-side">{!a.published && <Badge>Draft</Badge>}</div>
+                  </Row>
                 ))}
-              </ul>
+              </List>
             )}
           </Section>
         </>

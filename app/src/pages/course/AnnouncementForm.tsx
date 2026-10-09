@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Button, ButtonLink, ErrorNote, Field, focusField, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
+import { Button, ButtonLink, ErrorNote, Field, focusField, Loading, NotFound, PageHeader, Panel, TextArea, useToast } from "../../ui";
 
 export function AnnouncementForm() {
   const { course } = useCourse();
@@ -56,8 +56,8 @@ export function AnnouncementForm() {
   if (q.data && !q.data.found) return <NotFound />;
   return (
     <div className="content">
-      <PageHeader eyebrow={<Link to={`${base}/announcements`}>‹ Announcements</Link>} title={editing ? "Edit announcement" : "New announcement"} />
-      <form className="form" onSubmit={submit} noValidate>
+      <PageHeader back={{ to: `${base}/announcements`, label: "Announcements" }} title={editing ? "Edit announcement" : "New announcement"} />
+      <Panel><form className="form" onSubmit={submit} noValidate>
         <ErrorNote error={fail ?? q.error} />
         <Field id="announcement-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={titleError} />
         <TextArea label="Message" optional hint={editing ? undefined : "Students in the course are notified when you post."} value={message} onChange={(e) => setMessage(e.target.value)} rows={8} />
@@ -65,7 +65,7 @@ export function AnnouncementForm() {
           <Button variant="primary" type="submit" disabled={busy}>{editing ? "Save" : "Post"}</Button>
           <ButtonLink to={`${base}/announcements`}>Cancel</ButtonLink>
         </div>
-      </form>
+      </form></Panel>
     </div>
   );
 }

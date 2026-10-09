@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router";
+import { ListItem, ListUnordered, Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime, lateBy } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, Loading, PageHeader, Status, StatusBadge, useToast } from "../../ui";
+import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, List, Loading, PageHeader, Row, Status, StatusBadge, TextLink, useToast } from "../../ui";
 import { buildQueue, loadTeacherData, type QueueRow } from "./work/shared";
 
 import type { Filter } from "./work/shared";
@@ -69,37 +70,35 @@ export function Grading() {
         shown.length === 0 ? (
           <Empty title={active.empty} />
         ) : (
-          <ul className="list">
+          <List>
             {shown.map((r) => {
               const late = r.submittedAt && lateBy(r.due, r.submittedAt);
               return (
-                <li key={r.id}>
-                  <div className="row">
-                    <div className="row-main">
-                      {r.submissionId
-                        ? <Link className="row-title" to={`${base}/grading/${r.submissionId}`}>{r.student}</Link>
-                        : <span className="row-title">{r.student}</span>}
-                      <div className="row-meta">
-                        {r.assignment} ·{" "}
-                        {r.submittedAt
-                          ? <>Submitted <time dateTime={r.submittedAt}>{fmtDateTime(r.submittedAt)}</time></>
-                          : <>Due <time dateTime={r.due}>{fmtDateTime(r.due)}</time></>}
-                      </div>
-                    </div>
-                    <div className="actions">
-                      {late && <Badge tone="warning">Late by {late}</Badge>}
-                      {r.filter === "needs-grading" && <StatusBadge status="Needs grading" />}
-                      {r.filter === "graded" && <StatusBadge status="Graded (not released)" />}
-                      {r.filter === "released" && <StatusBadge status="Released" />}
-                      {r.filter === "missing" && <Badge tone="danger">Missing</Badge>}
-                      {r.filter === "graded" && <Button size="small" variant="ghost" disabled={busy} aria-label={`Release grade for ${r.student} on ${r.assignment}`} onClick={() => setReleased([r], true)}>Release</Button>}
-                      {r.filter === "released" && <Button size="small" variant="ghost" aria-label={`Withdraw grade for ${r.student} on ${r.assignment}`} onClick={() => setWithdraw(r)}>Withdraw</Button>}
+                <Row key={r.id}>
+                  <div className="row-main">
+                    {r.submissionId
+                      ? <TextLink className="row-title" to={`${base}/grading/${r.submissionId}`}>{r.student}<span className="ds-sr-only">, {r.assignment}</span></TextLink>
+                      : <span className="row-title">{r.student}</span>}
+                    <div className="row-meta">
+                      {r.assignment} ·{" "}
+                      {r.submittedAt
+                        ? <>Submitted <time dateTime={r.submittedAt}>{fmtDateTime(r.submittedAt)}</time></>
+                        : <>Due <time dateTime={r.due}>{fmtDateTime(r.due)}</time></>}
                     </div>
                   </div>
-                </li>
+                  <div className="actions">
+                    {late && <Badge tone="warning">Late by {late}</Badge>}
+                    {r.filter === "needs-grading" && <StatusBadge status="Needs grading" />}
+                    {r.filter === "graded" && <StatusBadge status="Graded (not released)" />}
+                    {r.filter === "released" && <StatusBadge status="Released" />}
+                    {r.filter === "missing" && <Badge tone="danger">Missing</Badge>}
+                    {r.filter === "graded" && <Button variant="tertiary" disabled={busy} aria-label={`Release grade for ${r.student} on ${r.assignment}`} onClick={() => setReleased([r], true)}>Release</Button>}
+                    {r.filter === "released" && <Button variant="tertiary" aria-label={`Withdraw grade for ${r.student} on ${r.assignment}`} onClick={() => setWithdraw(r)}>Withdraw</Button>}
+                  </div>
+                </Row>
               );
             })}
-          </ul>
+          </List>
         )
       )}
 
@@ -111,12 +110,12 @@ export function Grading() {
         onCancel={() => setWithdraw(null)}
         onConfirm={() => withdraw && setReleased([withdraw], false)}
       >
-        <p>The student will no longer see the score or feedback. You can release it again later.</p>
+        The student will no longer see the score or feedback. You can release it again later.
       </Confirm>
 
       <Dialog open={releaseAll} onClose={() => setReleaseAll(false)} title={`Release ${drafted.length} ${drafted.length === 1 ? "grade" : "grades"}?`}>
-        <p>These students will see their scores and feedback:</p>
-        <ul>{drafted.map((r) => <li key={r.id}>{r.student}, {r.assignment}</li>)}</ul>
+        <Paragraph>These students will see their scores and feedback:</Paragraph>
+        <ListUnordered>{drafted.map((r) => <ListItem key={r.id}>{r.student}, {r.assignment}</ListItem>)}</ListUnordered>
         <div className="actions">
           <Button onClick={() => setReleaseAll(false)}>Cancel</Button>
           <Button variant="primary" disabled={busy} onClick={() => setReleased(drafted, true)}>Release</Button>

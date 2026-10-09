@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { useCourse, useDocTitle, useUnread } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDate } from "../../lib/format";
@@ -38,12 +38,15 @@ export function AnnouncementView() {
   if (!q.data) return <NotFound />;
     return (
     <div className="content">
-      <PageHeader eyebrow={<Link to={`/courses/${course.id}/announcements`}>‹ Announcements</Link>} title={q.data.title} />
-      <p className="muted">
-        {q.data.author?.full_name} · <time dateTime={q.data.created_at}>{fmtDate(q.data.created_at)}</time>
-        {q.data.pinned && <> <Badge>Pinned</Badge></>}
-        {q.data.edited_at && <> <Badge>Edited</Badge></>}
-      </p>
+      <PageHeader
+        back={{ to: `/courses/${course.id}/announcements`, label: "Announcements" }}
+        title={q.data.title}
+        subtitle={<>
+          {q.data.author?.full_name} · <time dateTime={q.data.created_at}>{fmtDate(q.data.created_at)}</time>
+          {q.data.pinned && <> <Badge>Pinned</Badge></>}
+          {q.data.edited_at && <> <Badge>Edited</Badge></>}
+        </>}
+      />
       <Prose text={q.data.body} />
     </div>
   );

@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { db, isDemo } from "../lib/supabase";
-import { BrandMark, Button, ErrorNote, Field, useTitle } from "../ui";
+import { Heading, Link, Paragraph } from "@digdir/designsystemet-react";
+import { BrandMark, Button, ErrorNote, Field, Panel, useTitle } from "../ui";
 
 const DEMO_ACCOUNTS = [
   { label: "Student", email: "maya.okafor@scientia.test" },
@@ -41,28 +42,30 @@ export function SignIn() {
 
   return (
     <main className="auth-page" id="main">
-      <div className="auth-card card">
+      <Panel className="auth-card">
         <div className="brand"><BrandMark /> Scientia</div>
-        <h1>Sign in</h1>
+        <Heading level={1} data-size="sm">Sign in</Heading>
         <ErrorNote error={error} />
         <form className="form" onSubmit={submit} noValidate>
           <Field id="si-email" label="Email" type="email" autoFocus autoComplete="email" required value={email} error={missing.email} onChange={(e) => setEmail(e.target.value)} />
           <Field id="si-password" label="Password" type="password" autoComplete="current-password" required value={password} error={missing.password} onChange={(e) => setPassword(e.target.value)} />
           <Button type="submit" variant="primary" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
-        {isDemo() && <div className="demo-accounts muted">
-          <p>Demo accounts (password <code>{DEMO_PASSWORD}</code>):</p>
-          <ul>
+        {isDemo() && <div className="stack small">
+          <Paragraph className="muted">Demo accounts (password <code>{DEMO_PASSWORD}</code>):</Paragraph>
+          <ul className="plain-list stack">
             {DEMO_ACCOUNTS.map((a) => (
               <li key={a.email}>
-                <button type="button" onClick={() => { setEmail(a.email); setPassword(DEMO_PASSWORD); }}>
-                  {a.label}: {a.email}
-                </button>
+                <Link asChild>
+                  <button type="button" onClick={() => { setEmail(a.email); setPassword(DEMO_PASSWORD); }}>
+                    {a.label}: {a.email}
+                  </button>
+                </Link>
               </li>
             ))}
           </ul>
         </div>}
-      </div>
+      </Panel>
     </main>
   );
 }

@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { db, MAX_UPLOAD_BYTES, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, focusHeading, Loading, PageHeader, Section, useToast } from "../../ui";
+import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, ExtLink, Field, FileField, focusField, focusHeading, List, Loading, PageHeader, Row, Section, TextLink, useToast } from "../../ui";
 
 type Item = { id: string; kind: "page" | "file" | "link"; title: string; url: string | null; file_name: string | null; file_path: string | null; position: number };
 type Mod = { id: string; title: string; position: number; published: boolean; materials: Item[] };
@@ -83,39 +83,37 @@ export function Modules() {
             key={m.id}
             title={m.title}
             action={teacher && (
-              <div className="actions">
+              <div className="actions" data-size="sm">
                 {!m.published && <Badge>Draft</Badge>}
-                <Button size="small" aria-label={`${m.published ? "Unpublish" : "Publish"} module ${m.title}`} onClick={() => setPublished(m, !m.published)}>{m.published ? "Unpublish" : "Publish"}</Button>
-                <ButtonLink size="small" aria-label={`Add page to ${m.title}`} to={`${base}/modules/${m.id}/pages/new`}>Add page</ButtonLink>
-                <Button size="small" aria-label={`Add file to ${m.title}`} onClick={() => setDialog({ kind: "file", module: m })}>Add file</Button>
-                <Button size="small" aria-label={`Add link to ${m.title}`} onClick={() => setDialog({ kind: "link", module: m })}>Add link</Button>
+                <Button aria-label={`${m.published ? "Unpublish" : "Publish"} module ${m.title}`} onClick={() => setPublished(m, !m.published)}>{m.published ? "Unpublish" : "Publish"}</Button>
+                <ButtonLink aria-label={`Add page to ${m.title}`} to={`${base}/modules/${m.id}/pages/new`}>Add page</ButtonLink>
+                <Button aria-label={`Add file to ${m.title}`} onClick={() => setDialog({ kind: "file", module: m })}>Add file</Button>
+                <Button aria-label={`Add link to ${m.title}`} onClick={() => setDialog({ kind: "link", module: m })}>Add link</Button>
               </div>
             )}
           >
             {m.materials.length === 0 ? (
-              <p className="muted">This module is empty.{teacher && " Add a page, file or link."}</p>
+              <Paragraph className="muted">This module is empty.{teacher && " Add a page, file or link."}</Paragraph>
             ) : (
-              <ul className="list">
+              <List>
                 {m.materials.map((i) => (
-                  <li key={i.id}>
-                    <div className="row">
-                      <div className="row-main">
-                        {i.kind === "page" ? (
-                          <Link className="row-title" to={`${base}/pages/${i.id}`}>{i.title}</Link>
-                        ) : i.kind === "link" ? (
-                          <a className="row-title" href={i.url && /^https?:\/\//i.test(i.url) ? i.url : undefined} target="_blank" rel="noopener noreferrer">{i.title}</a>
-                        ) : q.data!.signed[i.file_path ?? ""] ? (
-                          <a className="row-title" href={q.data!.signed[i.file_path!]} download={i.file_name ?? i.title}>{i.title}</a>
-                        ) : (
-                          <span className="row-title">{i.title}</span>
-                        )}
-                        <div className="row-meta">{KIND_LABEL[i.kind]}{i.kind === "link" && " · Opens in a new tab"}{i.kind === "file" && i.file_name && <> · {i.file_name}</>}</div>
-                      </div>
-                      {teacher && <div className="row-side"><Button variant="danger" size="small" className="ghost" aria-label={`Delete ${KIND_LABEL[i.kind].toLowerCase()} ${i.title}`} onClick={() => setRemoving(i)}>Delete</Button></div>}
+                  <Row key={i.id}>
+                    <div className="row-main">
+                      {i.kind === "page" ? (
+                        <TextLink className="row-title" to={`${base}/pages/${i.id}`}>{i.title}</TextLink>
+                      ) : i.kind === "link" ? (
+                        <ExtLink className="row-title" href={i.url && /^https?:\/\//i.test(i.url) ? i.url : undefined} target="_blank" rel="noopener noreferrer">{i.title}</ExtLink>
+                      ) : q.data!.signed[i.file_path ?? ""] ? (
+                        <ExtLink className="row-title" href={q.data!.signed[i.file_path!]} download={i.file_name ?? i.title}>{i.title}</ExtLink>
+                      ) : (
+                        <span className="row-title">{i.title}</span>
+                      )}
+                      <div className="row-meta">{KIND_LABEL[i.kind]}{i.kind === "link" && " · Opens in a new tab"}{i.kind === "file" && i.file_name && <> · {i.file_name}</>}</div>
                     </div>
-                  </li>
+                    {teacher && <div className="row-side"><Button variant="tertiary" data-color="danger" aria-label={`Delete ${KIND_LABEL[i.kind].toLowerCase()} ${i.title}`} onClick={() => setRemoving(i)}>Delete</Button></div>}
+                  </Row>
                 ))}
-              </ul>
+              </List>
             )}
           </Section>
         ))
@@ -233,7 +231,7 @@ function FileForm({ module: mod, onCancel, onDone }: { module: Mod; onCancel: ()
   return (
     <form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={fail} />
-      <Field id="file-input" type="file" label="File" required hint="Up to 10 MB." error={error} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError(undefined); }} />
+      <FileField id="file-input" label="File" required hint="Up to 10 MB." error={error} onChange={(e) => { setFile(e.target.files?.[0] ?? null); setError(undefined); }} />
       <FormActions busy={busy} submit="Add file" onCancel={onCancel} />
     </form>
   );

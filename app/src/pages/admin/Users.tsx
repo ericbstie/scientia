@@ -1,5 +1,6 @@
+import { ListItem, ListUnordered, Paragraph, Select as DsSelect, Table } from "@digdir/designsystemet-react";
 import { useState, type FormEvent } from "react";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, PasswordField, Select, Status, useTitle, useToast } from "../../ui";
+import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, FileField, focusField, Loading, PageHeader, PasswordField, Select, Status, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { useAuth } from "../../lib/auth";
@@ -77,43 +78,43 @@ export function AdminUsers() {
         <Empty title="No users match your search" />
       ) : (
         <div className="table-wrap">
-          <table className="stack-rows">
-            <caption className="visually-hidden">Users</caption>
+          <Table data-color="neutral" data-size="sm" className="stack-rows">
+            <caption className="ds-sr-only">Users</caption>
             <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
-            <tbody>
+            <tbody data-color="accent">
               {rows.map((u) => (
                 <tr key={u.id}>
                   <th scope="row">{u.full_name}</th>
                   <td data-label="Email">{u.email}</td>
                   <td data-label="Role">
                     {u.id === profile?.id ? <span className="cap">{u.role}</span> : (
-                      <select className="select" aria-label={`Role for ${u.full_name}`} value={u.role} disabled={busy} onChange={(e) => setUserRole(u, e.target.value)}>
+                      <DsSelect className="role-select" aria-label={`Role for ${u.full_name}`} value={u.role} disabled={busy} onChange={(e) => setUserRole(u, e.target.value)}>
                         <option value="student">Student</option>
                         <option value="teacher">Teacher</option>
                         <option value="admin">Admin</option>
-                      </select>
+                      </DsSelect>
                     )}
                   </td>
                   <td data-label="Status"><Badge tone={u.deactivated ? undefined : "success"}>{u.deactivated ? "Deactivated" : "Active"}</Badge></td>
                   <td data-label="Actions">
                     <div className="actions">
-                      <Button size="small" variant="ghost" aria-label={`Reset password for ${u.full_name}`} onClick={() => setResetting(u)}>Reset password</Button>
+                      <Button variant="tertiary" aria-label={`Reset password for ${u.full_name}`} onClick={() => setResetting(u)}>Reset password</Button>
                       {u.deactivated ? (
-                        <Button size="small" variant="ghost" aria-label={`Reactivate ${u.full_name}`} disabled={busy} onClick={() => setDeactivated(u, false)}>Reactivate</Button>
+                        <Button variant="tertiary" aria-label={`Reactivate ${u.full_name}`} disabled={busy} onClick={() => setDeactivated(u, false)}>Reactivate</Button>
                       ) : u.id === profile?.id ? (
                         <>
-                          <Button size="small" variant="ghost" aria-label={`Deactivate ${u.full_name}`} disabled>Deactivate</Button>
+                          <Button variant="tertiary" aria-label={`Deactivate ${u.full_name}`} disabled>Deactivate</Button>
                           <span className="muted">You can't deactivate your own account</span>
                         </>
                       ) : (
-                        <Button size="small" variant="ghost" aria-label={`Deactivate ${u.full_name}`} onClick={() => setDeactivating(u)}>Deactivate</Button>
+                        <Button variant="tertiary" aria-label={`Deactivate ${u.full_name}`} onClick={() => setDeactivating(u)}>Deactivate</Button>
                       )}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       )}
 
@@ -253,7 +254,7 @@ function parseCsv(text: string) {
 function readUsers(text: string, existing: Set<string>): ImportRow[] | string {
   const [head = [], ...rest] = parseCsv(text);
   const col = Object.fromEntries(["name", "email", "role", "password"].map((h) => [h, head.findIndex((c) => c.toLowerCase() === h)]));
-  if (col.name < 0 || col.email < 0 || col.password < 0) return "The first row must name the columns: name, email, password and, if you need it, role.";
+  if (col.name < 0 || col.email < 0 || col.password < 0) return "The first row must name the columns name, email and password. A role column is optional.";
   const firstRow = new Map<string, number>();
   const rows = rest.flatMap((cells, i): ImportRow[] => {
     if (!cells.some(Boolean)) return [];
@@ -309,22 +310,22 @@ function ImportForm({ existing, onClose, onAdded }: { existing: Set<string>; onC
   return (
     <div className="form">
       {added === null && (
-        <Field id="import-file" type="file" accept=".csv,text/csv" label="CSV file" required error={fileError} onChange={(e) => choose(e.target.files?.[0])}
-          hint="First row: name, email, role, password. Role is student, teacher or admin, and student if empty. Passwords need at least 8 characters." />
+        <FileField id="import-file" accept=".csv,text/csv" label="CSV file" required error={fileError} onChange={(e) => choose(e.target.files?.[0])}
+          hint="The first row names the columns: name, email, password and, if you need it, role (student, teacher or admin; student when empty). Passwords need at least 8 characters." />
       )}
       {rows && (
         <>
           <div>
-            <p>{added !== null ? `${added} added. These rows were not added:` : `${ready.length} ready to add.${problems.length ? ` ${problems.length} with problems will be skipped:` : ""}`}</p>
-            {problems.length > 0 && <ul>{problems.map((r) => <li key={r.row}>Row {r.row}{r.email && `, ${r.email}`}: {r.problem}</li>)}</ul>}
+            <Paragraph>{added !== null ? `${added} added. These rows were not added:` : `${ready.length} ready to add.${problems.length ? ` ${problems.length} with problems will be skipped:` : ""}`}</Paragraph>
+            {problems.length > 0 && <ListUnordered>{problems.map((r) => <ListItem key={r.row}>Row {r.row}{r.email && `, ${r.email}`}: {r.problem}</ListItem>)}</ListUnordered>}
           </div>
           {added === null && ready.length > 0 && (
             <div className="table-wrap">
-              <table>
-                <caption className="visually-hidden">Ready to add</caption>
+              <Table data-color="neutral" data-size="sm">
+                <caption className="ds-sr-only">Ready to add</caption>
                 <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th></tr></thead>
-                <tbody>{ready.map((r) => <tr key={r.row}><th scope="row">{r.full_name}</th><td>{r.email}</td><td className="cap">{r.role}</td></tr>)}</tbody>
-              </table>
+                <tbody data-color="accent">{ready.map((r) => <tr key={r.row}><th scope="row">{r.full_name}</th><td>{r.email}</td><td className="cap">{r.role}</td></tr>)}</tbody>
+              </Table>
             </div>
           )}
         </>

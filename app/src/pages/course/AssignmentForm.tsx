@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime, toLocalInput } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Button, Checkbox, ErrorNote, ErrorSummary, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
+import { Fieldset, FieldsetLegend, ValidationMessage } from "@digdir/designsystemet-react";
+import { Button, ButtonLink, Checkbox, ErrorNote, ErrorSummary, Field, Loading, NotFound, PageHeader, Panel, TextArea, useToast } from "../../ui";
 import { loadAssignment } from "./work/shared";
 
 type Errors = { title?: string; due?: string; points?: string; accepts?: string };
@@ -75,25 +76,25 @@ export function AssignmentForm() {
   return (
     <div className="content">
       <PageHeader
-        eyebrow={<Link to={`${base}/assignments`}>‹ Assignments</Link>}
+        back={{ to: `${base}/assignments`, label: "Assignments" }}
         title={editing ? "Edit assignment" : "New assignment"}
       />
       <ErrorNote error={existing.error} />
       <ErrorSummary errors={[errors.title && { id: "a-title", message: errors.title }, errors.due && { id: "a-due", message: errors.due }, errors.points && { id: "a-points", message: errors.points }, errors.accepts && { id: "a-accepts", message: errors.accepts }]} />
       <ErrorNote error={saveError} />
-      <form className="form" ref={formRef} onSubmit={(e) => save(e, editing ? null : true)} noValidate>
+      <Panel><form className="form" ref={formRef} onSubmit={(e) => save(e, editing ? null : true)} noValidate>
         <Field id="a-title" label="Title" required value={title} onChange={(e) => setTitle(e.target.value)} error={errors.title} autoComplete="off" />
         <TextArea id="a-instructions" label="Instructions" optional rows={6} value={description} onChange={(e) => setDescription(e.target.value)} />
         <div className="field-row">
           <Field id="a-due" label="Due date and time" required type="datetime-local" value={due} onChange={(e) => setDue(e.target.value)} error={errors.due} hint={due && !isNaN(new Date(due).getTime()) ? `Students see ${fmtDateTime(new Date(due))}` : undefined} />
           <Field id="a-points" label="Points" required type="number" min="0" step="any" inputMode="decimal" value={points} onChange={(e) => setPoints(e.target.value)} error={errors.points} />
         </div>
-        <fieldset id="a-accepts" className="choices" aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>
-          <legend className="label">Students hand in by</legend>
+        <Fieldset id="a-accepts" aria-describedby={errors.accepts ? "a-accepts-error" : undefined}>
+          <FieldsetLegend>Students hand in by</FieldsetLegend>
           <Checkbox label="Uploading a file" checked={files} onChange={(e) => setFiles(e.target.checked)} />
           <Checkbox label="Typing an answer" checked={text} onChange={(e) => setText(e.target.checked)} />
-          {errors.accepts && <span className="error-text" id="a-accepts-error">{errors.accepts}</span>}
-        </fieldset>
+          {errors.accepts && <ValidationMessage id="a-accepts-error">{errors.accepts}</ValidationMessage>}
+        </Fieldset>
         <Checkbox label="Accept work after the due date (marked late)" checked={late} onChange={(e) => setLate(e.target.checked)} />
         <div className="actions">
           {editing ? (
@@ -104,9 +105,9 @@ export function AssignmentForm() {
               <Button disabled={busy} onClick={() => save(null, false)}>Save as draft</Button>
             </>
           )}
-          <Link to={editing ? `${base}/assignments/${assignmentId}` : `${base}/assignments`} className="btn ghost">Cancel</Link>
+          <ButtonLink to={editing ? `${base}/assignments/${assignmentId}` : `${base}/assignments`}>Cancel</ButtonLink>
         </div>
-      </form>
+      </form></Panel>
     </div>
   );
 }

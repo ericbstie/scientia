@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useUnread } from "../App";
 import { useAuth } from "../lib/auth";
 import { fmtDateTime } from "../lib/format";
 import { db, must } from "../lib/supabase";
 import { useQuery } from "../lib/useQuery";
-import { Badge, Button, Empty, ErrorNote, focusHeading, Loading, PageHeader, useTitle, useToast } from "../ui";
+import { Badge, Button, Empty, ErrorNote, focusHeading, List, Loading, PageHeader, Row, TextLink, useTitle, useToast } from "../ui";
 
 type Note = { id: string; title: string; link: string; read_at: string | null; created_at: string };
 
@@ -54,17 +54,17 @@ export function Notifications() {
           <Empty title="No notifications">New announcements, grades and replies appear here.</Empty>
         ) : (
           data && (
-            <ul className="list">
+            <List>
               {data.map((n) => (
-                <li key={n.id} className="row">
+                <Row key={n.id} tint={!n.read_at}>
                   <div className="row-main">
-                    <Link className="row-title" to={n.link} onClick={(e) => open(e, n)}>{n.title}</Link>
+                    <TextLink className="row-title" to={n.link} onClick={(e) => open(e, n)}>{n.title}</TextLink>
                     <div className="row-meta"><time dateTime={n.created_at}>{fmtDateTime(n.created_at)}</time></div>
                   </div>
                   {!n.read_at && <div className="row-side"><Badge tone="accent">Unread</Badge></div>}
-                </li>
+                </Row>
               ))}
-            </ul>
+            </List>
           )
         )}
       </div>

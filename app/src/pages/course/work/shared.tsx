@@ -1,8 +1,9 @@
 // Shared types, loaders and small components for assignments, submissions and grading.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
+import { Paragraph } from "@digdir/designsystemet-react";
 import { db, isUuid, must } from "../../../lib/supabase";
-import { Button, Dialog } from "../../../ui";
+import { Button, Dialog, ExtLink } from "../../../ui";
 
 export type Assignment = {
   id: string; course_id: string; title: string; description: string; due_at: string; points: number;
@@ -113,7 +114,7 @@ export function FileLinks({ files }: { files: FileRef[] }) {
   return (
     <ul className="plain-list">
       {files.map((f) => (
-        <li key={f.path}>{urls[f.path] ? <a href={urls[f.path]} download={f.name} target="_blank" rel="noreferrer">{f.name}</a> : <span>{f.name}</span>}</li>
+        <li key={f.path}>{urls[f.path] ? <ExtLink href={urls[f.path]} download={f.name} target="_blank" rel="noreferrer">{f.name}</ExtLink> : <span>{f.name}</span>}</li>
       ))}
     </ul>
   );
@@ -163,10 +164,10 @@ export function useUnsavedGuard(dirty: boolean) {
   const go = (path: string) => (dirtyRef.current ? setPending(path) : navigate(path));
   const dialog = (
     <Dialog open={pending !== null} onClose={() => setPending(null)} title="Discard unsaved changes?">
-      <p>Your score and feedback have not been saved.</p>
+      <Paragraph>Your score and feedback have not been saved.</Paragraph>
       <div className="actions">
         <Button onClick={() => setPending(null)}>Stay on this page</Button>
-        <Button variant="danger" onClick={() => { const p = pending!; dirtyRef.current = false; setPending(null); navigate(p); }}>Discard changes</Button>
+        <Button variant="tertiary" data-color="danger" onClick={() => { const p = pending!; dirtyRef.current = false; setPending(null); navigate(p); }}>Discard changes</Button>
       </div>
     </Dialog>
   );

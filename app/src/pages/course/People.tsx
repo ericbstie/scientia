@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, focusField, focusHeading, Loading, PageHeader, Section, TextArea, useToast } from "../../ui";
+import { Avatar, Badge, Button, Confirm, Dialog, Empty, ErrorNote, focusField, focusHeading, List, Loading, PageHeader, Row, Section, TextArea, TextLink, useToast } from "../../ui";
 import { enrolAll, enrolProblems, splitEmails, type EnrolProblem } from "../../lib/enrol";
 import { byLastName } from "../../lib/format";
 
@@ -46,39 +46,35 @@ export function People() {
       {q.loading && !q.data ? <Loading /> : (
         <>
           <Section title="Teachers">
-            {teachers.length === 0 ? <Empty title="No teachers yet" /> : <ul className="list">
+            {teachers.length === 0 ? <Empty title="No teachers yet" /> : <List>
               {teachers.map((p) => (
-                <li key={p.user_id}>
-                  <div className="row">
-                    <Avatar name={p.full_name} />
-                    <div className="row-main">
-                      <span className="row-title">{p.full_name}</span>
-                      {teacher && p.email && <div className="row-meta">{p.email}</div>}
-                    </div>
-                    <div className="row-side"><Badge>Teacher</Badge></div>
+                <Row key={p.user_id}>
+                  <Avatar name={p.full_name} />
+                  <div className="row-main">
+                    <span className="row-title">{p.full_name}</span>
+                    {teacher && p.email && <div className="row-meta">{p.email}</div>}
                   </div>
-                </li>
+                  <div className="row-side"><Badge>Teacher</Badge></div>
+                </Row>
               ))}
-            </ul>}
+            </List>}
           </Section>
           <Section title={`${students.length} ${students.length === 1 ? "student" : "students"}`}>
             {students.length === 0 ? (
               <Empty title="No students yet" action={teacher && <Button onClick={() => setAdding(true)}>Add student</Button>} />
             ) : (
-              <ul className="list">
+              <List>
                 {students.map((p) => (
-                  <li key={p.user_id}>
-                    <div className="row">
-                      <Avatar name={p.full_name} />
-                      <div className="row-main">
-                        <span className="row-title">{p.full_name}</span>
-                        {teacher && p.email && <div className="row-meta">{p.email}</div>}
-                      </div>
-                      {teacher && <div className="row-side"><Button size="small" variant="danger" className="ghost" aria-label={`Remove ${p.full_name}`} onClick={() => setRemoving(p)}>Remove</Button></div>}
+                  <Row key={p.user_id}>
+                    <Avatar name={p.full_name} />
+                    <div className="row-main">
+                      <span className="row-title">{p.full_name}</span>
+                      {teacher && p.email && <div className="row-meta">{p.email}</div>}
                     </div>
-                  </li>
+                    {teacher && <div className="row-side"><Button variant="tertiary" data-color="danger" aria-label={`Remove ${p.full_name}`} onClick={() => setRemoving(p)}>Remove</Button></div>}
+                  </Row>
                 ))}
-              </ul>
+              </List>
             )}
           </Section>
         </>
@@ -147,7 +143,7 @@ function AddForm({ onClose, onAdded }: { onClose: () => void; onAdded: (who: str
   return (
     <form className="form" onSubmit={submit} noValidate>
       <TextArea id="person-email" label="Email" required rows={3} inputMode="email" value={emails} onChange={(e) => setEmails(e.target.value)} error={error} hint="One address, or several on separate lines. Each person needs an existing Scientia account." />
-      {error?.includes("the Users page") && <p><Link to="/admin/users">Open Users</Link></p>}
+      {error?.includes("the Users page") && <Paragraph><TextLink to="/admin/users">Open Users</TextLink></Paragraph>}
       <div className="actions">
         <Button variant="primary" type="submit" disabled={busy}>Add student</Button>
         {others.length > 0 && <Button disabled={busy} onClick={addOthers}>Add the other {others.length}</Button>}

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDate } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ButtonLink, Confirm, Empty, ErrorNote, focusHeading, Loading, PageHeader, useToast } from "../../ui";
+import { Badge, Button, ButtonLink, Confirm, Empty, ErrorNote, focusHeading, List, Loading, PageHeader, Row, TextLink, useToast } from "../../ui";
 
 export type AnnouncementRow = { id: string; title: string; body: string; pinned: boolean; created_at: string; edited_at: string | null; author: { full_name: string } | null };
 
@@ -76,32 +76,30 @@ export function Announcements() {
       {q.loading && !q.data ? <Loading /> : list.length === 0 ? (
         <Empty title="No announcements yet" action={teacher && <ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
       ) : (
-        <ul className="list">
+        <List>
           {list.map((a) => {
             return (
-              <li key={a.id}>
-                <div className="row">
-                  <div className="row-main">
-                    <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
-                    <div className="row-meta">
-                      {a.author?.full_name} · <time dateTime={a.created_at}>{fmtDate(a.created_at)}</time>
-                      {a.pinned && <> <Badge>Pinned</Badge></>}
-                      {!teacher && !reads.has(a.id) && <> <Badge tone="accent">Unread</Badge></>}
-                      {a.edited_at && <> <Badge>Edited</Badge></>}
-                    </div>
+              <Row key={a.id}>
+                <div className="row-main">
+                  <TextLink className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</TextLink>
+                  <div className="row-meta">
+                    {a.author?.full_name} · <time dateTime={a.created_at}>{fmtDate(a.created_at)}</time>
+                    {a.pinned && <> <Badge>Pinned</Badge></>}
+                    {!teacher && !reads.has(a.id) && <> <Badge tone="accent">Unread</Badge></>}
+                    {a.edited_at && <> <Badge>Edited</Badge></>}
                   </div>
-                  {teacher && (
-                    <div className="row-side actions">
-                      <Button size="small" variant="ghost" aria-label={`${a.pinned ? "Unpin" : "Pin"} announcement ${a.title}`} onClick={() => togglePin(a)}>{a.pinned ? "Unpin" : "Pin"}</Button>
-                      <ButtonLink size="small" variant="ghost" aria-label={`Edit announcement ${a.title}`} to={`${base}/announcements/${a.id}/edit`}>Edit</ButtonLink>
-                      <Button size="small" variant="danger" className="ghost" aria-label={`Delete announcement ${a.title}`} onClick={() => setRemoving(a)}>Delete</Button>
-                    </div>
-                  )}
                 </div>
-              </li>
+                {teacher && (
+                  <div className="row-side actions">
+                    <Button variant="tertiary" aria-label={`${a.pinned ? "Unpin" : "Pin"} announcement ${a.title}`} onClick={() => togglePin(a)}>{a.pinned ? "Unpin" : "Pin"}</Button>
+                    <ButtonLink variant="tertiary" aria-label={`Edit announcement ${a.title}`} to={`${base}/announcements/${a.id}/edit`}>Edit</ButtonLink>
+                    <Button variant="tertiary" data-color="danger" aria-label={`Delete announcement ${a.title}`} onClick={() => setRemoving(a)}>Delete</Button>
+                  </div>
+                )}
+              </Row>
             );
           })}
-        </ul>
+        </List>
       )}
       <Confirm
         open={!!removing}

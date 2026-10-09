@@ -1,9 +1,9 @@
+import { Table } from "@digdir/designsystemet-react";
 import type { ReactNode } from "react";
-import { Link } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { byLastName, firstName, lastName, lateBy, num, pct } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
-import { Button, Empty, ErrorNote, Loading, PageHeader, Section } from "../../ui";
+import { Button, Empty, ErrorNote, Loading, PageHeader, Section, TextLink } from "../../ui";
 import { key, loadTeacherData, type TeacherData } from "./work/shared";
 
 /** Students by last name, with lookups for each student's submission and grade per assignment. */
@@ -72,8 +72,8 @@ export function Gradebook() {
         ) : (
           <>
             <div className="table-wrap">
-              <table className="sticky-total">
-                <caption className="visually-hidden">Gradebook for {course.title}</caption>
+              <Table data-color="neutral" data-size="sm" className="sticky-total">
+                <caption className="ds-sr-only">Gradebook for {course.title}</caption>
                 <thead>
                   <tr>
                     <th scope="col">Student</th>
@@ -81,7 +81,7 @@ export function Gradebook() {
                     <th scope="col" className="num">Total</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody data-color="accent">
                   {students.map((s) => {
                     const total = totalFor(data, s.user_id);
                     return (
@@ -91,7 +91,7 @@ export function Gradebook() {
                         const sub = subOf(a.id, s.user_id);
                         const g = gradeOf(a.id, s.user_id);
                         const link = (content: ReactNode, text: string) => (
-                          <Link to={`${base}/grading/${sub!.id}`} aria-label={`${s.full_name}, ${a.title}: ${text}`} className="fill">{content}</Link>
+                          <TextLink to={`${base}/grading/${sub!.id}`} aria-label={`${s.full_name}, ${a.title}: ${text}`} className="fill">{content}</TextLink>
                         );
                         let cell: ReactNode;
                         if (g?.score != null && sub) cell = link(<>{num(g.score)} <span className="muted">{g.released ? "Released" : "Not released"}</span></>, `${num(g.score)} ${g.released ? "Released" : "Not released"}`);
@@ -105,7 +105,7 @@ export function Gradebook() {
                     );
                   })}
                 </tbody>
-              </table>
+              </Table>
             </div>
             <Section title="Legend">
               <dl className="defs">

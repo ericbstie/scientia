@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
+import { Table } from "@digdir/designsystemet-react";
 import { useAuth } from "../lib/auth";
 import { fmtDate } from "../lib/format";
 import { useQuery } from "../lib/useQuery";
-import { Button, Empty, ErrorNote, Loading, PageHeader, Status, useTitle } from "../ui";
+import { Button, Empty, ErrorNote, List, Loading, PageHeader, Row, Section, Status, TextLink, useTitle } from "../ui";
 import { myCourses, publishedAssignments } from "./personal/data";
 
 type Item = { id: string; label: string; href: string; day: string };
@@ -56,65 +56,68 @@ export function Calendar() {
       <PageHeader title="Calendar" />
       <ErrorNote error={error} />
       <Status>Showing {monthName}</Status>
-      <div className="section-title">
-        <h2>{monthName}</h2>
-        <div className="actions">
-          <Button onClick={() => go(-1)}>Previous<span className="visually-hidden"> month</span></Button>
-          <Button onClick={() => setShown(new Date(new Date().getFullYear(), new Date().getMonth(), 1))}>Today</Button>
-          <Button onClick={() => go(1)}>Next<span className="visually-hidden"> month</span></Button>
-        </div>
-      </div>
-      {loading && !data ? <Loading /> : (
-        <>
-          <div className="table-wrap cal-wrap">
-            <table className="cal-grid">
-              <caption className="visually-hidden">{monthName}</caption>
-              <thead>
-                <tr>{WEEKDAYS.map((d) => <th key={d} scope="col">{d}</th>)}</tr>
-              </thead>
-              <tbody>
-                {weeks.map((w, i) => (
-                  <tr key={i}>
-                    {w.map((d, j) => {
-                      if (!d) return <td key={j} aria-hidden="true" />;
-                      const k = key(d);
-                      const items = byDay.get(k) ?? [];
-                      const today = k === todayKey;
-                      return (
-                        <td key={j} data-date={k} aria-current={today ? "date" : undefined} className={today ? "cal-today" : undefined}>
-                          <div className="cal-day"><span>{d.getDate()}</span>{today && <span className="cal-today-label">Today</span>}</div>
-                          {items.length > 0 && (
-                            <ul className="cal-items">
-                              {items.map((it) => <li key={it.id}><Link to={it.href}>{it.label}</Link></li>)}
-                            </ul>
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <Section
+        title={monthName}
+        action={
+          <div className="actions">
+            <Button onClick={() => go(-1)}>Previous<span className="ds-sr-only"> month</span></Button>
+            <Button onClick={() => setShown(new Date(new Date().getFullYear(), new Date().getMonth(), 1))}>Today</Button>
+            <Button onClick={() => go(1)}>Next<span className="ds-sr-only"> month</span></Button>
           </div>
-          <div className="cal-list">
-            {data && count === 0 ? null : (
-              <ul className="list">
-                {listDays.map((d) => (
-                  <li key={key(d)} className="row top">
-                    <div className="row-main">
-                      <div className="row-meta"><time dateTime={key(d)}>{fmtDate(d)}</time>{key(d) === todayKey && " · Today"}</div>
-                      <ul className="cal-items">
-                        {byDay.get(key(d))!.map((it) => <li key={it.id}><Link className="row-title" to={it.href}>{it.label}</Link></li>)}
-                      </ul>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+        }
+      >
+        {loading && !data ? <Loading /> : (
+          <>
+            <div className="table-wrap cal-wrap">
+              <Table className="cal-grid" data-color="neutral" data-size="sm">
+                <caption className="ds-sr-only">{monthName}</caption>
+                <thead>
+                  <tr>{WEEKDAYS.map((d) => <th key={d} scope="col">{d}</th>)}</tr>
+                </thead>
+                <tbody>
+                  {weeks.map((w, i) => (
+                    <tr key={i}>
+                      {w.map((d, j) => {
+                        if (!d) return <td key={j} aria-hidden="true" />;
+                        const k = key(d);
+                        const items = byDay.get(k) ?? [];
+                        const today = k === todayKey;
+                        return (
+                          <td key={j} data-date={k} aria-current={today ? "date" : undefined} className={today ? "cal-today" : undefined}>
+                            <div className="cal-day"><span>{d.getDate()}</span>{today && <span>Today</span>}</div>
+                            {items.length > 0 && (
+                              <ul className="cal-items">
+                                {items.map((it) => <li key={it.id}><TextLink to={it.href}>{it.label}</TextLink></li>)}
+                              </ul>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+            {data && count > 0 && (
+              <div className="cal-list">
+                <List>
+                  {listDays.map((d) => (
+                    <Row key={key(d)} className="top" tint={key(d) === todayKey}>
+                      <div className="row-main">
+                        <div className="row-meta"><time dateTime={key(d)}>{fmtDate(d)}</time>{key(d) === todayKey && " · Today"}</div>
+                        <ul className="cal-items">
+                          {byDay.get(key(d))!.map((it) => <li key={it.id}><TextLink className="row-title" to={it.href}>{it.label}</TextLink></li>)}
+                        </ul>
+                      </div>
+                    </Row>
+                  ))}
+                </List>
+              </div>
             )}
-          </div>
-          {data && count === 0 && <Empty title="Nothing due this month" />}
-        </>
-      )}
+            {data && count === 0 && <Empty title="Nothing due this month" />}
+          </>
+        )}
+      </Section>
     </div>
   );
 }

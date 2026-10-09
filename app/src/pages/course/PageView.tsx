@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
@@ -22,7 +22,7 @@ export function PageView() {
   if (!q.data) return <NotFound />;
   return (
     <div className="content">
-      <PageHeader eyebrow={<Link to={`/courses/${course.id}/modules`}>‹ Modules</Link>} title={q.data.title} />
+      <PageHeader back={{ to: `/courses/${course.id}/modules`, label: "Modules" }} title={q.data.title} />
       <Prose text={q.data.body} />
     </div>
   );

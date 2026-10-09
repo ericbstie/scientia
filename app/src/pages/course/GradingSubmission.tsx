@@ -1,10 +1,11 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
+import { Alert, Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime, lateBy, num } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, ErrorNote, Field, Loading, NotFound, PageHeader, Section, StatusBadge, TextArea, useToast } from "../../ui";
+import { Badge, Button, ErrorNote, Field, Loading, NotFound, PageHeader, Panel, Section, StatusBadge, TextArea, TextLink, useToast } from "../../ui";
 import { FileLinks, buildQueue, loadTeacherData, useUnsavedGuard } from "./work/shared";
 
 export function GradingSubmission() {
@@ -75,31 +76,39 @@ function GradeOne({ submissionId }: { submissionId: string }) {
     setBusy(false);
     if (error) return setFail("Could not save. Check your connection and try again.");
     setSaved({ score: raw, feedback: feedback ?? "", released, exists: true });
-    toast(release ? "Grade released" : "Saved");
+    toast(release ? "Grade released" : released ? "Saved" : "Saved, not released");
     reload();
   }
 
   return (
     <div className="content wide">
       <PageHeader
-        eyebrow={<Link to={`${base}/grading`}>‹ Grading</Link>}
+        back={{ to: `${base}/grading`, label: "Grading" }}
         title={`${student.full_name}: ${assignment.title}`}
         subtitle={<>Status: <StatusBadge status={state} /></>}
       />
       <Section title="Submission">
-        <div className="card stack">
-          <p>
+        <Panel>
+          <Paragraph>
             Submitted <time dateTime={sub.submitted_at}>{fmtDateTime(sub.submitted_at)}</time>
             {" "}<span className="muted">· Attempt {sub.attempt}</span>
             {late && <> <Badge tone="warning">Late by {late}</Badge></>}
-          </p>
-          {sub.body ? <p className="prose">{sub.body}</p> : <p className="muted">No text.</p>}
+          </Paragraph>
+          {sub.body ? <Paragraph className="prose">{sub.body}</Paragraph> : <Paragraph className="muted">No text.</Paragraph>}
           <FileLinks files={sub.files} />
-        </div>
+        </Panel>
       </Section>
       <Section title="Grade">
         <ErrorNote error={fail} />
-        <form className="card form" onSubmit={(e) => save(e, false)} noValidate>
+        {saved.exists && !saved.released && (
+          <Alert data-color="info">
+            <Paragraph>
+              Saved, not released. {student.full_name} cannot see this grade until you release it, here or from{" "}
+              <TextLink to={`${base}/grading?status=graded`}>Graded, not released</TextLink>.
+            </Paragraph>
+          </Alert>
+        )}
+        <Panel><form className="form" onSubmit={(e) => save(e, false)} noValidate>
           <Field
             id="g-score" label="Score" required type="number" step="any" inputMode="decimal" hint={`out of ${num(assignment.points)}`}
             value={score ?? ""} onChange={(e) => setScore(e.target.value)} error={scoreError}
@@ -111,7 +120,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
             {!nextId && <span className="muted">Nothing else needs grading</span>}
             {saved.exists && !saved.released && <Button disabled={busy} onClick={() => save(null, true)}>Release</Button>}
           </div>
-        </form>
+        </form></Panel>
       </Section>
       {guard.dialog}
     </div>

@@ -1,9 +1,10 @@
-import { Link } from "react-router";
+import type { ReactNode } from "react";
 import { useAuth } from "../lib/auth";
 import { db, must } from "../lib/supabase";
 import { num, studentStatus } from "../lib/format";
 import { useQuery } from "../lib/useQuery";
-import { Due, Empty, ErrorNote, Loading, PageHeader, Section, StatusBadge, useTitle } from "../ui";
+import { Card, CardBlock, Heading, Paragraph, Tag } from "@digdir/designsystemet-react";
+import { Due, Empty, ErrorNote, List, Loading, PageHeader, Row, Section, StatusBadge, TextLink, useTitle } from "../ui";
 import { myCourses, publishedAssignments, type AssignmentLite, type CourseLite } from "./personal/data";
 import { loadTeacherData, needsGrading } from "./course/work/shared";
 
@@ -58,49 +59,44 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
     <>
       <Section title="Upcoming">
         {upcoming.length ? (
-          <ul className="list">
-            {upcoming.map((r) => (
-              <li key={r.id} className="row">
+          <List>
+            {upcoming.map((r, i) => (
+              <Row key={r.id} tint={i === 0}>
                 <div className="row-main">
-                  <Link className="row-title" to={`/courses/${r.course_id}/assignments/${r.id}`}>{r.title}</Link>
+                  <TextLink className="row-title" to={`/courses/${r.course_id}/assignments/${r.id}`}>{r.title}</TextLink>
                   <div className="row-meta">{r.code} · {num(r.points)} points</div>
                 </div>
                 <div className="row-side"><Due at={r.due_at} /> <StatusBadge status={r.status} /></div>
-              </li>
+              </Row>
             ))}
-          </ul>
+          </List>
         ) : (
           <Empty title="Nothing due">New assignments appear here when your teacher publishes them.</Empty>
         )}
       </Section>
       <Section title="Missing">
         {missing.length ? (
-          <ul className="list">
+          <List>
             {missing.map((r) => (
-              <li key={r.id} className="row">
+              <Row key={r.id}>
                 <div className="row-main">
-                  <Link className="row-title" to={`/courses/${r.course_id}/assignments/${r.id}`}>{r.title}</Link>
+                  <TextLink className="row-title" to={`/courses/${r.course_id}/assignments/${r.id}`}>{r.title}</TextLink>
                   <div className="row-meta">{r.code} · {num(r.points)} points</div>
                 </div>
                 <div className="row-side">
                   <Due at={r.due_at} />{" "}
-                  {r.status === "Closed" ? <span className="muted">Closed, can no longer be handed in</span> : <Link to={`/courses/${r.course_id}/assignments/${r.id}`}>Submit late</Link>}
+                  {r.status === "Closed" ? <span className="muted">Closed, can no longer be handed in</span> : <TextLink to={`/courses/${r.course_id}/assignments/${r.id}`}>Submit late</TextLink>}
                 </div>
-              </li>
+              </Row>
             ))}
-          </ul>
+          </List>
         ) : (
           <Empty title="Nothing missing">Assignments you have not handed in appear here once they are past due.</Empty>
         )}
       </Section>
       <Section title="Your courses">
         <div className="grid">
-          {courses.map((c) => (
-            <Link key={c.id} to={`/courses/${c.id}`} className="card course-card">
-              <div className="code">{c.code}</div>
-              <div className="title">{c.title}</div>
-            </Link>
-          ))}
+          {courses.map((c) => <CourseCard key={c.id} course={c} />)}
         </div>
       </Section>
     </>
@@ -113,17 +109,31 @@ function TeacherView({ courses }: { courses: TeacherCourse[] }) {
       {courses.length ? (
         <div className="grid">
           {courses.map(({ course: c, students, needGrading }) => (
-            <div key={c.id} className="card course-card">
-              <div className="code">{c.code}</div>
-              <div className="title"><Link to={`/courses/${c.id}`}>{c.title}</Link></div>
-              <div className="muted small">{students} {students === 1 ? "student" : "students"}</div>
-              <div className="small"><Link to={`/courses/${c.id}/grading?status=needs-grading`}>{needGrading} need grading</Link></div>
-            </div>
+            <CourseCard key={c.id} course={c} meta={`${students} ${students === 1 ? "student" : "students"}`}>
+              <CardBlock className="tint">
+                <Paragraph><TextLink to={`/courses/${c.id}/grading?status=needs-grading`}><span className="figure">{needGrading}</span> need grading</TextLink></Paragraph>
+              </CardBlock>
+            </CourseCard>
           ))}
         </div>
       ) : (
         <Empty title="No courses yet">An administrator creates courses and assigns teachers.</Empty>
       )}
     </Section>
+  );
+}
+
+/** A course on the Dashboard: a tinted card. Its title links to the course, so the system's
+ *  Card makes the whole card open it and shows the title as a linked card heading. */
+function CourseCard({ course: c, meta, children }: { course: { id: string; code: string; title: string }; meta?: string; children?: ReactNode }) {
+  return (
+    <Card data-color="accent" data-variant="tinted" className="course-card">
+      <CardBlock>
+        <Tag data-size="sm" data-variant="outline">{c.code}</Tag>
+        <Heading level={3} data-size="2xs"><TextLink to={`/courses/${c.id}`}>{c.title}</TextLink></Heading>
+        {meta && <Paragraph className="muted small">{meta}</Paragraph>}
+      </CardBlock>
+      {children}
+    </Card>
   );
 }

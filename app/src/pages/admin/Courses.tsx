@@ -1,3 +1,4 @@
+import { Table } from "@digdir/designsystemet-react";
 import { useState, type FormEvent } from "react";
 import { Button, ButtonLink, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
@@ -27,10 +28,10 @@ export function AdminCourses() {
         <Empty title="No courses yet" action={newButton}>Create a course and choose its teacher.</Empty>
       ) : data && (
         <div className="table-wrap">
-          <table className="stack-rows">
-            <caption className="visually-hidden">Courses</caption>
+          <Table data-color="neutral" data-size="sm" className="stack-rows">
+            <caption className="ds-sr-only">Courses</caption>
             <thead><tr><th scope="col">Code</th><th scope="col">Title</th><th scope="col">Teacher</th><th scope="col" className="num">Students</th><th scope="col">Actions</th></tr></thead>
-            <tbody>
+            <tbody data-color="accent">
               {data.courses.map((c) => (
                 <tr key={c.id}>
                   <th scope="row">{c.code}</th>
@@ -39,14 +40,14 @@ export function AdminCourses() {
                   <td className="num" data-label="Students">{c.enrollments.filter((e) => e.role === "student").length}</td>
                   <td data-label="Actions">
                     <div className="actions">
-                      <Button size="small" variant="ghost" aria-label={`Edit ${c.code}`} onClick={() => setEditing(c)}>Edit</Button>
-                      <ButtonLink size="small" variant="ghost" to={`/courses/${c.id}/people`} aria-label={`People in ${c.code}`}>People</ButtonLink>
+                      <Button variant="tertiary" aria-label={`Edit ${c.code}`} onClick={() => setEditing(c)}>Edit</Button>
+                      <ButtonLink variant="tertiary" to={`/courses/${c.id}/people`} aria-label={`People in ${c.code}`}>People</ButtonLink>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       )}
       <Dialog open={creating} onClose={() => setCreating(false)} title="New course">

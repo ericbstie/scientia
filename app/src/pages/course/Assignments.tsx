@@ -1,9 +1,8 @@
-import { Link } from "react-router";
 import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { fmtDateTime, num, studentStatus } from "../../lib/format";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, ButtonLink, Empty, ErrorNote, Loading, PageHeader, StatusBadge } from "../../ui";
+import { Badge, ButtonLink, Empty, ErrorNote, List, Loading, PageHeader, Row, StatusBadge, TextLink } from "../../ui";
 import { loadAssignments, loadMyWork } from "./work/shared";
 
 export function Assignments() {
@@ -27,29 +26,27 @@ export function Assignments() {
             ? <Empty title="No assignments yet" action={newButton}>Students see an assignment as soon as you publish it.</Empty>
             : <Empty title="No assignments yet">Your teacher's assignments appear here when they are published.</Empty>
         ) : (
-          <ul className="list">
+          <List>
             {data.assignments.map((a) => {
               const sub = data.subs.get(a.id);
               const released = !!data.grades.get(a.id)?.released;
               return (
-                <li key={a.id}>
-                  <div className="row">
-                    <div className="row-main">
-                      <Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link>
-                      <div className="row-meta">
-                        Due <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time> · {num(a.points)} points
-                      </div>
-                    </div>
-                    <div className="row-side">
-                      {role === "teacher"
-                        ? (!a.published && <Badge>Draft</Badge>)
-                        : <StatusBadge status={studentStatus(a, sub?.submitted_at, released)} />}
+                <Row key={a.id}>
+                  <div className="row-main">
+                    <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                    <div className="row-meta">
+                      Due <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time> · {num(a.points)} points
                     </div>
                   </div>
-                </li>
+                  <div className="row-side">
+                    {role === "teacher"
+                      ? (!a.published && <Badge>Draft</Badge>)
+                      : <StatusBadge status={studentStatus(a, sub?.submitted_at, released)} />}
+                  </div>
+                </Row>
               );
             })}
-          </ul>
+          </List>
         )
       )}
     </div>

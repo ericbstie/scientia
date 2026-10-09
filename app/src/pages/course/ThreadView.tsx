@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime } from "../../lib/format";
 import { db, isUuid, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, Confirm, ErrorNote, focusField, focusHeading, Loading, NotFound, PageHeader, Section, TextArea, useToast } from "../../ui";
+import { Badge, Button, Confirm, ErrorNote, focusField, focusHeading, List, Loading, NotFound, PageHeader, Row, Section, TextArea, useToast } from "../../ui";
 import { Prose } from "../../ui/Prose";
 
 type Post = { key: string; kind: "first" | "reply"; removed?: boolean; replyId?: string; authorId?: string; author?: string; at: string; text: string };
@@ -91,40 +92,38 @@ export function ThreadView() {
   return (
     <div className="content">
       <PageHeader
-        eyebrow={<Link to={`${base}/discussions`}>‹ Discussions</Link>}
+        back={{ to: `${base}/discussions`, label: "Discussions" }}
         title={thread.title}
-        actions={teacher && <Button variant="danger" onClick={() => setRemovingThread(true)}>Delete thread</Button>}
+        actions={teacher && <Button variant="tertiary" data-color="danger" onClick={() => setRemovingThread(true)}>Delete thread</Button>}
       />
       <ErrorNote error={fail} />
       <Section title="Posts">
-        <ul className="list">
+        <List>
           {posts.map((p) => (
-            <li key={p.key}>
-              <div className="row top">
-                <div className="row-main">
-                  {p.removed ? (
-                    <>
-                      <p className="muted">This reply was deleted by a teacher</p>
-                      <div className="row-meta"><time dateTime={p.at}>{fmtDateTime(p.at)}</time></div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="row-meta">
-                        <strong className="author">{p.author}</strong>
-                        {p.authorId && teachers.has(p.authorId) && <> <Badge>Teacher</Badge></>}
-                        {" · "}<time dateTime={p.at}>{fmtDateTime(p.at)}</time>
-                      </div>
-                      <Prose text={p.text} />
-                    </>
-                  )}
-                </div>
-                {teacher && p.kind === "reply" && !p.removed && (
-                  <div className="row-side"><Button size="small" variant="danger" className="ghost" aria-label={`Delete reply by ${p.author ?? "unknown author"}, ${fmtDateTime(p.at)}`} onClick={() => setRemovingPost(p)}>Delete</Button></div>
+            <Row key={p.key} className="top">
+              <div className="row-main">
+                {p.removed ? (
+                  <>
+                    <Paragraph className="muted">This reply was deleted by a teacher</Paragraph>
+                    <div className="row-meta"><time dateTime={p.at}>{fmtDateTime(p.at)}</time></div>
+                  </>
+                ) : (
+                  <>
+                    <div className="row-meta">
+                      <strong className="author">{p.author}</strong>
+                      {p.authorId && teachers.has(p.authorId) && <> <Badge>Teacher</Badge></>}
+                      {" · "}<time dateTime={p.at}>{fmtDateTime(p.at)}</time>
+                    </div>
+                    <Prose text={p.text} />
+                  </>
                 )}
               </div>
-            </li>
+              {teacher && p.kind === "reply" && !p.removed && (
+                <div className="row-side"><Button variant="tertiary" data-color="danger" aria-label={`Delete reply by ${p.author ?? "unknown author"}, ${fmtDateTime(p.at)}`} onClick={() => setRemovingPost(p)}>Delete</Button></div>
+              )}
+            </Row>
           ))}
-        </ul>
+        </List>
       </Section>
       <form className="form" onSubmit={sendReply} noValidate>
         <TextArea id="thread-reply" label="Reply" required value={reply} onChange={(e) => setReply(e.target.value)} error={replyError} rows={4} />

@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useAuth } from "../../lib/auth";
 import { db } from "../../lib/supabase";
-import { Button, ErrorNote, ErrorSummary, Field, PageHeader, Section, useTitle, useToast } from "../../ui";
+import { Button, ErrorNote, ErrorSummary, Field, PageHeader, Panel, Section, useTitle, useToast } from "../../ui";
 import { SettingsNav } from "../personal/ui";
 
 export function Profile() {
@@ -64,21 +64,21 @@ export function Profile() {
       <PageHeader title="Settings" />
       <SettingsNav />
       <Section title="Profile">
-        <form className="form card" onSubmit={saveName} noValidate>
+        <Panel><form className="form" onSubmit={saveName} noValidate>
           <ErrorNote error={nameFail} />
           <Field label="Email" type="email" value={profile!.email} readOnly />
           <Field id="pf-name" label="Display name" required value={name} onChange={(e) => setName(e.target.value)} error={nameError} autoComplete="name" />
           <div className="actions"><Button type="submit" variant="primary">Save name</Button></div>
-        </form>
+        </form></Panel>
       </Section>
       <Section title="Password">
-        <form className="form card" onSubmit={changePassword} noValidate>
+        <Panel><form className="form" onSubmit={changePassword} noValidate>
           <ErrorNote error={pwFail} />
           <ErrorSummary errors={[curError && { id: "pf-current", message: curError }, nextError && { id: "pf-new", message: nextError }]} />
           <Field id="pf-current" label="Current password" required type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} error={curError} />
           <Field id="pf-new" label="New password" required type="password" autoComplete="new-password" hint="At least 8 characters" value={next} onChange={(e) => setNext(e.target.value)} error={nextError} />
           <div className="actions"><Button type="submit" disabled={busy}>Change password</Button></div>
-        </form>
+        </form></Panel>
       </Section>
     </div>
   );

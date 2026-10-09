@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Fieldset, FieldsetLegend, Paragraph } from "@digdir/designsystemet-react";
 import { useAuth } from "../../lib/auth";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
@@ -40,15 +41,15 @@ export function NotificationSettings() {
       <PageHeader title="Settings" />
       <SettingsNav />
       <Section title="Notifications">
-        <p>Notifications appear in Scientia only. No email is sent.</p>
+        <Paragraph>Notifications appear in Scientia only. No email is sent.</Paragraph>
         <ErrorNote error={error ?? failure} />
         {loading && !data ? <Loading /> : data && (
-          <fieldset className="choices">
-            <legend className="visually-hidden">Notify me about</legend>
+          <Fieldset>
+            <FieldsetLegend>Notify me about</FieldsetLegend>
             {KINDS.map(([k, label]) => (
               <Checkbox key={k} label={label} checked={data[k]} onChange={(e) => change(k, e.target.checked)} />
             ))}
-          </fieldset>
+          </Fieldset>
         )}
       </Section>
     </div>
