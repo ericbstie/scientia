@@ -129,7 +129,6 @@ test.describe("Who is notified", () => {
   });
 
   test("@US-16 a reply notifies the thread author only", async ({ request }) => {
-    test.fixme(true, "Schema: app_private.on_reply titles the notification 'Reply: <thread>' but US-16 requires 'New reply: <thread>' (needs a new migration).");
     const maya = await api(request, "maya");
     const [thread] = await maya.get("threads?title=eq.Question%20about%20the%20lab%20report&select=id,course_id");
     await maya.post("replies", { thread_id: thread.id, body: "One more thing." });

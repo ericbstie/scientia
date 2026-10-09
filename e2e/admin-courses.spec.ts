@@ -50,7 +50,7 @@ test("@US-42 the assigned teacher sees the new course", async ({ page, browser }
   await p.getByLabel("Email").fill(users.ingrid.email);
   await p.getByLabel("Password").fill(PASSWORD);
   await p.getByRole("button", { name: "Sign in" }).click();
-  const card = p.getByRole("link", { name: /CHE110/ }).first();
+  const card = p.getByRole("link", { name: "General Chemistry" });
   await expect(card).toBeVisible();
   await expect(p.getByText("0 students")).toBeVisible();
   await card.click();
@@ -58,10 +58,10 @@ test("@US-42 the assigned teacher sees the new course", async ({ page, browser }
   await expect(nav.getByRole("link")).toHaveText(["CHE110General Chemistry", "Home", "Modules", "Assignments", "Announcements", "Discussions", "Grading", "Gradebook", "People"]);
   await nav.getByRole("link", { name: "Modules" }).click();
   await expect(p.getByText("No modules yet")).toBeVisible();
-  await expect(p.getByRole("button", { name: "Add module" })).toBeVisible();
+  await expect(p.getByRole("button", { name: "Add module" }).first()).toBeVisible();
   await nav.getByRole("link", { name: "Assignments" }).click();
   await expect(p.getByText("No assignments yet")).toBeVisible();
-  await expect(p.getByRole("link", { name: "New assignment" }).or(p.getByRole("button", { name: "New assignment" }))).toBeVisible();
+  await expect(p.getByRole("link", { name: "New assignment" }).or(p.getByRole("button", { name: "New assignment" })).first()).toBeVisible();
   await ctx.close();
 });
 

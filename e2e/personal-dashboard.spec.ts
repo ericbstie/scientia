@@ -214,7 +214,6 @@ test.describe("Phone layout", () => {
   });
 
   test("@US-21 the course home and the worksheet page fit a phone", async ({ page }) => {
-    test.fixme(true, "The course layout grid overflows a 390 px viewport (shell CSS, owned by the orchestrator).");
     await login(page, "maya");
     await page.getByRole("link", { name: /BIO101/ }).first().click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+$/);
@@ -244,7 +243,6 @@ test.describe("Phone layout", () => {
   });
 
   test("@US-21 no page scrolls sideways", async ({ page }) => {
-    test.fixme(true, "The top bar is wider than 390 px (name menu overflows by 17 px); App.tsx and styles.css belong to the orchestrator.");
     await login(page, "maya");
     for (const path of ["/", "/calendar", "/notifications", "/settings/profile", "/settings/notifications"]) {
       await page.goto(path);

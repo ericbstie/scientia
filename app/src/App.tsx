@@ -131,7 +131,7 @@ function Shell() {
       <a href="#main" className="skip-link">Skip to main content</a>
       <header className="topbar">
         <div className="topbar-inner">
-          <Link to="/" className="brand"><span className="brand-mark" aria-hidden="true">S</span><span className="brand-name">Scientia</span></Link>
+          <Link to="/" className="brand" aria-label="Scientia, go to dashboard"><span className="brand-mark" aria-hidden="true">S</span><span className="brand-name">Scientia</span></Link>
           <nav aria-label="Main" className="topnav">
             <NavLink to="/" end className="nav-link">Dashboard</NavLink>
             <NavLink to="/calendar" className="nav-link">Calendar</NavLink>
@@ -183,7 +183,7 @@ function AccountMenu({ name }: { name: string }) {
   return (
     <div className="menu" ref={ref}>
       <button className="nav-link" aria-haspopup="menu" aria-expanded={open} aria-label={`Account menu for ${name}`} onClick={() => setOpen(!open)}>
-        <span>{name}</span> <span aria-hidden="true">▾</span>
+        <span className="nav-label">{name}</span><span className="mobile-only initials" aria-hidden="true">{name.split(/\s+/).filter(Boolean).slice(-2).map((w) => w[0]).join("").toUpperCase()}</span> <span aria-hidden="true">▾</span>
       </button>
       {open && (
         <div className="menu-list" role="menu" aria-label="Account">
@@ -208,6 +208,9 @@ function CourseLayout() {
   const { courseId } = useParams();
   const { profile } = useAuth();
   const [state, setState] = useState<{ course: Course; role: CourseRole } | "none" | "missing" | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => setMenuOpen(false), [pathname]);
 
   useEffect(() => {
     let live = true;
@@ -249,12 +252,17 @@ function CourseLayout() {
   return (
     <CourseContext.Provider value={state}>
       <div className="course-layout">
-        <nav className="course-nav" aria-label="Course">
-          <Link to={base} className="course-nav-title">
-            <span className="nav-course-code">{state.course.code}</span>
-            <span>{state.course.title}</span>
-          </Link>
-          <ul>
+        <nav className={`course-nav ${menuOpen ? "open" : ""}`} aria-label="Course">
+          <div className="course-nav-head">
+            <Link to={base} className="course-nav-title">
+              <span className="nav-course-code">{state.course.code}</span>
+              <span>{state.course.title}</span>
+            </Link>
+            <button type="button" className="btn small course-menu-button" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
+              Menu
+            </button>
+          </div>
+          <ul id="course-nav-items">
             {items.map(([label, to]) => (
               <li key={label}><NavLink to={to} end={label === "Home"} className="nav-link">{label}</NavLink></li>
             ))}
