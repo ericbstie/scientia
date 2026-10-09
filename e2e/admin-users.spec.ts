@@ -30,7 +30,7 @@ async function newUser(page: Page, f: { name: string; email: string; role?: stri
   await dialog.getByLabel("Name").fill(f.name);
   await dialog.getByLabel("Email").fill(f.email);
   if (f.role) await dialog.getByLabel("Role").selectOption(f.role);
-  await dialog.getByLabel("Password").fill(f.password);
+  await dialog.getByLabel("Password", { exact: true }).fill(f.password);
   await dialog.getByRole("button", { name: "Save" }).click();
   return dialog;
 }
@@ -82,6 +82,17 @@ test("@US-39 admin creates a user", async ({ page }) => {
   await expect(page.getByRole("status").filter({ hasText: "Eva Lund added as a student" })).toBeVisible();
   await expect(eva.getByRole("combobox", { name: "Role for Eva Lund" })).toHaveValue("student");
   await expect(eva.getByRole("cell").nth(2)).toHaveText("Active");
+});
+
+test("@US-39 the new password is masked until shown", async ({ page }) => {
+  await openUsers(page);
+  await page.getByRole("button", { name: "New user" }).click();
+  const password = page.getByRole("dialog", { name: "New user" }).getByLabel("Password", { exact: true });
+  await password.fill("Start-pass-1");
+  await expect(password).toHaveAttribute("type", "password");
+  await page.getByLabel("Show password").check();
+  await expect(password).toHaveAttribute("type", "text");
+  await expect(password).toHaveValue("Start-pass-1");
 });
 
 test("@US-39 admin corrects the role of an account", async ({ page }) => {

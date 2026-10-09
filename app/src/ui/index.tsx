@@ -172,6 +172,17 @@ export function Select({ label, hint, error, id, children, ...rest }: FieldBase 
   );
 }
 
+/** Password input, masked until the person ticks "Show password" (for passwords they must pass on). */
+export function PasswordField(props: FieldBase & InputHTMLAttributes<HTMLInputElement>) {
+  const [shown, setShown] = useState(false);
+  return (
+    <>
+      <Field {...props} type={shown ? "text" : "password"} />
+      <Checkbox label="Show password" checked={shown} onChange={(e) => setShown(e.target.checked)} />
+    </>
+  );
+}
+
 export function Checkbox({ label, ...rest }: { label: string } & InputHTMLAttributes<HTMLInputElement>) {
   const id = useId();
   return (

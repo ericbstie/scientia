@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { AdminNav } from "./AdminNav";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, Select, Status, useTitle, useToast } from "../../ui";
+import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, ErrorSummary, Field, focusField, Loading, PageHeader, PasswordField, Select, Status, useTitle, useToast } from "../../ui";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { useAuth } from "../../lib/auth";
@@ -177,7 +177,7 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
         <option value="teacher">Teacher</option>
         <option value="admin">Admin</option>
       </Select>
-      <Field id="nu-password" label="Password" required type="text" hint="At least 8 characters. Give it to the person so they can sign in." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+      <PasswordField id="nu-password" label="Password" required hint="At least 8 characters. Give it to the person so they can sign in." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         <Button onClick={onCancel}>Cancel</Button>
@@ -210,7 +210,7 @@ function ResetForm({ user, onCancel, onDone }: { user: Row; onCancel: () => void
   return (
     <form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={formError} />
-      <Field id="rp-password" label="New password" required type="text" hint="At least 8 characters." value={password} error={error} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+      <PasswordField id="rp-password" label="New password" required hint="At least 8 characters." value={password} error={error} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         <Button onClick={onCancel}>Cancel</Button>
