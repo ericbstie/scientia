@@ -39,6 +39,12 @@ account and a course; one scenario with `--phone`.
 ## 3. Act on it
 - Merge findings into `docs/process/reviews/<milestone>-user-test.md`: finding,
   how many testers hit it, the change made (or why not).
+- Record the first pass in a table headed `| Scenario | Result | Commands |`,
+  Result starting with `Done`, `Partly` or `Failed`. `mise run metrics` reads it
+  as `ux.blind_tasks_done_pct`; retests after fixes go in a separate table with
+  other headers and do not change the number.
+- Check each scenario's premise against `supabase/seed.ts` before running it
+  (M3: Liam's "read feedback" scenario had no released grade to read).
 - Fix copy and flows, keeping e2e assertions in step (update stories if a quoted
   string changes).
 - Run `bun run supabase/reset.ts` afterwards; testers change data.

@@ -39,8 +39,13 @@ m["stories.covered_pct"] = storyIds.size
   ? Math.round(([...storyIds].filter((id) => covered.has(id)).length / storyIds.size) * 1000) / 10
   : null;
 
-// e2e results (Playwright JSON reporter)
-const report = read(p("e2e/.results/report.json"));
+// e2e results (Playwright JSON reporter). A run with `--reporter=<other>` leaves an
+// old report.json behind while it rewrites a11y.jsonl: treat that report as stale.
+const reportFile = p("e2e/.results/report.json");
+const a11yFile = p("e2e/.results/a11y.jsonl");
+const stale = existsSync(reportFile) && existsSync(a11yFile) && statSync(reportFile).mtimeMs < statSync(a11yFile).mtimeMs;
+if (stale) console.warn("e2e/.results/report.json is older than the last a11y scan (run the suite with the default reporters); e2e.* recorded as null");
+const report = stale ? null : read(reportFile);
 if (report) {
   const r = JSON.parse(report);
   const s = r.stats ?? {};
@@ -54,7 +59,7 @@ if (report) {
 }
 
 // Accessibility (written by e2e/fixtures.ts)
-const a11yRaw = read(p("e2e/.results/a11y.jsonl"));
+const a11yRaw = read(a11yFile);
 const a11y = a11yRaw && `[${a11yRaw.trim().split("\n").filter(Boolean).join(",")}]`;
 if (a11y) {
   const scans: { url: string; violations: { id: string; impact: string; nodes: number }[] }[] = JSON.parse(a11y);
@@ -92,6 +97,18 @@ for (const f of [...walk(p("app/src"), ".tsx"), ...walk(p("app/src"), ".ts"), p(
 }
 m["copy.leaks"] = leaks;
 
+// Blind user tests: first-pass "| Scenario | Result | ... |" table of the newest
+// docs/process/reviews/m<n>-user-test.md. Result cells start with Done, Partly or Failed.
+const userTests = walk(p("docs/process/reviews"), "-user-test.md").sort(
+  (a, b) => Number(a.match(/m(\d+)-user-test/)?.[1] ?? 0) - Number(b.match(/m(\d+)-user-test/)?.[1] ?? 0),
+);
+const ut = userTests.length ? readFileSync(userTests.at(-1)!, "utf8") : "";
+const utTable = ut.split(/^\|\s*Scenario\s*\|\s*Result\s*\|.*$/m)[1]?.split(/\n\s*\n/)[0] ?? "";
+const results = [...utTable.matchAll(/^\|[^|\n]+\|\s*\**(Done|Partly|Failed)\b/gim)].map((x) => x[1].toLowerCase());
+m["ux.blind_tasks_done_pct"] = results.length
+  ? Math.round((results.filter((r) => r === "done").length / results.length) * 1000) / 10
+  : null;
+
 // Process health
 const briefs = walk(p("docs/process/briefs"), ".md").filter((f) => !f.endsWith("TEMPLATE.md"));
 m["process.briefs"] = briefs.length;
@@ -99,7 +116,7 @@ m["process.briefs_with_criteria_pct"] = briefs.length
   ? Math.round((briefs.filter((f) => /##\s*Acceptance criteria[\s\S]*?- \[/.test(readFileSync(f, "utf8"))).length / briefs.length) * 1000) / 10
   : null;
 try {
-  const log = await Bun.$`git -C ${root} log --format=%H -1 --grep=^retro(`.text();
+  const log = await Bun.$`git -C ${root} log --format=%H -1 ${"--grep=^retro("}`.text(); // interpolated: a bare "(" is shell syntax to Bun
   const sha = log.trim();
   if (sha) {
     const files = (await Bun.$`git -C ${root} show --name-only --format= ${sha}`.text()).split("\n");

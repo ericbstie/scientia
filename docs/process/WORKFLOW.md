@@ -11,7 +11,9 @@ Every milestone runs the same steps.
 0. **Preflight.** Check the tools the milestone needs actually work here
    (Docker daemon, image pulls, browser for Playwright, network to research
    sources). Known workarounds live in [environment.md](environment.md); add
-   any new one there before moving on.
+   any new one there before moving on. Before parallel slices start, one spec
+   calls every helper in `e2e/fixtures.ts` (sign in as each role, sign out,
+   reset, scan) and passes: a shared helper no spec has run is not a contract.
 1. **Plan.** The orchestrator splits the milestone into tasks. Each task gets a
    brief written from [briefs/TEMPLATE.md](briefs/TEMPLATE.md) and, for
    anything larger than a few minutes, a GitHub issue carrying that brief.
