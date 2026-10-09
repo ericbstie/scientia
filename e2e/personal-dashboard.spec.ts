@@ -225,6 +225,7 @@ test.describe("Phone layout", () => {
     await noHorizontalScroll(page);
     // Under 820 px the grid becomes a list of the days that have items.
     await expect(page.locator("table.cal-grid")).toBeHidden();
+    await expect(page.getByText("Loading…")).toHaveCount(0); // else the loop below can page past the month before the items arrive
     for (let i = 0; i < 4 && !(await page.getByRole("link", { name: "BIO101 Photosynthesis worksheet" }).isVisible()); i++) {
       await page.getByRole("button", { name: "Next month" }).click();
     }
