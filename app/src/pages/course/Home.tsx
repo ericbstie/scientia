@@ -5,7 +5,7 @@ import { fmtDate, studentStatus } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ButtonLink, Due, ErrorNote, Loading, PageHeader, Section, StatusBadge, Empty } from "../../ui";
-import { useDocTitle, linkTarget } from "./content/util";
+import { useDocTitle } from "./content/util";
 
 type Asg = { id: string; title: string; due_at: string; allow_late: boolean; published: boolean };
 type Ann = { id: string; title: string; created_at: string };
@@ -54,7 +54,7 @@ function StudentHome() {
                 <li>
                   <div className="row">
                     <div className="row-main">
-                      <Link className="row-title" style={linkTarget} to={`${base}/announcements/${q.data.pinned.id}`}>{q.data.pinned.title}</Link>
+                      <Link className="row-title" to={`${base}/announcements/${q.data.pinned.id}`}>{q.data.pinned.title}</Link>
                       <div className="row-meta"><time dateTime={q.data.pinned.created_at}>{fmtDate(q.data.pinned.created_at)}</time></div>
                     </div>
                   </div>
@@ -71,7 +71,7 @@ function StudentHome() {
                   <li key={a.id}>
                     <div className="row">
                       <div className="row-main">
-                        <Link className="row-title" style={linkTarget} to={`${base}/assignments/${a.id}`}>{a.title}</Link>
+                        <Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link>
                         <div className="row-meta">Due <Due at={a.due_at} /></div>
                       </div>
                       <div className="row-side"><StatusBadge status={studentStatus(a, q.data!.submitted.get(a.id), q.data!.released.has(a.id))} /></div>
@@ -115,7 +115,7 @@ function TeacherHome() {
             <li>
               <div className="row">
                 <div className="row-main">
-                  <Link className="row-title" style={linkTarget} to={`${base}/grading`}>{q.data.needs} need grading</Link>
+                  <Link className="row-title" to={`${base}/grading`}>{q.data.needs} need grading</Link>
                   <div className="row-meta">Open the grading queue</div>
                 </div>
               </div>
@@ -130,7 +130,7 @@ function TeacherHome() {
                   <li key={a.id}>
                     <div className="row">
                       <div className="row-main">
-                        <Link className="row-title" style={linkTarget} to={`${base}/announcements/${a.id}`}>{a.title}</Link>
+                        <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
                         <div className="row-meta"><time dateTime={a.created_at}>{fmtDate(a.created_at)}</time></div>
                       </div>
                     </div>
@@ -148,7 +148,7 @@ function TeacherHome() {
                   <li key={a.id}>
                     <div className="row">
                       <div className="row-main">
-                        <Link className="row-title" style={linkTarget} to={`${base}/assignments/${a.id}`}>{a.title}</Link>
+                        <Link className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</Link>
                         <div className="row-meta">Due <Due at={a.due_at} /></div>
                       </div>
                       <div className="row-side">{!a.published && <Badge>Draft</Badge>}</div>

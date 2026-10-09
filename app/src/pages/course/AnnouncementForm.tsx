@@ -4,7 +4,6 @@ import { useCourse } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Button, ButtonLink, ErrorNote, Field, Loading, NotFound, PageHeader, TextArea, useToast } from "../../ui";
-import { joinBody, splitBody, type Meta } from "./content/meta";
 import { focusField, useDocTitle } from "./content/util";
 
 export function AnnouncementForm() {
@@ -16,7 +15,6 @@ export function AnnouncementForm() {
   const base = `/courses/${course.id}`;
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [meta, setMeta] = useState<Meta>({});
   const [original, setOriginal] = useState({ title: "", message: "" });
   const [titleError, setTitleError] = useState<string>();
   const [fail, setFail] = useState<Error | null>(null);
@@ -28,11 +26,9 @@ export function AnnouncementForm() {
     if (!/^[0-9a-f-]{36}$/i.test(announcementId!)) return { found: false };
     const row = must(await db().from("announcements").select("id, title, body").eq("id", announcementId!).eq("course_id", course.id).maybeSingle()) as { id: string; title: string; body: string } | null;
     if (!row) return { found: false };
-    const { text, meta } = splitBody(row.body);
     setTitle(row.title);
-    setMessage(text);
-    setMeta(meta);
-    setOriginal({ title: row.title, message: text });
+    setMessage(row.body);
+    setOriginal({ title: row.title, message: row.body });
     return { found: true };
   }, [announcementId, course.id]);
 
@@ -46,7 +42,7 @@ export function AnnouncementForm() {
       if (editing) {
         const changed = title.trim() !== original.title || message !== original.message;
         // Edits never notify students: the notification trigger only fires on insert.
-        must(await db().from("announcements").update({ title: title.trim(), body: joinBody(message, { ...meta, edited: meta.edited || changed }) }).eq("id", announcementId!).select("id"));
+        must(await db().from("announcements").update({ title: title.trim(), body: message, ...(changed ? { edited_at: new Date().toISOString() } : {}) }).eq("id", announcementId!).select("id"));
         toast("Saved");
       } else {
         must(await db().from("announcements").insert({ course_id: course.id, title: title.trim(), body: message }).select("id"));

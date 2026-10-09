@@ -1,15 +1,10 @@
 import type { Page } from "@playwright/test";
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
+import { test, expect, reset, signIn, signOut, type Who } from "./fixtures";
 
+// Sign in with the shared fixture; when someone else is signed in, sign out first.
 async function login(page: Page, who: Who) {
-  await page.goto("/sign-in");
-  await page.evaluate(() => localStorage.removeItem("scientia-auth"));
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith("/sign-in"));
-  await expect(page.getByRole("banner")).toContainText(users[who].name);
+  if (page.url().startsWith("http") && !page.url().includes("/sign-in")) await signOut(page);
+  await signIn(page, who);
 }
 
 async function courseBase(page: Page, code: string) {
@@ -72,7 +67,7 @@ test.describe("Announcements", () => {
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Announcements");
     await expect(rows(page).nth(1)).toContainText("Lab report 1 marking update");
     await expect(rows(page).nth(1)).not.toContainText("Unread");
-    await expect(rows(page).nth(0)).toContainText("Unread");
+    await expect(rows(page).nth(0)).not.toContainText("Unread");
   });
 
   test("@US-7 a notification link opens the announcement", async ({ page }) => {

@@ -6,9 +6,8 @@ import { fmtDate } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, ErrorNote, Loading, NotFound, PageHeader } from "../../ui";
-import { splitBody } from "./content/meta";
 import { Prose } from "./content/Prose";
-import { markAnnouncementRead, useDocTitle } from "./content/util";
+import { useDocTitle } from "./content/util";
 import type { AnnouncementRow } from "./Announcements";
 
 export function AnnouncementView() {
@@ -19,7 +18,7 @@ export function AnnouncementView() {
   const q = useQuery(async () => {
     if (!/^[0-9a-f-]{36}$/i.test(announcementId ?? "")) return null;
     return must(
-      await db().from("announcements").select("id, title, body, pinned, created_at, author:profiles!author_id(full_name)").eq("id", announcementId!).eq("course_id", course.id).maybeSingle(),
+      await db().from("announcements").select("id, title, body, pinned, created_at, edited_at, author:profiles!author_id(full_name)").eq("id", announcementId!).eq("course_id", course.id).maybeSingle(),
     ) as unknown as AnnouncementRow | null;
   }, [announcementId, course.id]);
   useDocTitle(q.data?.title);
@@ -27,9 +26,9 @@ export function AnnouncementView() {
   const id = q.data?.id;
   useEffect(() => {
     if (!id) return;
-    markAnnouncementRead(profile!.id, id);
     // Opening an announcement also reads its notification, if there is one.
     (async () => {
+      await db().from("announcement_reads").upsert({ announcement_id: id, user_id: profile!.id }, { onConflict: "announcement_id,user_id", ignoreDuplicates: true });
       await db().from("notifications").update({ read_at: new Date().toISOString() }).is("read_at", null).like("link", `%/announcements#${id}`);
       refreshUnread();
     })();
@@ -38,16 +37,15 @@ export function AnnouncementView() {
   if (q.error) return <div className="content"><ErrorNote error={q.error} /></div>;
   if (q.loading && q.data === undefined) return <div className="content"><Loading /></div>;
   if (!q.data) return <NotFound />;
-  const { text, meta } = splitBody(q.data.body);
-  return (
+    return (
     <div className="content">
       <PageHeader eyebrow={<Link to={`/courses/${course.id}/announcements`}>‹ Announcements</Link>} title={q.data.title} />
       <p className="muted">
         {q.data.author?.full_name} · <time dateTime={q.data.created_at}>{fmtDate(q.data.created_at)}</time>
         {q.data.pinned && <> <Badge tone="accent">Pinned</Badge></>}
-        {meta.edited && <> <Badge>Edited</Badge></>}
+        {q.data.edited_at && <> <Badge>Edited</Badge></>}
       </p>
-      <Prose text={text} />
+      <Prose text={q.data.body} />
     </div>
   );
 }

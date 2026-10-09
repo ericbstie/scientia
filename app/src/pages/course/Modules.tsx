@@ -4,7 +4,7 @@ import { useCourse } from "../../App";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ButtonLink, Confirm, Dialog, Empty, ErrorNote, Field, Loading, PageHeader, Section, useToast } from "../../ui";
-import { focusField, focusHeading, useDocTitle, linkTarget } from "./content/util";
+import { focusField, focusHeading, useDocTitle } from "./content/util";
 
 type Item = { id: string; kind: "page" | "file" | "link"; title: string; url: string | null; file_name: string | null; file_path: string | null; position: number };
 type Mod = { id: string; title: string; position: number; published: boolean; materials: Item[] };
@@ -103,13 +103,13 @@ export function Modules() {
                     <div className="row">
                       <div className="row-main">
                         {i.kind === "page" ? (
-                          <Link className="row-title" style={linkTarget} to={`${base}/pages/${i.id}`}>{i.title}</Link>
+                          <Link className="row-title" to={`${base}/pages/${i.id}`}>{i.title}</Link>
                         ) : i.kind === "link" ? (
-                          <a className="row-title" style={linkTarget} href={i.url ?? "#"} target="_blank" rel="noopener noreferrer">{i.title}</a>
+                          <a className="row-title" href={i.url ?? "#"} target="_blank" rel="noopener noreferrer">{i.title}</a>
                         ) : q.data!.signed[i.file_path ?? ""] ? (
-                          <a className="row-title" style={linkTarget} href={q.data!.signed[i.file_path!]} download={i.file_name ?? i.title}>{i.title}</a>
+                          <a className="row-title" href={q.data!.signed[i.file_path!]} download={i.file_name ?? i.title}>{i.title}</a>
                         ) : (
-                          <span className="row-title" style={linkTarget}>{i.title}</span>
+                          <span className="row-title">{i.title}</span>
                         )}
                         <div className="row-meta">{KIND_LABEL[i.kind]}{i.kind === "file" && i.file_name && <> · {i.file_name}</>}</div>
                       </div>

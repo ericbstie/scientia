@@ -1,15 +1,10 @@
 import type { Page } from "@playwright/test";
-import { test, expect, reset, users, PASSWORD, type Who } from "./fixtures";
+import { test, expect, reset, signIn, signOut, type Who } from "./fixtures";
 
+// Sign in with the shared fixture; when someone else is signed in, sign out first.
 async function login(page: Page, who: Who) {
-  await page.goto("/sign-in");
-  await page.evaluate(() => localStorage.removeItem("scientia-auth"));
-  await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(users[who].email);
-  await page.getByLabel("Password").fill(PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith("/sign-in"));
-  await expect(page.getByRole("banner")).toContainText(users[who].name);
+  if (page.url().startsWith("http") && !page.url().includes("/sign-in")) await signOut(page);
+  await signIn(page, who);
 }
 
 async function courseBase(page: Page, code: string) {

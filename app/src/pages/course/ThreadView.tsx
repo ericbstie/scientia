@@ -5,11 +5,10 @@ import { fmtDateTime } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, Confirm, ErrorNote, Loading, NotFound, PageHeader, Section, TextArea, useToast } from "../../ui";
-import { joinBody, splitBody } from "./content/meta";
 import { Prose } from "./content/Prose";
 import { focusField, focusHeading, useDocTitle } from "./content/util";
 
-type Post = { key: string; kind: "first" | "reply" | "removed"; replyId?: string; authorId?: string; author?: string; at: string; text: string };
+type Post = { key: string; kind: "first" | "reply"; removed?: boolean; replyId?: string; authorId?: string; author?: string; at: string; text: string };
 
 export function ThreadView() {
   const { course, role } = useCourse();
@@ -29,13 +28,13 @@ export function ThreadView() {
     if (!/^[0-9a-f-]{36}$/i.test(threadId ?? "")) return null;
     const [thread, replies, people] = await Promise.all([
       db().from("threads").select("id, title, body, created_at, author_id, author:profiles!author_id(full_name)").eq("id", threadId!).eq("course_id", course.id).maybeSingle(),
-      db().from("replies").select("id, body, created_at, author_id, author:profiles!author_id(full_name)").eq("thread_id", threadId!).order("created_at"),
+      db().from("replies").select("id, body, removed, created_at, author_id, author:profiles!author_id(full_name)").eq("thread_id", threadId!).order("created_at"),
       db().rpc("course_people", { c: course.id }),
     ]);
     const t = must(thread) as unknown as { id: string; title: string; body: string; created_at: string; author_id: string; author: { full_name: string } | null } | null;
     if (!t) return null;
     const teachers = new Set((must(people) as { user_id: string; role: string }[]).filter((p) => p.role === "teacher").map((p) => p.user_id));
-    return { thread: t, replies: must(replies) as unknown as { id: string; body: string; created_at: string; author_id: string; author: { full_name: string } | null }[], teachers };
+    return { thread: t, replies: must(replies) as unknown as { id: string; body: string; removed: boolean; created_at: string; author_id: string; author: { full_name: string } | null }[], teachers };
   }, [threadId, course.id]);
   useDocTitle(q.data?.thread.title);
 
@@ -59,10 +58,8 @@ export function ThreadView() {
     setBusy(true);
     setFail(null);
     try {
-      const { text, meta } = splitBody(q.data.thread.body);
-      must(await db().from("replies").delete().eq("id", removingPost.replyId).select("id"));
-      // Keep a marker so the removed post stays visible as removed to everyone.
-      must(await db().from("threads").update({ body: joinBody(text, { ...meta, removed: [...(meta.removed ?? []), removingPost.at] }) }).eq("id", threadId!).select("id"));
+      // Flag it and clear the text, so the post stays visible as removed but its content is gone.
+      must(await db().from("replies").update({ removed: true, body: "" }).eq("id", removingPost.replyId).select("id"));
       setRemovingPost(null);
       toast("Post removed");
       await q.reload();
@@ -87,11 +84,9 @@ export function ThreadView() {
   if (!q.data) return <NotFound />;
 
   const { thread, replies, teachers } = q.data;
-  const { text: firstText, meta } = splitBody(thread.body);
-  const posts: Post[] = ([
-    { key: "first", kind: "first", authorId: thread.author_id, author: thread.author?.full_name, at: thread.created_at, text: firstText },
-    ...replies.map((r): Post => ({ key: r.id, kind: "reply", replyId: r.id, authorId: r.author_id, author: r.author?.full_name, at: r.created_at, text: r.body })),
-    ...(meta.removed ?? []).map((at, i): Post => ({ key: `removed-${i}`, kind: "removed", at, text: "" })),
+    const posts: Post[] = ([
+    { key: "first", kind: "first", authorId: thread.author_id, author: thread.author?.full_name, at: thread.created_at, text: thread.body },
+    ...replies.map((r): Post => ({ key: r.id, kind: "reply", replyId: r.id, authorId: r.author_id, author: r.author?.full_name, at: r.created_at, text: r.body, removed: r.removed })),
   ]  as Post[]).sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
 
   return (
@@ -108,7 +103,7 @@ export function ThreadView() {
             <li key={p.key}>
               <div className="row" style={{ alignItems: "flex-start" }}>
                 <div className="row-main">
-                  {p.kind === "removed" ? (
+                  {p.removed ? (
                     <>
                       <p className="muted" style={{ margin: 0 }}>This post was removed by a teacher</p>
                       <div className="row-meta"><time dateTime={p.at}>{fmtDateTime(p.at)}</time></div>
@@ -124,7 +119,7 @@ export function ThreadView() {
                     </>
                   )}
                 </div>
-                {teacher && p.kind === "reply" && (
+                {teacher && p.kind === "reply" && !p.removed && (
                   <div className="row-side"><Button size="small" variant="danger" className="ghost" onClick={() => setRemovingPost(p)}>Delete</Button></div>
                 )}
               </div>

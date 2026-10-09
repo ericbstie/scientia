@@ -6,10 +6,9 @@ import { fmtDate } from "../../lib/format";
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ButtonLink, Confirm, Empty, ErrorNote, Loading, PageHeader, useToast } from "../../ui";
-import { splitBody } from "./content/meta";
-import { focusHeading, readAnnouncements, useDocTitle, linkTarget } from "./content/util";
+import { focusHeading, useDocTitle } from "./content/util";
 
-export type AnnouncementRow = { id: string; title: string; body: string; pinned: boolean; created_at: string; author: { full_name: string } | null };
+export type AnnouncementRow = { id: string; title: string; body: string; pinned: boolean; created_at: string; edited_at: string | null; author: { full_name: string } | null };
 
 export function Announcements() {
   const { course, role } = useCourse();
@@ -23,23 +22,27 @@ export function Announcements() {
   const [removing, setRemoving] = useState<AnnouncementRow | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<Error | null>(null);
-  const [reads] = useState(() => readAnnouncements(profile!.id));
-
-  const q = useQuery(async () =>
-    must(
-      await db()
+  
+  const q = useQuery(async () => {
+    const [anns, reads] = await Promise.all([
+      db()
         .from("announcements")
-        .select("id, title, body, pinned, created_at, author:profiles!author_id(full_name)")
+        .select("id, title, body, pinned, created_at, edited_at, author:profiles!author_id(full_name)")
         .eq("course_id", course.id)
         .order("pinned", { ascending: false })
         .order("created_at", { ascending: false }),
-    ) as unknown as AnnouncementRow[],
-  [course.id]);
+      db().from("announcement_reads").select("announcement_id").eq("user_id", profile!.id),
+    ]);
+    return {
+      list: must(anns) as unknown as AnnouncementRow[],
+      reads: new Set((must(reads) as { announcement_id: string }[]).map((r) => r.announcement_id)),
+    };
+  }, [course.id]);
 
   // Notifications link to /announcements#<id>: open that announcement.
   useEffect(() => {
     const id = hash.replace(/^#/, "");
-    if (id && q.data?.some((a) => a.id === id)) navigate(`${base}/announcements/${id}`, { replace: true });
+    if (id && q.data?.list.some((a) => a.id === id)) navigate(`${base}/announcements/${id}`, { replace: true });
   }, [hash, q.data, base, navigate]);
 
   async function togglePin(a: AnnouncementRow) {
@@ -64,7 +67,8 @@ export function Announcements() {
     setBusy(false);
   }
 
-  const list = q.data ?? [];
+  const list = q.data?.list ?? [];
+  const reads = q.data?.reads ?? new Set<string>();
   return (
     <div className="content">
       <PageHeader title="Announcements" actions={teacher && <ButtonLink variant="primary" to={`${base}/announcements/new`}>New announcement</ButtonLink>} />
@@ -74,17 +78,16 @@ export function Announcements() {
       ) : (
         <ul className="list">
           {list.map((a) => {
-            const { meta } = splitBody(a.body);
             return (
               <li key={a.id}>
                 <div className="row">
                   <div className="row-main">
-                    <Link className="row-title" style={linkTarget} to={`${base}/announcements/${a.id}`}>{a.title}</Link>
+                    <Link className="row-title" to={`${base}/announcements/${a.id}`}>{a.title}</Link>
                     <div className="row-meta">
                       {a.author?.full_name} · <time dateTime={a.created_at}>{fmtDate(a.created_at)}</time>
                       {a.pinned && <> <Badge tone="accent">Pinned</Badge></>}
                       {!teacher && !reads.has(a.id) && <> <Badge tone="accent">Unread</Badge></>}
-                      {meta.edited && <> <Badge>Edited</Badge></>}
+                      {a.edited_at && <> <Badge>Edited</Badge></>}
                     </div>
                   </div>
                   {teacher && (
