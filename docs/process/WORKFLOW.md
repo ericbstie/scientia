@@ -56,6 +56,9 @@ Every milestone runs the same steps.
   restate them from memory.
 - **Story sets get a two-lens review** (testability, research fit) before any
   implementation brief cites them.
+- **Changes are made by opus at high effort.** Any agent that edits code, tests,
+  docs or process runs on opus with high effort; read-only research, reviews and
+  blind user tests may use smaller models (`docs/process/roles.md`).
 - **Copy is tested on people who know nothing.** Interface text says only what
   the user needs: no product comparisons, no words about how or why it was
   built, no internal ids (`docs/design/ui-guidelines.md`, `copy.leaks` metric).
