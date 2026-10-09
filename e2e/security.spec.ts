@@ -187,6 +187,16 @@ test("@US-43 security: storage responses carry a sandbox content-security-policy
   expect(res.headers()["content-security-policy"]).toContain("sandbox");
 });
 
+test("@US-43 security: app pages cannot be framed and only run their own scripts", async ({ request }) => {
+  for (const path of ["/", "/sign-in", "/courses/00000000-0000-0000-0000-000000000000/grading"]) {
+    const res = await request.get(path);
+    expect(res.headers()["content-type"], path).toContain("text/html");
+    expect(res.headers()["x-frame-options"], path).toBe("DENY");
+    expect(res.headers()["content-security-policy"], path).toContain("frame-ancestors 'none'");
+    expect(res.headers()["content-security-policy"], path).toContain("script-src 'self'");
+  }
+});
+
 test("@US-43 security: every API response carries x-content-type-options nosniff", async ({ request }) => {
   const apikey = await anonKey(request);
   const maya = await login(request, "maya");

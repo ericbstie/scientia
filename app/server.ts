@@ -9,6 +9,13 @@ const upstream = {
 };
 const anonKey = process.env.ANON_KEY ?? "";
 const serviceKey = process.env.SERVICE_ROLE_KEY ?? "";
+const service = { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" };
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const roles = ["student", "teacher", "admin"];
+
+const error = (message: string, status: number) => Response.json({ error: message }, { status });
+const asService = (url: string, method: string, body: unknown) => fetch(url, { method, headers: service, body: JSON.stringify(body) });
+const patchProfile = (id: string, body: Record<string, unknown>) => asService(`${upstream["/rest/v1"]}/profiles?id=eq.${id}`, "PATCH", body);
 
 /** Returns the caller's user id if their JWT is valid and they are an admin. */
 async function requireAdmin(req: Request): Promise<string | null> {
@@ -18,40 +25,54 @@ async function requireAdmin(req: Request): Promise<string | null> {
   if (!me.ok) return null;
   const { id } = (await me.json()) as { id: string };
   if (!uuid.test(id)) return null;
-  const rows = await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}&select=is_admin,deactivated`, {
-    headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey },
-  });
+  const rows = await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}&select=is_admin,deactivated`, { headers: service });
   const [row] = rows.ok ? ((await rows.json()) as { is_admin: boolean; deactivated: boolean }[]) : [];
   return row?.is_admin && !row.deactivated ? id : null;
 }
 
 /** Admin: create a user account (email + temporary password). */
 async function createUser(req: Request) {
-  if (!(await requireAdmin(req))) return Response.json({ error: "Only administrators can create users." }, { status: 403 });
+  if (!(await requireAdmin(req))) return error("Only administrators can create users.", 403);
   const { email, password, full_name, role = "student" } = (await req.json()) as { email: string; password: string; full_name: string; role?: string };
-  if (!["student", "teacher", "admin"].includes(role)) return Response.json({ error: "Role must be student, teacher or admin." }, { status: 400 });
-  if (!email || !password || password.length < 8) return Response.json({ error: "Email and a password of at least 8 characters are required." }, { status: 400 });
-  const res = await fetch(`${upstream["/auth/v1"]}/admin/users`, {
-    method: "POST",
-    headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-    body: JSON.stringify({ email, password, email_confirm: true, user_metadata: { full_name } }),
-  });
+  if (!roles.includes(role)) return error("Role must be student, teacher or admin.", 400);
+  if (!email || !password || password.length < 8) return error("Email and a password of at least 8 characters are required.", 400);
+  const res = await asService(`${upstream["/auth/v1"]}/admin/users`, "POST", { email, password, email_confirm: true, user_metadata: { full_name } });
   const body = (await res.json()) as { id?: string; msg?: string; message?: string; error_description?: string };
   if (!res.ok) {
     const msg = body.msg ?? body.message ?? body.error_description ?? "";
-    if (res.status === 422 && /already/i.test(msg)) return Response.json({ error: "An account with this email already exists." }, { status: 409 });
-    return Response.json({ error: msg || "Could not create the account. Try again." }, { status: res.status });
+    if (res.status === 422 && /already/i.test(msg)) return error("An account with this email already exists.", 409);
+    return error(msg || "Could not create the account. Try again.", res.status);
   }
   // The role is set with the service key, never from signup metadata (ADR 0006).
-  await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${body.id}`, {
-    method: "PATCH",
-    headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-    body: JSON.stringify({ role }),
-  });
+  if (!(await patchProfile(body.id!, { role })).ok) return error("The account was created, but its role could not be set. Change it in the list.", 502);
   return Response.json({ id: body.id }, { status: 201 });
 }
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Admin: change role, deactivate/reactivate (bans sign-in, keeps data) or set a new password. */
+async function updateUser(req: Request & { params: { id: string } }) {
+  const adminId = await requireAdmin(req);
+  if (!adminId) return error("Only administrators can change accounts.", 403);
+  const id = req.params.id;
+  if (!uuid.test(id)) return error("Unknown account.", 404);
+  const { deactivated, password, role } = (await req.json()) as { deactivated?: boolean; password?: string; role?: string };
+  if (deactivated !== undefined && id === adminId) return error("You can't deactivate your own account.", 400);
+  if (role !== undefined && id === adminId) return error("You can't change your own role.", 400);
+  if (role !== undefined && !roles.includes(role)) return error("Role must be student, teacher or admin.", 400);
+  if (password !== undefined && password.length < 8) return error("The password must be at least 8 characters.", 400);
+  const failed = (res: Response) => error("Could not update the account. Try again.", res.status);
+  if (password !== undefined || deactivated !== undefined) {
+    const res = await asService(`${upstream["/auth/v1"]}/admin/users/${id}`, "PUT", {
+      password,
+      ban_duration: deactivated === undefined ? undefined : deactivated ? "876000h" : "none",
+    });
+    if (!res.ok) return failed(res);
+  }
+  if (role !== undefined || deactivated !== undefined) {
+    const res = await patchProfile(id, { role, deactivated });
+    if (!res.ok) return failed(res);
+  }
+  return Response.json({ ok: true });
+}
 
 // Security headers for every response from this origin.
 const securityHeaders: Record<string, string> = {
@@ -72,7 +93,7 @@ function proxy(prefix: keyof typeof upstream) {
     const url = new URL(req.url);
     // GoTrue admin routes need the service key; refuse anything else before it reaches GoTrue.
     if (prefix === "/auth/v1" && url.pathname.startsWith("/auth/v1/admin") && req.headers.get("authorization") !== `Bearer ${serviceKey}`)
-      return withHeaders(Response.json({ error: "Not found" }, { status: 404 }));
+      return withHeaders(error("Not found", 404));
     const target = upstream[prefix] + url.pathname.slice(prefix.length) + url.search;
     const headers = new Headers(req.headers);
     headers.delete("host");
@@ -91,41 +112,9 @@ function proxy(prefix: keyof typeof upstream) {
   };
 }
 
-/** Admin: change role, deactivate/reactivate (bans sign-in, keeps data) or set a new password. */
-async function updateUser(req: Request & { params: { id: string } }) {
-  const adminId = await requireAdmin(req);
-  if (!adminId) return Response.json({ error: "Only administrators can change accounts." }, { status: 403 });
-  const id = req.params.id;
-  if (!uuid.test(id)) return Response.json({ error: "Unknown account." }, { status: 404 });
-  const { deactivated, password, role } = (await req.json()) as { deactivated?: boolean; password?: string; role?: string };
-  if (deactivated !== undefined && id === adminId) return Response.json({ error: "You can't deactivate your own account." }, { status: 400 });
-  if (role !== undefined && id === adminId) return Response.json({ error: "You can't change your own role." }, { status: 400 });
-  if (role !== undefined && !["student", "teacher", "admin"].includes(role)) return Response.json({ error: "Role must be student, teacher or admin." }, { status: 400 });
-  if (password !== undefined && password.length < 8) return Response.json({ error: "The password must be at least 8 characters." }, { status: 400 });
-  const body: Record<string, unknown> = {};
-  if (password !== undefined) body.password = password;
-  if (deactivated !== undefined) body.ban_duration = deactivated ? "876000h" : "none";
-  if (Object.keys(body).length) {
-    const res = await fetch(`${upstream["/auth/v1"]}/admin/users/${id}`, {
-      method: "PUT",
-      headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) return Response.json({ error: "Could not update the account. Try again." }, { status: res.status });
-  }
-  const profile: Record<string, unknown> = {};
-  if (deactivated !== undefined) profile.deactivated = deactivated;
-  if (role !== undefined) profile.role = role;
-  if (Object.keys(profile).length) {
-    const res = await fetch(`${upstream["/rest/v1"]}/profiles?id=eq.${id}`, {
-      method: "PATCH",
-      headers: { authorization: `Bearer ${serviceKey}`, apikey: serviceKey, "content-type": "application/json" },
-      body: JSON.stringify(profile),
-    });
-    if (!res.ok) return Response.json({ error: "Could not update the account. Try again." }, { status: res.status });
-  }
-  return Response.json({ ok: true });
-}
+// Bun serves the bundled page without a way to add headers, so it sits on a private path
+// and every page request fetches it from there and adds the security headers.
+const pagePath = `/_page/${crypto.randomUUID()}`;
 
 const server = Bun.serve({
   port: Number(process.env.PORT ?? 3000),
@@ -138,7 +127,8 @@ const server = Bun.serve({
     "/auth/v1/*": proxy("/auth/v1"),
     "/rest/v1/*": proxy("/rest/v1"),
     "/storage/v1/*": proxy("/storage/v1"),
-    "/*": index,
+    [pagePath as "/_page"]: index,
+    "/*": async (_req, srv) => withHeaders(await fetch(new URL(pagePath, srv.url))),
   },
 });
 
