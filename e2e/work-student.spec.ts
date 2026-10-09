@@ -193,7 +193,9 @@ test.describe("Assignments and submitting", () => {
     await signOut(page);
     await login(page, "maya");
     await openAssignment(page, "Lab report 1");
+    await expect(page.getByText("86 / 100")).toBeVisible();
     await expect(page.getByRole("button", { name: "Edit submission" })).toHaveCount(0);
+    await expect(page.getByText("Your teacher has started grading this work")).toHaveCount(0);
   });
 
   test("@US-11 late work is accepted and marked Late", async ({ page }) => {

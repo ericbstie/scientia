@@ -142,7 +142,7 @@ function StudentView({ a }: { a: Assignment }) {
             </p>
             {sub.body && <p className="prose">{sub.body}</p>}
             <FileLinks files={sub.files} />
-            {graded && <p className="muted">Your teacher has started grading this work</p>}
+            {graded && !released && <p className="muted">Your teacher has started grading this work</p>}
             {canEdit && <div><Button onClick={() => setEditing(true)}>Edit submission</Button></div>}
           </div>
         ) : closed && !sub ? (

@@ -142,7 +142,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 - Given I am signed in as Liam and his Photosynthesis worksheet submission is ungraded, When I open it, Then I see an "Edit submission" button.
 - Given I change the text to "Light reactions occur in the thylakoid membrane; the Calvin cycle is in the stroma." and submit again, When the page reloads, Then it shows the new text and the label "Attempt 2"; and Ingrid's grading view of that submission shows the new text and not the old one.
 - Given I am signed in as Liam and Lab report 1 has a draft grade, When I open it, Then there is no Edit submission button and I read "Your teacher has started grading this work".
-- Given I am signed in as Maya and Lab report 1 is graded, When I open it, Then there is no Edit submission button.
+- Given I am signed in as Maya and Lab report 1 is graded and released, When I open it, Then there is no Edit submission button and no "Your teacher has started grading this work" line, only the grade and feedback.
 
 ### US-11 Understand late and closed deadlines
 
