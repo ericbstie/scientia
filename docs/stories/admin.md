@@ -59,6 +59,20 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 - Given the reset is saved, When Liam signs in with Reset-pass-9, Then he reaches his dashboard.
 - Given I enter the 7-character password "short12", When I save, Then I see "Password must be at least 8 characters" and Liam can still sign in with Demo-pass-123.
 
+### US-46 Import users from a file
+
+**As an** admin **I want** to create many accounts at once from a spreadsheet **so that** a whole class or school can start without me typing each person in.
+
+**Priority:** P1
+
+**Evidence:** gap-analysis.md (rank 7, bulk import)
+
+**Acceptance criteria:**
+- Given a CSV file whose first row is "name,email,role,password", with a row for "Berg, Astrid" (role empty) and one for Jonas Holm (role Teacher), When I choose it under Import users, Then I see "2 ready to add" and both listed, Astrid as a student and Jonas as a teacher, and nothing is saved yet.
+- Given the file also has rows with the email "not-an-email", with maya.okafor@scientia.test, with Jonas's email again, with the role "principal" and with the password "abc", When I preview it, Then each of those is listed by its row number with what is wrong, and will be skipped.
+- Given that preview, When I click "Add 2 users", Then I see "2 users added", Astrid and Jonas appear in the Users table with their roles, Astrid can sign in with the password from the file, and the five skipped rows stay listed as not added.
+- Given a file whose first row does not name the columns name, email and password, When I choose it, Then I am told which columns the first row needs and nothing is listed. A file separated by semicolons, as some spreadsheets save it, is read the same way as one separated by commas.
+
 ### US-42 Create a course and assign its teacher
 
 **As an** admin **I want** to create a course with a code, a title and a teacher **so that** the teacher can start building it immediately.

@@ -7,7 +7,7 @@ async function openUsers(page: Page) {
   await signIn(page, "admin");
   await expect(page.getByRole("heading", { level: 1, name: "Users" })).toBeVisible();
 }
-const userRows = (page: Page) => page.getByRole("table").getByRole("row").filter({ has: page.getByRole("rowheader") });
+const userRows = (page: Page) => page.getByRole("table", { name: "Users" }).getByRole("row").filter({ has: page.getByRole("rowheader") });
 const rowOf = (page: Page, name: string) => userRows(page).filter({ hasText: name });
 
 async function newUser(page: Page, f: { name: string; email: string; role?: string; password: string }) {
@@ -119,6 +119,64 @@ test("@US-39 duplicate email and invalid fields are rejected", async ({ page }) 
   await expect(dialog.getByLabel("Email")).toHaveAccessibleDescription(/Enter a valid email address/);
   await dialog.getByRole("button", { name: "Cancel" }).click();
   await expect(userRows(page)).toHaveCount(7);
+});
+
+async function importFile(page: Page, lines: string[]) {
+  await page.getByRole("button", { name: "Import users" }).click();
+  const dialog = page.getByRole("dialog", { name: "Import users" });
+  await dialog.getByLabel("CSV file").setInputFiles({ name: "people.csv", mimeType: "text/csv", buffer: Buffer.from(lines.join("\r\n")) });
+  return dialog;
+}
+
+test("@US-46 admin previews a CSV file and adds the ready rows", async ({ page }) => {
+  await openUsers(page);
+  const dialog = await importFile(page, [
+    "name,email,role,password",
+    '"Berg, Astrid",astrid.berg@scientia.test,,Welcome-2026',
+    "Jonas Holm,Jonas.Holm@scientia.test,Teacher,Welcome-2026",
+    "No Email,not-an-email,student,Welcome-2026",
+    `Maya Again,${users.maya.email},student,Welcome-2026`,
+    "Jonas Twin,jonas.holm@scientia.test,student,Welcome-2026",
+    "Head Teacher,head@scientia.test,principal,Welcome-2026",
+    "Short Pass,short@scientia.test,student,abc",
+  ]);
+  await expect(dialog.getByText("2 ready to add. 5 with problems will be skipped:")).toBeVisible();
+  const skipped = [
+    "Row 4, not-an-email: Enter a valid email address",
+    `Row 5, ${users.maya.email}: An account with this email already exists`,
+    "Row 6, jonas.holm@scientia.test: Same email as row 3",
+    "Row 7, head@scientia.test: Role must be student, teacher or admin",
+    "Row 8, short@scientia.test: Password must be at least 8 characters",
+  ];
+  await expect(dialog.getByRole("listitem")).toHaveText(skipped);
+  const preview = dialog.getByRole("table", { name: "Ready to add" }).getByRole("row");
+  await expect(preview.filter({ hasText: "Berg, Astrid" })).toContainText("astrid.berg@scientia.teststudent");
+  await expect(preview.filter({ hasText: "Jonas Holm" })).toContainText("jonas.holm@scientia.testteacher");
+  await expect(userRows(page)).toHaveCount(7);
+
+  await dialog.getByRole("button", { name: "Add 2 users" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "2 users added" })).toBeVisible();
+  await expect(dialog.getByText("2 added. These rows were not added:")).toBeVisible();
+  await expect(dialog.getByRole("listitem")).toHaveText(skipped);
+  await dialog.getByRole("button", { name: "Close" }).click();
+  await expect(userRows(page)).toHaveCount(9);
+  await expect(rowOf(page, "Berg, Astrid").getByRole("combobox")).toHaveValue("student");
+  await expect(rowOf(page, "Jonas Holm").getByRole("combobox")).toHaveValue("teacher");
+
+  const { anonKey } = await (await page.request.get("/config.json")).json();
+  const astrid = await page.request.post("/auth/v1/token?grant_type=password", { headers: { apikey: anonKey }, data: { email: "astrid.berg@scientia.test", password: "Welcome-2026" } });
+  expect(astrid.ok(), "Astrid signs in with the password from the file").toBe(true);
+});
+
+test("@US-46 a file without the needed columns is refused; semicolons work like commas", async ({ page }) => {
+  await openUsers(page);
+  const dialog = await importFile(page, ["first name,last name,email", "Astrid,Berg,astrid.berg@scientia.test"]);
+  await expect(dialog.getByText("The first row must name the columns: name, email, password and, if you need it, role.")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /^Add/ })).toHaveCount(0);
+
+  await dialog.getByLabel("CSV file").setInputFiles({ name: "people.csv", mimeType: "text/csv", buffer: Buffer.from("Name;Email;Password\nAstrid Berg;astrid.berg@scientia.test;Welcome-2026\n") });
+  await expect(dialog.getByText("1 ready to add.")).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Add 1 user" })).toBeVisible();
 });
 
 test("@US-40 admin deactivates and reactivates a user", async ({ page, browser }) => {

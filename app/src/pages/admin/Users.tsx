@@ -19,6 +19,7 @@ async function api(path: string, method: string, body: unknown) {
 }
 
 const emailOk = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+const roleNames = ["student", "teacher", "admin"];
 
 export function AdminUsers() {
   const { profile } = useAuth();
@@ -28,6 +29,7 @@ export function AdminUsers() {
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("");
   const [creating, setCreating] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [resetting, setResetting] = useState<Row | null>(null);
   const [deactivating, setDeactivating] = useState<Row | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export function AdminUsers() {
 
   return (
     <div className="content wide">
-      <PageHeader title="Users" actions={<Button variant="primary" onClick={() => setCreating(true)}>New user</Button>} />
+      <PageHeader title="Users" actions={<><Button onClick={() => setImporting(true)}>Import users</Button><Button variant="primary" onClick={() => setCreating(true)}>New user</Button></>} />
       <AdminNav />
       <ErrorNote error={error} />
       <ErrorNote error={actionError} />
@@ -119,6 +121,9 @@ export function AdminUsers() {
 
       <Dialog open={creating} onClose={() => setCreating(false)} title="New user">
         <NewUserForm onCancel={() => setCreating(false)} onDone={(name, r) => { setCreating(false); toast(`${name} added as ${r === "admin" ? "an" : "a"} ${r}`); reload(); }} />
+      </Dialog>
+      <Dialog open={importing} onClose={() => setImporting(false)} title="Import users">
+        <ImportForm existing={new Set((data ?? []).map((u) => u.email.toLowerCase()))} onClose={() => setImporting(false)} onAdded={(n) => { toast(`${n} ${n === 1 ? "user" : "users"} added`); reload(); }} />
       </Dialog>
       <Dialog open={!!resetting} onClose={() => setResetting(null)} title={resetting ? `Reset password for ${resetting.full_name}` : "Reset password"}>
         {resetting && <ResetForm user={resetting} onCancel={() => setResetting(null)} onDone={() => { toast(`Password reset for ${resetting.full_name}`); setResetting(null); }} />}
@@ -216,5 +221,122 @@ function ResetForm({ user, onCancel, onDone }: { user: Row; onCancel: () => void
         <Button onClick={onCancel}>Cancel</Button>
       </div>
     </form>
+  );
+}
+
+type ImportRow = { row: number; full_name: string; email: string; role: string; password: string; problem?: string };
+
+/** Splits CSV text into rows of cells. The separator is a comma, semicolon or tab, whichever the first row uses most. */
+function parseCsv(text: string) {
+  text = text.replace(/^\uFEFF/, "");
+  const first = text.split("\n", 1)[0];
+  const sep = [";", "\t"].find((s) => first.split(s).length > first.split(",").length) ?? ",";
+  const rows: string[][] = [[]];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c !== '"') cell += c;
+      else if (text[i + 1] === '"') cell += text[++i];
+      else quoted = false;
+    } else if (c === '"') quoted = true;
+    else if (c === sep || c === "\n") {
+      rows.at(-1)!.push(cell);
+      cell = "";
+      if (c === "\n") rows.push([]);
+    } else if (c !== "\r") cell += c;
+  }
+  rows.at(-1)!.push(cell);
+  return rows.map((r) => r.map((c) => c.trim()));
+}
+
+/** Reads the import file; returns the rows, each with the first problem found, or a message about the whole file. */
+function readUsers(text: string, existing: Set<string>): ImportRow[] | string {
+  const [head = [], ...rest] = parseCsv(text);
+  const col = Object.fromEntries(["name", "email", "role", "password"].map((h) => [h, head.findIndex((c) => c.toLowerCase() === h)]));
+  if (col.name < 0 || col.email < 0 || col.password < 0) return "The first row must name the columns: name, email, password and, if you need it, role.";
+  const firstRow = new Map<string, number>();
+  const rows = rest.flatMap((cells, i): ImportRow[] => {
+    if (!cells.some(Boolean)) return [];
+    const r = { row: i + 2, full_name: cells[col.name] ?? "", email: (cells[col.email] ?? "").toLowerCase(), role: (cells[col.role] ?? "").toLowerCase() || "student", password: cells[col.password] ?? "" };
+    const twin = firstRow.get(r.email);
+    if (twin === undefined) firstRow.set(r.email, r.row);
+    const problem =
+      (!r.full_name && "Enter a name") ||
+      (!emailOk(r.email) && "Enter a valid email address") ||
+      (existing.has(r.email) && "An account with this email already exists") ||
+      (twin !== undefined && `Same email as row ${twin}`) ||
+      (!roleNames.includes(r.role) && "Role must be student, teacher or admin") ||
+      (r.password.length < 8 && "Password must be at least 8 characters") ||
+      undefined;
+    return [{ ...r, problem }];
+  });
+  return rows.length ? rows : "The file has no people under its first row.";
+}
+
+/** Bulk account creation: preview every row, then create the ready ones one by one through the same endpoint as New user. */
+function ImportForm({ existing, onClose, onAdded }: { existing: Set<string>; onClose: () => void; onAdded: (n: number) => void }) {
+  const [rows, setRows] = useState<ImportRow[] | null>(null);
+  const [fileError, setFileError] = useState<string>();
+  const [progress, setProgress] = useState(0);
+  const [added, setAdded] = useState<number | null>(null);
+  const ready = rows?.filter((r) => !r.problem) ?? [];
+  const problems = rows?.filter((r) => r.problem) ?? [];
+
+  async function choose(file: File | undefined) {
+    setRows(null);
+    setFileError(undefined);
+    if (!file) return;
+    const read = readUsers(await file.text(), existing);
+    if (typeof read === "string") setFileError(read);
+    else setRows(read);
+  }
+
+  async function add() {
+    const failed: ImportRow[] = [];
+    for (const [i, r] of ready.entries()) {
+      setProgress(i + 1);
+      const res = await api("/api/admin/users", "POST", { email: r.email, password: r.password, full_name: r.full_name, role: r.role });
+      if (!res.ok) failed.push({ ...r, problem: res.error ?? "Could not create the account" });
+    }
+    setProgress(0);
+    const n = ready.length - failed.length;
+    if (n) onAdded(n);
+    if (!failed.length && !problems.length) return onClose();
+    setAdded(n);
+    setRows([...problems, ...failed].sort((a, b) => a.row - b.row));
+  }
+
+  return (
+    <div className="form">
+      {added === null && (
+        <Field id="import-file" type="file" accept=".csv,text/csv" label="CSV file" required error={fileError} onChange={(e) => choose(e.target.files?.[0])}
+          hint="First row: name, email, role, password. Role is student, teacher or admin, and student if empty. Passwords need at least 8 characters." />
+      )}
+      {rows && (
+        <>
+          <div>
+            <p>{added !== null ? `${added} added. These rows were not added:` : `${ready.length} ready to add.${problems.length ? ` ${problems.length} with problems will be skipped:` : ""}`}</p>
+            {problems.length > 0 && <ul>{problems.map((r) => <li key={r.row}>Row {r.row}{r.email && `, ${r.email}`}: {r.problem}</li>)}</ul>}
+          </div>
+          {added === null && ready.length > 0 && (
+            <div className="table-wrap">
+              <table>
+                <caption className="visually-hidden">Ready to add</caption>
+                <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Role</th></tr></thead>
+                <tbody>{ready.map((r) => <tr key={r.row}><th scope="row">{r.full_name}</th><td>{r.email}</td><td className="cap">{r.role}</td></tr>)}</tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+      <div className="actions">
+        {added === null && ready.length > 0 && (
+          <Button variant="primary" disabled={progress > 0} onClick={add}>{progress ? `Adding ${progress} of ${ready.length}…` : `Add ${ready.length} ${ready.length === 1 ? "user" : "users"}`}</Button>
+        )}
+        <Button onClick={onClose} disabled={progress > 0}>{added === null ? "Cancel" : "Close"}</Button>
+      </div>
+    </div>
   );
 }
