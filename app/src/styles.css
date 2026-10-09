@@ -104,7 +104,6 @@ img { max-width: 100%; }
 .menu-list { position: absolute; right: 0; top: calc(100% + 6px); min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 12px 32px rgb(0 0 0 / 0.12); padding: var(--s1); z-index: 60; }
 .menu-list [role="menuitem"] { display: block; width: 100%; text-align: left; padding: var(--s2) var(--s3); border-radius: var(--radius-sm); color: var(--text); text-decoration: none; background: none; border: 0; cursor: pointer; }
 .menu-list [role="menuitem"]:hover, .menu-list [role="menuitem"]:focus-visible { background: var(--surface-2); }
-.menu-meta { padding: var(--s2) var(--s3); color: var(--text-3); font-size: 0.85rem; border-bottom: 1px solid var(--border); margin-bottom: var(--s1); }
 
 .main { padding: var(--s6) var(--s5) var(--s7); }
 .content { max-width: var(--content); margin: 0 auto; }
