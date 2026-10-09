@@ -154,7 +154,8 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 
 **Acceptance criteria:**
 - Given I am signed in as Noah and Lab report 1 is past due and allows late work, When I open it, Then I see "Past due" and a submission form.
-- Given I submit the text "Late but complete." to Lab report 1 as Noah, When it saves, Then the status shows "Late" and the submission time (now) is after the due date T-7d 23:59.
+- Given I submit the text "Late but complete." to Lab report 1 as Noah, When it saves, Then the status shows "Late" instead of "Past due" and the submission time (now) is after the due date T-7d 23:59.
+- Given I am signed in as Maya, who handed in Lab report 1 on time, When I open it after the due date, Then the due date shows without "Past due".
 - Given I am signed in as Sofia, When I open Lab report 1, Then the status is "Late" and it says "Submitted 1 day late".
 - Given I am signed in as Liam and Safety acknowledgement is closed, When I open it, Then I see "Closed: this assignment stopped accepting work on" followed by the due date T-14d 23:59, and there is no form.
 - Given I am signed in as Liam, When I POST `{assignment_id: <Safety acknowledgement id>, student_id: <Liam's id>, body: "Too late"}` to `/rest/v1/submissions`, Then the response status is 4xx, the response message contains "closed" and not only a generic failure, and `/rest/v1/submissions` still has no row for Liam and Safety acknowledgement.

@@ -159,6 +159,7 @@ test.describe("Assignments and submitting", () => {
     await signIn(page, "maya");
     await openAssignment(page, "Lab report 1");
     await expect(page.getByText("86 / 100")).toBeVisible();
+    await expect(page.getByText("Past due")).toHaveCount(0); // handed in on time
     await expect(page.getByRole("button", { name: "Edit submission" })).toHaveCount(0);
     await expect(page.getByText("Your teacher has started grading this work")).toHaveCount(0);
   });
@@ -170,6 +171,7 @@ test.describe("Assignments and submitting", () => {
     await page.getByRole("textbox", { name: "Your answer" }).fill("Late but complete.");
     await page.getByRole("button", { name: "Submit" }).click();
     await expect(assignmentStatus(page)).toContainText("Late");
+    await expect(page.getByText("Past due")).toHaveCount(0);
     const when = await page.locator("main time[datetime]").last().getAttribute("datetime");
     expect(new Date(when!).getTime()).toBeGreaterThan(dueAt(-7).getTime());
     expect(Math.abs(new Date(when!).getTime() - Date.now())).toBeLessThan(2 * 60000);

@@ -212,7 +212,7 @@ function StudentView({ a }: { a: Assignment }) {
       />
       <Facts items={[
         ["Status", <StatusBadge status={status} />],
-        ["Due date", <><time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>{pastDue && <> <Badge>Past due</Badge></>}</>],
+        ["Due date", <><time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>{pastDue && !sub && <> <Badge>Past due</Badge></>}</>],
         ["Points", `${num(a.points)} points`],
         ["How to hand in", acceptsLabel(a)],
         ["Late work", lateWorkLabel(a.allow_late)],
