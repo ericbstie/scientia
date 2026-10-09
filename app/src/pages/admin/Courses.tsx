@@ -4,16 +4,17 @@ import { Button, ButtonLink, Dialog, Empty, ErrorNote, ErrorSummary, Field, focu
 import { db, must } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 
-type CourseRow = { id: string; code: string; title: string; enrollments: { role: string; profiles: { full_name: string } | null }[] };
+type CourseRow = { id: string; code: string; title: string; enrollments: { role: string; user_id: string; profiles: { full_name: string } | null }[] };
 type Teacher = { id: string; full_name: string };
-
+const teacherOf = (c: CourseRow) => c.enrollments.find((e) => e.role === "teacher")?.user_id ?? "";
 
 export function AdminCourses() {
   const toast = useToast();
   useTitle("Courses");
   const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<CourseRow | null>(null);
   const { data, error, loading, reload } = useQuery(async () => {
-    const courses = must(await db().from("courses").select("id, code, title, enrollments(role, profiles(full_name))").order("code")) as unknown as CourseRow[];
+    const courses = must(await db().from("courses").select("id, code, title, enrollments(role, user_id, profiles(full_name))").order("code")) as unknown as CourseRow[];
     const teachers = must(await db().from("profiles").select("id, full_name").eq("role", "teacher").order("full_name")) as Teacher[];
     return { courses, teachers };
   });
@@ -38,7 +39,12 @@ export function AdminCourses() {
                   <td>{c.title}</td>
                   <td>{c.enrollments.filter((e) => e.role === "teacher").map((e) => e.profiles?.full_name).filter(Boolean).join(", ")}</td>
                   <td className="num">{c.enrollments.filter((e) => e.role === "student").length}</td>
-                  <td><ButtonLink size="small" variant="ghost" to={`/courses/${c.id}/people`} aria-label={`People in ${c.code}`}>People</ButtonLink></td>
+                  <td>
+                    <div className="actions">
+                      <Button size="small" variant="ghost" aria-label={`Edit ${c.code}`} onClick={() => setEditing(c)}>Edit</Button>
+                      <ButtonLink size="small" variant="ghost" to={`/courses/${c.id}/people`} aria-label={`People in ${c.code}`}>People</ButtonLink>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -46,16 +52,28 @@ export function AdminCourses() {
         </div>
       )}
       <Dialog open={creating} onClose={() => setCreating(false)} title="New course">
-        <NewCourseForm teachers={data?.teachers ?? []} codes={(data?.courses ?? []).map((c) => c.code.toLowerCase())} onCancel={() => setCreating(false)} onDone={(code) => { setCreating(false); toast(`${code} created`); reload(); }} />
+        <CourseForm teachers={data?.teachers ?? []} codes={(data?.courses ?? []).map((c) => c.code.toLowerCase())} onCancel={() => setCreating(false)} onDone={(code) => { setCreating(false); toast(`${code} created`); reload(); }} />
+      </Dialog>
+      <Dialog open={!!editing} onClose={() => setEditing(null)} title={editing ? `Edit ${editing.code}` : "Edit course"}>
+        {editing && (
+          <CourseForm
+            course={editing}
+            teachers={data?.teachers ?? []}
+            codes={(data?.courses ?? []).filter((c) => c.id !== editing.id).map((c) => c.code.toLowerCase())}
+            onCancel={() => setEditing(null)}
+            onDone={(code) => { setEditing(null); toast(`${code} saved`); reload(); }}
+          />
+        )}
       </Dialog>
     </div>
   );
 }
 
-function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teacher[]; codes: string[]; onCancel: () => void; onDone: (code: string) => void }) {
-  const [code, setCode] = useState("");
-  const [title, setTitle] = useState("");
-  const [teacher, setTeacher] = useState("");
+/** Creates a course, or with `course` changes its code, title and teacher (students stay enrolled). */
+function CourseForm({ course, teachers, codes, onCancel, onDone }: { course?: CourseRow; teachers: Teacher[]; codes: string[]; onCancel: () => void; onDone: (code: string) => void }) {
+  const [code, setCode] = useState(course?.code ?? "");
+  const [title, setTitle] = useState(course?.title ?? "");
+  const [teacher, setTeacher] = useState(course ? teacherOf(course) : "");
   const [errors, setErrors] = useState<{ code?: string; title?: string; teacher?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -74,7 +92,8 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
     if (Object.keys(errs).length) return focusField(errs.code ? "nc-code" : errs.title ? "nc-title" : "nc-teacher");
     setBusy(true);
     try {
-      const { data: course, error } = await db().from("courses").insert({ code: c, title: title.trim() }).select("id").single();
+      const fields = { code: c, title: title.trim() };
+      const { data: saved, error } = await (course ? db().from("courses").update(fields).eq("id", course.id) : db().from("courses").insert(fields)).select("id").single();
       if (error) {
         if (error.code === "23505") {
           setErrors({ code: "A course with this code already exists" });
@@ -82,14 +101,21 @@ function NewCourseForm({ teachers, codes, onCancel, onDone }: { teachers: Teache
         }
         throw error;
       }
-      const res = await db().from("enrollments").insert({ course_id: course.id, user_id: teacher, role: "teacher" });
-      if (res.error) {
-        await db().from("courses").delete().eq("id", course.id);
-        throw res.error;
+      if (course) {
+        if (teacher !== teacherOf(course)) {
+          const moved = must(await db().from("enrollments").update({ user_id: teacher }).eq("course_id", course.id).eq("role", "teacher").select("user_id"));
+          if (!moved?.length) must(await db().from("enrollments").insert({ course_id: course.id, user_id: teacher, role: "teacher" }));
+        }
+      } else {
+        const res = await db().from("enrollments").insert({ course_id: saved.id, user_id: teacher, role: "teacher" });
+        if (res.error) {
+          await db().from("courses").delete().eq("id", saved.id);
+          throw res.error;
+        }
       }
       onDone(c);
     } catch {
-      setFormError("Could not create the course. Check your connection and try again.");
+      setFormError(course ? "Could not save the course. Check your connection and try again." : "Could not create the course. Check your connection and try again.");
     } finally {
       setBusy(false);
     }

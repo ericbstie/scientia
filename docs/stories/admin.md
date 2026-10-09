@@ -75,6 +75,19 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 - Given I leave the teacher unselected, When I save, Then I see "Choose a teacher" linked to the teacher field and no course is created.
 - Given I click People on the HIS201 row, When I add sofia.reyes@scientia.test, Then I see "Sofia Reyes added", the Courses table shows 3 students for HIS201, and Sofia sees HIS201 on her dashboard.
 
+### US-44 Change a course after creating it
+
+**As an** admin **I want** to change a course's code, title and teacher **so that** courses stay correct when they are renamed or another teacher takes over.
+
+**Priority:** P1
+
+**Evidence:** gap-analysis.md (rank 7, managing a course after creation)
+
+**Acceptance criteria:**
+- Given I click Edit on the HIS201 row, When I change the title to "Modern European History, 1789–1918" and save, Then I see "HIS201 saved" and the row shows the new title.
+- Given another teacher, Tomas Lind, has an account, When I edit BIO101, choose Tomas Lind and save, Then the BIO101 row shows Tomas Lind and still 4 students, Tomas sees BIO101 on his dashboard and Ingrid no longer does.
+- Given I edit HIS201, When I change its code to BIO101 and save, Then I see "A course with this code already exists" and HIS201 is unchanged.
+
 ### US-43 Keep admin and teacher tools away from other roles
 
 **As an** admin **I want** pages and data restricted by role **so that** students cannot see or change what is not theirs.

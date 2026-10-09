@@ -1,4 +1,4 @@
-import { test, expect, reset, signIn, users, PASSWORD } from "./fixtures";
+import { test, expect, reset, signIn, token, users, PASSWORD } from "./fixtures";
 import type { Page } from "@playwright/test";
 
 test.beforeEach(() => reset());
@@ -98,5 +98,53 @@ test("@US-42 admin adds a student to an existing course", async ({ page, browser
   await p.getByLabel("Password").fill(PASSWORD);
   await p.getByRole("button", { name: "Sign in" }).click();
   await expect(p.getByRole("region", { name: "Your courses" }).getByRole("link", { name: /HIS201/ })).toBeVisible();
+  await ctx.close();
+});
+
+test("@US-44 admin renames a course", async ({ page }) => {
+  await openCourses(page);
+  await page.getByRole("button", { name: "Edit HIS201" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit HIS201" });
+  await expect(dialog.getByLabel("Teacher")).toHaveValue(/.+/);
+  await dialog.getByLabel("Title").fill("Modern European History, 1789–1918");
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "HIS201 saved" })).toBeVisible();
+  await expect(page.getByRole("row", { name: /HIS201/ })).toContainText("Modern European History, 1789–1918");
+
+  await page.getByRole("button", { name: "Edit HIS201" }).click();
+  await dialog.getByLabel("Code").fill("BIO101");
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(dialog.getByText("A course with this code already exists")).toBeVisible();
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(page.getByRole("row", { name: /HIS201/ })).toBeVisible();
+});
+
+test("@US-44 admin hands a course to another teacher", async ({ page, browser }) => {
+  const tomas = { email: "tomas.lind@scientia.test", password: "Start-pass-1", full_name: "Tomas Lind", role: "teacher" };
+  const created = await page.request.post("/api/admin/users", { headers: (await token(page.request, "admin")).headers, data: tomas });
+  expect(created.status()).toBe(201);
+
+  await openCourses(page);
+  await page.getByRole("button", { name: "Edit BIO101" }).click();
+  const dialog = page.getByRole("dialog", { name: "Edit BIO101" });
+  await dialog.getByLabel("Teacher").selectOption({ label: "Tomas Lind" });
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "BIO101 saved" })).toBeVisible();
+  const row = page.getByRole("row", { name: /BIO101/ });
+  await expect(row).toContainText("Tomas Lind");
+  await expect(row).not.toContainText(users.ingrid.name);
+  await expect(row.getByRole("cell").nth(2)).toHaveText("4");
+
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  await p.goto("/sign-in");
+  await p.getByLabel("Email").fill(tomas.email);
+  await p.getByLabel("Password").fill(tomas.password);
+  await p.getByRole("button", { name: "Sign in" }).click();
+  const courses = p.getByRole("region", { name: "Your courses" });
+  await expect(courses.getByRole("link", { name: "Introduction to Biology" })).toBeVisible();
+  await signIn(p, "ingrid");
+  await expect(courses.getByRole("link", { name: "Modern European History" })).toBeVisible();
+  await expect(courses.getByRole("link", { name: "Introduction to Biology" })).toHaveCount(0);
   await ctx.close();
 });
