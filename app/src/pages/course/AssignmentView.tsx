@@ -228,7 +228,7 @@ function StudentView({ a }: { a: Assignment }) {
             <Paragraph>
               <strong>Submitted{late && ` ${late} late`}</strong>
               {" "}<time dateTime={sub.submitted_at}>{fmtDateTime(sub.submitted_at)}</time>
-              {" "}<span className="muted">· Attempt {sub.attempt}</span>
+              {sub.attempt > 1 && <> <Badge>Edited</Badge></>}
             </Paragraph>
             {sub.body && <Paragraph className="prose">{sub.body}</Paragraph>}
             <FileLinks files={sub.files} />
@@ -236,7 +236,7 @@ function StudentView({ a }: { a: Assignment }) {
             {canEdit && <div><Button onClick={() => setEditing(true)}>Edit submission</Button></div>}
           </Panel>
         ) : closed && !sub ? (
-          <Paragraph>Closed: this assignment stopped accepting work on <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time></Paragraph>
+          <Paragraph>Closed: this assignment stopped accepting work on <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>. Ask your teacher if you need more time.</Paragraph>
         ) : (
           <SubmitForm
             a={a}

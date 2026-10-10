@@ -23,7 +23,7 @@ export function Assignments() {
       {loading && !data ? <Loading /> : data && (
         data.assignments.length === 0 ? (
           role === "teacher"
-            ? <Empty title="No assignments yet" action={newButton}>Students see an assignment as soon as you publish it.</Empty>
+            ? <Empty title="No assignments yet">Students see an assignment as soon as you publish it.</Empty>
             : <Empty title="No assignments yet">Your teacher's assignments appear here when they are published.</Empty>
         ) : (
           <List>

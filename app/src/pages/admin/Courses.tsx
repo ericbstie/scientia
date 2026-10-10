@@ -19,13 +19,12 @@ export function AdminCourses() {
     return { courses, teachers };
   });
 
-  const newButton = <Button variant="primary" onClick={() => setCreating(true)}>New course</Button>;
   return (
     <div className="content wide">
-      <PageHeader title="Courses" subtitle="Open People on a course to add or remove its students." actions={data && data.courses.length > 0 ? newButton : undefined} />
+      <PageHeader title="Courses" subtitle="Open People on a course to add or remove its students." actions={<Button variant="primary" onClick={() => setCreating(true)}>New course</Button>} />
       <ErrorNote error={error} />
       {loading && !data ? <Loading /> : data && data.courses.length === 0 ? (
-        <Empty title="No courses yet" action={newButton}>Create a course and choose its teacher.</Empty>
+        <Empty title="No courses yet">Create a course and choose its teacher.</Empty>
       ) : data && (
         <div className="table-wrap">
           <Table data-color="neutral" data-size="sm" className="stack-rows">
@@ -126,7 +125,7 @@ function CourseForm({ course, teachers, codes, onCancel, onDone }: { course?: Co
       <ErrorSummary errors={[errors.code && { id: "nc-code", message: errors.code }, errors.title && { id: "nc-title", message: errors.title }, errors.teacher && { id: "nc-teacher", message: errors.teacher }]} />
       <Field id="nc-code" label="Code" required value={code} error={errors.code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
       <Field id="nc-title" label="Title" required value={title} error={errors.title} onChange={(e) => setTitle(e.target.value)} autoComplete="off" />
-      <Select id="nc-teacher" label="Teacher" required value={teacher} onChange={(e) => setTeacher(e.target.value)} error={errors.teacher} hint={noTeachers ? "No teachers yet. Add a teacher on the Users page first." : "Only accounts with the teacher role are listed."}>
+      <Select id="nc-teacher" label="Teacher" required value={teacher} onChange={(e) => setTeacher(e.target.value)} error={errors.teacher} hint={noTeachers ? "No teachers yet. Add a teacher on the Users page first." : "Only teachers are listed. If the teacher is missing, create their account on the Users page first."}>
         <option value="">Choose a teacher</option>
         {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name}</option>)}
       </Select>

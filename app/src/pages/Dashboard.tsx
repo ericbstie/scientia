@@ -39,7 +39,7 @@ async function loadStudent(uid: string) {
   const now = Date.now();
   const rows: Row[] = assignments.map((a) => ({ ...a, code: code.get(a.course_id) ?? "", status: studentStatus(a, submitted.get(a.id), released.has(a.id), now) }));
   const upcoming = rows.filter((r) => new Date(r.due_at).getTime() > now);
-  const missing = rows.filter((r) => new Date(r.due_at).getTime() <= now && !submitted.has(r.id)).sort((a, b) => b.due_at.localeCompare(a.due_at));
+  const missing = rows.filter((r) => r.status === "Missing").sort((a, b) => b.due_at.localeCompare(a.due_at));
   return { courses, upcoming, missing };
 }
 
@@ -84,14 +84,13 @@ function StudentView({ courses, upcoming, missing }: { courses: CourseLite[]; up
                   <div className="row-meta">{r.code} · {num(r.points)} points</div>
                 </div>
                 <div className="row-side">
-                  <Due at={r.due_at} /> <StatusBadge status={r.status} />
-                  {r.status !== "Closed" && <> <TextLink to={`/courses/${r.course_id}/assignments/${r.id}`}>Submit</TextLink></>}
+                  <Due at={r.due_at} /> <StatusBadge status={r.status} /> <TextLink to={`/courses/${r.course_id}/assignments/${r.id}`}>Submit</TextLink>
                 </div>
               </Row>
             ))}
           </List>
         ) : (
-          <Empty title="Nothing missing">Assignments you have not handed in appear here once their due date has passed.</Empty>
+          <Empty title="Nothing missing">Work that is past its due date and can still be handed in appears here.</Empty>
         )}
       </Section>
       <Section title="Your courses">

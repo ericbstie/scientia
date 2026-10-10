@@ -48,10 +48,13 @@ test("@US-42 the assigned teacher sees the new course", async ({ page, browser }
   await expect(nav.getByRole("link")).toHaveText(["CHE110General Chemistry", "Home", "Modules", "Assignments", "Announcements", "Discussions", "Grading", "Gradebook", "People"]);
   await nav.getByRole("link", { name: "Modules" }).click();
   await expect(p.getByText("No modules yet")).toBeVisible();
-  await expect(p.getByRole("button", { name: "Add module" }).first()).toBeVisible();
+  await expect(p.getByRole("button", { name: "Add module" })).toHaveCount(1);
   await nav.getByRole("link", { name: "Assignments" }).click();
   await expect(p.getByText("No assignments yet")).toBeVisible();
-  await expect(p.getByRole("link", { name: "New assignment" }).or(p.getByRole("button", { name: "New assignment" })).first()).toBeVisible();
+  await expect(p.getByRole("link", { name: "New assignment" }).or(p.getByRole("button", { name: "New assignment" }))).toHaveCount(1);
+  await nav.getByRole("link", { name: "People" }).click();
+  await expect(p.getByText("No students yet")).toBeVisible();
+  await expect(p.getByRole("button", { name: "Add student" })).toHaveCount(1); // the header's, not repeated in the empty list
   await ctx.close();
 });
 

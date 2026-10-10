@@ -76,7 +76,7 @@ Decisions that keep the route count low:
 ### R2 `/` Dashboard
 - **Purpose:** answer "what is due" and open a course.
 - **Who:** student and teacher (admin is redirected).
-- **Student regions:** h1 "Dashboard"; 1. Upcoming (list rows, soonest first, drafts and missing work excluded; each row: title, course code, due date, points, status badge); 2. Missing (list rows: title, course code, due date, status badge, and a "Submit" link unless the status is Closed; "Nothing missing" when none); 3. Your courses (course cards: code, title).
+- **Student regions:** h1 "Dashboard"; 1. Upcoming (list rows, soonest first, drafts and missing work excluded; each row: title, course code, due date, points, status badge); 2. Missing (work that is past its due date and can still be handed in; list rows: title, course code, due date, status badge, "Submit" link; "Nothing missing" when none; Closed work is not listed); 3. Your courses (course cards: code, title).
 - **Teacher regions:** h1 "Dashboard"; Your courses as cards: code, title (link to R7), "N students", "N need grading" (link to `/grading?status=needs-grading`).
 - **Primary action:** none. The whole page is links; the first useful row is the first tab stop after the skip link and top bar.
 - **Empty state:** student with no courses: "You are not enrolled in any course yet. Your teacher can add you by email, or ask an administrator." Upcoming empty: "Nothing due. New assignments appear here when your teacher publishes them." Teacher with no courses: "You don't teach any course yet. An administrator creates courses and assigns teachers."
@@ -128,7 +128,7 @@ Decisions that keep the route count low:
 - **Who:** student sees published modules only; teacher sees all with "Draft" badges.
 - **Regions:** h1 "Modules"; Add module (teacher, opens a dialog with Name); one `section` per module: h2 name, Draft badge, Publish or Unpublish (teacher), buttons Add page, Add file, Add link (teacher, Add page links to R9), item list (type label Page, File or Link, title, Delete for teacher).
 - **Primary action:** Add module (teacher); none for students.
-- **Empty state:** teacher "No modules yet" with Add module button; student "No material yet. Your teacher has not published any modules."; module with no items: "This module is empty." (teacher adds "Add a page, file or link.").
+- **Empty state:** teacher "No modules yet" (Add module is in the header); student "No material yet. Your teacher has not published any modules."; module with no items: "This module is empty." (teacher adds "Add a page, file or link.").
 - **Stories:** US-6, US-23, US-24.
 
 ### R9 `/courses/:courseId/modules/:moduleId/pages/new`
@@ -152,7 +152,7 @@ Decisions that keep the route count low:
 - **Who:** members. Teacher also manages.
 - **Regions:** h1 "Announcements"; New announcement (teacher); list rows: title, author, date, "Pinned" and "Unread" and "Edited" labels; teacher row buttons Pin or Unpin, Edit (to R14), Delete (confirm dialog).
 - **Primary action:** New announcement (teacher).
-- **Empty state:** "No announcements yet." Teacher adds the New announcement button.
+- **Empty state:** "No announcements yet." (New announcement is in the header.)
 - **Stories:** US-7, US-25, US-26.
 
 ### R12 `/courses/:courseId/announcements/new`
@@ -208,7 +208,7 @@ Decisions that keep the route count low:
 - **Who:** student (published only, with status badges); teacher (all, with "Draft" badge).
 - **Regions:** h1 "Assignments"; New assignment (teacher); list rows soonest due first: title, due date, points, status badge (student) or Draft badge (teacher).
 - **Primary action:** New assignment (teacher); none for students.
-- **Empty state:** teacher "No assignments yet" with New assignment button; student "No assignments yet."
+- **Empty state:** teacher "No assignments yet" (New assignment is in the header); student "No assignments yet."
 - **Stories:** US-8, US-27, US-28.
 
 ### R19 `/courses/:courseId/assignments/new`
@@ -222,7 +222,7 @@ Decisions that keep the route count low:
 ### R20 `/courses/:courseId/assignments/:assignmentId`
 - **Purpose:** student: know what to do and hand in work, then see status and feedback. Teacher: review the definition and publish state.
 - **Who:** student of the course; teacher of the course.
-- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Status, Due date, Points, Accepts, and "Late work: Not accepted after the due date" until that date passes when late work is not allowed); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", Attempt label, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>" with no form; Feedback (score "86 / 100" and feedback text) after release.
+- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Status, Due date, Points, Accepts, and "Late work: Not accepted after the due date" until that date passes when late work is not allowed); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", an "Edited" tag once the work was handed in again, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>. Ask your teacher if you need more time." with no form; Feedback (score "86 / 100" and feedback text) after release.
 - **Teacher regions:** back link "Assignments"; h1 title with Draft badge; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
 - **Primary action:** Submit (student); Publish on a draft (teacher), otherwise none.
 - **Empty state:** none.
@@ -239,7 +239,7 @@ Decisions that keep the route count low:
 ### R22 `/courses/:courseId/grades`
 - **Purpose:** a student's released grades.
 - **Who:** student.
-- **Regions:** h1 "Grades"; total line "87.3% (96 of 110 points graded so far)"; table (Assignment link, Status, Score): released "86 / 100", otherwise "Not submitted", "Missing" or "Awaiting grade", never 0.
+- **Regions:** h1 "Grades"; table (Assignment link, Status, Score): released "86 / 100", otherwise "Not submitted", "Missing", "Closed" or "Awaiting grade", never 0; a last row "Total" ("96 / 110", "87.3%", "2 of 4 assignments graded so far") once any score is released, otherwise the sentence "Nothing graded yet. Grades appear here when your teacher releases them."
 - **Primary action:** none.
 - **Empty state:** "No assignments yet, so there are no grades."
 - **Stories:** US-12, US-13.
@@ -255,7 +255,7 @@ Decisions that keep the route count low:
 ### R24 `/courses/:courseId/grading/:submissionId`
 - **Purpose:** grade one submission and move on.
 - **Who:** teacher.
-- **Regions:** back link "Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted) or Withdraw (when released, with the same confirmation as the Grading list).
+- **Regions:** back link "Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); a note under Grade that says whether the student can see the grade ("Released. ... Withdraw hides the grade again." or "Saved, not released. ... Use Release below"); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted) or Withdraw (when released, with the same confirmation as the Grading list).
 - **Primary action:** Save (Release is separate).
 - **Empty state:** "Next to grade" disabled with "Nothing else needs grading" when the queue is empty.
 - **Stories:** US-29, US-30, US-31, US-32.
@@ -273,7 +273,7 @@ Decisions that keep the route count low:
 - **Who:** members see names and roles; teacher also sees emails and manages.
 - **Regions:** h1 "People"; Add student (teacher, dialog with Email); Teachers (list); Students heading with count "4 students" (list sorted by last name; teacher: email, Remove button with confirm dialog).
 - **Primary action:** Add student (teacher).
-- **Empty state:** "No students yet." (teacher adds Add student).
+- **Empty state:** "No students yet." (Add student is in the header.)
 - **Stories:** US-5, US-34, US-35, US-36.
 
 ### R27 `/admin/users`

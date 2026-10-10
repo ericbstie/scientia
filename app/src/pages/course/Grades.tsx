@@ -13,15 +13,9 @@ export function Grades() {
   useDocTitle("Grades");
   const { data, error, loading } = useQuery(() => loadMyWork(course.id, profile!.id), [course.id, profile?.id]);
 
-  let total = "Nothing graded yet. Grades appear here when your teacher releases them.";
-  if (data) {
-    const scored = data.assignments.filter((a) => data.grades.get(a.id)?.released && data.grades.get(a.id)?.score != null);
-    if (scored.length) {
-      const got = scored.reduce((s, a) => s + data.grades.get(a.id)!.score!, 0);
-      const of = scored.reduce((s, a) => s + a.points, 0);
-      total = `Graded so far: ${num(got)} of ${num(of)} points (${pct(got, of)}%) from ${scored.length} of ${data.assignments.length} assignments`;
-    }
-  }
+  const scored = data ? data.assignments.filter((a) => data.grades.get(a.id)?.released && data.grades.get(a.id)?.score != null) : [];
+  const got = scored.reduce((s, a) => s + data!.grades.get(a.id)!.score!, 0);
+  const of = scored.reduce((s, a) => s + a.points, 0);
 
   return (
     <div className="content">
@@ -32,7 +26,7 @@ export function Grades() {
           <Empty title="No grades yet">Grades appear here once your teacher publishes assignments.</Empty>
         ) : (
           <>
-            <Paragraph><strong>{total}</strong></Paragraph>
+            {scored.length === 0 && <Paragraph><strong>Nothing graded yet. Grades appear here when your teacher releases them.</strong></Paragraph>}
             <div className="table-wrap fit">
               <Table data-color="neutral" data-size="sm">
                 <caption className="ds-sr-only">Your grades in {course.title}</caption>
@@ -54,6 +48,15 @@ export function Grades() {
                     );
                   })}
                 </tbody>
+                {scored.length > 0 && (
+                  <tfoot>
+                    <tr>
+                      <th scope="row">Total<div className="row-meta">{scored.length} of {data.assignments.length} assignments graded so far</div></th>
+                      <td />
+                      <td className="num"><strong>{num(got)} / {num(of)}</strong><div className="row-meta">{pct(got, of)}%</div></td>
+                    </tr>
+                  </tfoot>
+                )}
               </Table>
             </div>
           </>

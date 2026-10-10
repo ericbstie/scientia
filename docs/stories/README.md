@@ -101,7 +101,7 @@ Author of all three is Dr. Ingrid Solberg. Maya has read Welcome to BIO101 (20 d
 | Lab report 1 | Sofia | T-6d 23:59 (exactly one day after the due time) | text `Sorry this is late. Report text: cells observed under 400x magnification.` | not graded |
 | Photosynthesis worksheet | Liam | 1 day ago | text `Light reactions occur in the thylakoid membrane.` | not graded |
 
-Everything else has no submission: Liam, Sofia and Noah have not submitted Safety acknowledgement (Missing, and closed); Noah has not submitted Lab report 1 (Missing, still open for late work); Maya, Sofia and Noah have not submitted Photosynthesis worksheet; nobody has submitted Field journal or any HIS201 assignment. Counts that follow from this: Ingrid has 2 submissions that need grading (Sofia's Lab report 1, Liam's Photosynthesis worksheet) in BIO101 and 0 in HIS201.
+Everything else has no submission: Liam, Sofia and Noah have not submitted Safety acknowledgement (Closed); Noah has not submitted Lab report 1 (Missing, still open for late work); Maya, Sofia and Noah have not submitted Photosynthesis worksheet; nobody has submitted Field journal or any HIS201 assignment. Counts that follow from this: Ingrid has 2 submissions that need grading (Sofia's Lab report 1, Liam's Photosynthesis worksheet) in BIO101 and 0 in HIS201.
 
 ### Discussions
 

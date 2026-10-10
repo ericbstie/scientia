@@ -350,11 +350,13 @@ test.describe("Grading queue, grading and releasing", () => {
     await row(page, "Lab report 1").getByRole("link", { name: "Maya Okafor" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Maya Okafor: Lab report 1");
     await expect(page.getByRole("button", { name: "Release" })).toHaveCount(0);
+    await expect(page.getByText("Maya Okafor can see this score and feedback.")).toBeVisible();
     await page.getByRole("button", { name: "Withdraw" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toContainText("Withdraw the grade for Maya Okafor on Lab report 1?");
     await dialog.getByRole("button", { name: "Withdraw" }).click();
     await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
+    await expect(page.getByText("Maya Okafor cannot see this grade until you release it.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Withdraw" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Release" })).toBeVisible();
 

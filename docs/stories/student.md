@@ -54,7 +54,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Evidence:** design-patterns.md#Pain points (5); pain-points.md#Pain points (1)
 
 **Acceptance criteria:**
-- Given I am signed in as Noah, When I open the dashboard, Then a "Missing" section lists Lab report 1 (BIO101, due T-7d 23:59, labelled "Missing", with a "Submit" link) and Safety acknowledgement (BIO101, due T-14d 23:59, labelled "Closed" and with no link).
+- Given I am signed in as Noah, When I open the dashboard, Then a "Missing" section lists Lab report 1 (BIO101, due T-7d 23:59, labelled "Missing", with a "Submit" link) and not Safety acknowledgement, which can no longer be handed in and shows as "Closed" on the Assignments and Grades pages.
 - Given Noah has missing items, When I read the dashboard, Then the first item in "Upcoming" is Photosynthesis worksheet, the second is Field journal, and no missing item appears inside "Upcoming".
 - Given I am signed in as Maya, When I open the dashboard, Then the Missing section shows "Nothing missing".
 - Given I am signed in as Noah, When I click "Submit" on Lab report 1 in the Missing section, Then I land on that assignment's page with the submission form visible.
@@ -141,7 +141,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 
 **Acceptance criteria:**
 - Given I am signed in as Liam and his Photosynthesis worksheet submission is ungraded, When I open it, Then I see an "Edit submission" button.
-- Given I change the text to "Light reactions occur in the thylakoid membrane; the Calvin cycle is in the stroma." and submit again, When the page reloads, Then it shows the new text and the label "Attempt 2"; and Ingrid's grading view of that submission shows the new text and not the old one.
+- Given I change the text to "Light reactions occur in the thylakoid membrane; the Calvin cycle is in the stroma." and submit again, When the page reloads, Then it shows the new text and the label "Edited"; and Ingrid's grading view of that submission shows the new text and not the old one.
 - Given I am signed in as Liam and Lab report 1 has a draft grade, When I open it, Then there is no Edit submission button and I read "Your teacher has started grading this work".
 - Given I am signed in as Maya and Lab report 1 is graded and released, When I open it, Then there is no Edit submission button and no "Your teacher has started grading this work" line, only the grade and feedback.
 
@@ -158,7 +158,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 - Given I submit the text "Late but complete." to Lab report 1 as Noah, When it saves, Then the status shows "Late" instead of "Missing" and the submission time (now) is after the due date T-7d 23:59.
 - Given I am signed in as Maya, who handed in Lab report 1 on time, When I open it after the due date, Then the status is not "Missing".
 - Given I am signed in as Sofia, When I open Lab report 1, Then the status is "Late" and it says "Submitted 1 day late".
-- Given I am signed in as Liam and Safety acknowledgement is closed, When I open it, Then I see "Closed: this assignment stopped accepting work on" followed by the due date T-14d 23:59, and there is no form.
+- Given I am signed in as Liam and Safety acknowledgement is closed, When I open it, Then I see "Closed: this assignment stopped accepting work on" followed by the due date T-14d 23:59 and "Ask your teacher if you need more time.", and there is no form.
 - Given I am signed in as Liam, When I POST `{assignment_id: <Safety acknowledgement id>, student_id: <Liam's id>, body: "Too late"}` to `/rest/v1/submissions`, Then the response status is 4xx, the response message contains "closed" and not only a generic failure, and `/rest/v1/submissions` still has no row for Liam and Safety acknowledgement.
 
 ### US-12 View my grades in a course
@@ -172,8 +172,8 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Acceptance criteria:**
 - Given I am signed in as Maya, When I open BIO101 Grades, Then I see one row per published assignment (four rows) with released scores "10 / 10" for Safety acknowledgement and "86 / 100" for Lab report 1.
 - Given the other rows are not graded, When I read them, Then Photosynthesis worksheet and Field journal each show "Not submitted" in place of a score, never "0".
-- Given Maya's released scores, When I read the total, Then it shows "Graded so far: 96 of 110 points (87.3%) from 2 of 4 assignments"; work that is not graded is not counted as zero.
-- Given I am signed in as Liam, When I open BIO101 Grades, Then Lab report 1 and Photosynthesis worksheet show "Awaiting grade" and no number such as 72, Safety acknowledgement shows "Missing", and the total shows "Nothing graded yet. Grades appear here when your teacher releases them."
+- Given Maya's released scores, When I read the total, Then the last row of the table is "Total" with "96 / 110", "87.3%" and "2 of 4 assignments graded so far"; work that is not graded is not counted as zero.
+- Given I am signed in as Liam, When I open BIO101 Grades, Then Lab report 1 and Photosynthesis worksheet show "Awaiting grade" and no number such as 72, Safety acknowledgement shows "Closed", and the page says "Nothing graded yet. Grades appear here when your teacher releases them."
 
 ### US-13 Read feedback on graded work
 

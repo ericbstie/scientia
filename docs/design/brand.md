@@ -185,7 +185,7 @@ Plain, direct, sentence case, "you". Say what is true and what to do; leave out 
 why the product was built. Examples from the app that set the tone:
 
 - "Nothing due this month" (not "You're all caught up!")
-- "Graded so far: 96 of 110 points (87.3%)" (not "Your grade: 87%")
+- "2 of 4 assignments graded so far", beside a Total of "96 / 110" (not "Your grade: 87%")
 - "Choose a due date and time" (not "Invalid date")
 - "Your teacher has started grading this work"
 

@@ -73,7 +73,7 @@ export function Modules() {
       <ErrorNote error={q.error ?? actionError} />
       {q.loading && !q.data ? <Loading /> : mods.length === 0 ? (
         teacher ? (
-          <Empty title="No modules yet" action={<Button onClick={() => setDialog({ kind: "module" })}>Add module</Button>}>Modules group the pages, files and links students read. New modules start as drafts.</Empty>
+          <Empty title="No modules yet">Modules group the pages, files and links students read. New modules start as drafts.</Empty>
         ) : (
           <Empty title="No material yet">Your teacher has not published any modules.</Empty>
         )

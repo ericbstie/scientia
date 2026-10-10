@@ -103,7 +103,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
         <Panel>
           <Paragraph>
             Submitted <time dateTime={sub.submitted_at}>{fmtDateTime(sub.submitted_at)}</time>
-            {" "}<span className="muted">· Attempt {sub.attempt}</span>
+            {sub.attempt > 1 && <> <Badge>Edited</Badge></>}
             {late && <> <Badge tone="warning">Late by {late}</Badge></>}
           </Paragraph>
           {sub.body ? <Paragraph className="prose">{sub.body}</Paragraph> : <Paragraph className="muted">No text.</Paragraph>}
@@ -112,11 +112,17 @@ function GradeOne({ submissionId }: { submissionId: string }) {
       </Section>
       <Section title="Grade">
         <ErrorNote error={fail} />
-        {saved.exists && !saved.released && (
+        {saved.exists && (
           <Alert data-color="info">
             <Paragraph>
-              Saved, not released. {student.full_name} cannot see this grade until you release it, here or from{" "}
-              <TextLink to={`${base}/grading?status=graded`}>Graded, not released</TextLink>.
+              {saved.released ? (
+                <>Released. {student.full_name} can see this score and feedback. Changes you save show to the student at once; Withdraw hides the grade again.</>
+              ) : (
+                <>
+                  Saved, not released. {student.full_name} cannot see this grade until you release it. Use Release below, or release it from{" "}
+                  <TextLink to={`${base}/grading?status=graded`}>Graded, not released</TextLink>.
+                </>
+              )}
             </Paragraph>
           </Alert>
         )}

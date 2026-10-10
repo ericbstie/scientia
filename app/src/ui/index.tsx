@@ -114,12 +114,11 @@ export function Panel({ children, className }: { children: ReactNode; className?
   return <Card data-color="neutral" className={className}><div data-color="accent" className="stack">{children}</div></Card>;
 }
 
-export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <Card data-color="neutral">
       <Heading level={3} data-size="2xs">{title}</Heading>
       {children && <Paragraph>{children}</Paragraph>}
-      {action && <div data-color="accent">{action}</div>}
     </Card>
   );
 }

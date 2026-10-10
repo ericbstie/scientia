@@ -61,7 +61,7 @@ export function People() {
           </Section>
           <Section title={`${students.length} ${students.length === 1 ? "student" : "students"}`}>
             {students.length === 0 ? (
-              <Empty title="No students yet" action={teacher && <Button onClick={() => setAdding(true)}>Add student</Button>} />
+              <Empty title="No students yet" />
             ) : (
               <List>
                 {students.map((p) => (

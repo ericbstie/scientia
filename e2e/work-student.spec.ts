@@ -179,7 +179,7 @@ test.describe("Assignments and submitting", () => {
     await page.getByRole("button", { name: "Submit" }).click();
     await page.reload();
     await expect(page.getByText(text)).toBeVisible();
-    await expect(page.getByText("Attempt 2")).toBeVisible();
+    await expect(page.getByText("Edited", { exact: true })).toBeVisible();
 
     await signOut(page);
     await signIn(page, "ingrid");
@@ -241,7 +241,7 @@ test.describe("Assignments and submitting", () => {
   test("@US-11 a closed assignment explains itself and refuses submissions", async ({ page }) => {
     await signIn(page, "liam");
     await openAssignment(page, "Safety acknowledgement");
-    await expect(page.getByText(`Closed: this assignment stopped accepting work on ${fmt(dueAt(-14))}`)).toBeVisible();
+    await expect(page.getByText(`Closed: this assignment stopped accepting work on ${fmt(dueAt(-14))}. Ask your teacher if you need more time.`)).toBeVisible();
     await expect(page.getByRole("button", { name: "Submit" })).toHaveCount(0);
     await expect(page.getByRole("textbox")).toHaveCount(0);
 
@@ -261,13 +261,16 @@ test.describe("Grades and feedback", () => {
     await signIn(page, "maya");
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Grades");
-    await expect(page.getByRole("row")).toHaveCount(5); // header + four assignments
+    await expect(page.getByRole("row")).toHaveCount(6); // header, four assignments and the total
     await expect(page.getByRole("row", { name: /Safety acknowledgement/ })).toContainText("10 / 10");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("86 / 100");
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet/ })).toContainText("Not submitted");
     await expect(page.getByRole("row", { name: /Field journal/ })).toContainText("Not submitted");
     await expect(page.getByRole("row", { name: /Photosynthesis worksheet|Field journal/ }).first()).not.toContainText(/(^|\s)0(\s|$)/);
-    await expect(page.getByText("Graded so far: 96 of 110 points (87.3%) from 2 of 4 assignments")).toBeVisible();
+    const total = page.getByRole("row", { name: /^Total/ });
+    await expect(total).toContainText("2 of 4 assignments graded so far");
+    await expect(total).toContainText("96 / 110");
+    await expect(total).toContainText("87.3%");
   });
 
   test("@US-12 grades that are not released stay hidden", async ({ page }) => {

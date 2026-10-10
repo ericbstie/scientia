@@ -99,20 +99,21 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 | Teacher, on a submission | Needs grading (warning), Graded (not released) (accent), Released (success) |
 
 - "Graded" appears to a student only after release. Missing is never a zero.
-- Work that is overdue has one name per state, on every page: **Missing** (the due date has passed, nothing is handed in, and it still takes work), **Closed** (the same, and it no longer takes work), **Late** (handed in after the due date; "Late by 1 day" beside a submission on the teacher's screens, "Submitted 1 day late" on the student's page). "Past due", "Overdue" and "Submit late" are not used. The action is always "Submit", before and after the date. The Dashboard section for this work is "Missing".
+- Work that is overdue has one name per state, on every page: **Missing** (the due date has passed, nothing is handed in, and it still takes work), **Closed** (the same, and it no longer takes work), **Late** (handed in after the due date; "Late by 1 day" beside a submission on the teacher's screens, "Submitted 1 day late" on the student's page). "Past due", "Overdue" and "Submit late" are not used. The action is always "Submit", before and after the date. The Dashboard lists only Missing work, because that is the work a student can still act on: Closed work stays on the Assignments and Grades pages, with its tag.
 - A line about late work appears only where it limits the person. A student sees "Late work: Not accepted after the due date" until that date passes. Where late work is accepted nothing is said before the date; after it the status says Missing and the form says "The due date has passed. Your work will be marked late." The teacher sees the setting on every assignment. Late work has no cut-off or penalty to state, and the interface does not invent one.
-- Labels that are not statuses may appear next to them, and only these: Draft, Pinned, Unread, Edited, Teacher, Active, Deactivated, "Late by 1 day". Gradebook cell text follows US-32: score, "Not released", "Released", "Late, needs grading", "Needs grading", "Missing".
+- Labels that are not statuses may appear next to them, and only these: Draft, Pinned, Unread, Edited, Teacher, Active, Deactivated, "Late by 1 day". Gradebook cell text follows US-32: score, "Not released", "Released", "Late, needs grading", "Needs grading", "Missing". "Edited" also tags work that was handed in again; the number of attempts is not shown.
 
 ## Dates, numbers and times
 
 - Format `ddd D MMM, HH:mm`, 24-hour, viewer's time zone: `Fri 17 Oct, 23:59`. Date only: `Fri 17 Oct`. Add the year only when it is not the current year (`Fri 17 Oct 2027, 23:59`).
 - Relative text ("in 2 days", "7 days ago") may follow in muted text, never replace the date. Always render in `<time dateTime>`.
 - Scores are `86 / 100` and always sit beside the label "Score" (a fact on the assignment page, a column in tables); percentages one decimal (`87.3%`); no score is shown as an en dash only inside a gradebook cell, elsewhere as words ("Awaiting grade").
+- A total is the last row of the table it adds up, labelled "Total", with what it counts under the label ("2 of 4 assignments graded so far"). It is never a sentence above the table that can be read as one grade.
 - Points read "50 points" in text, "(50)" only in table headers and CSV.
 
 ## Empty states
 
-- Use `Empty`: a short title that says what is missing, one sentence that says what happens next, and the action button when the viewer can act. The wording is in `ia.md` per route.
+- Use `Empty`: a short title that says what is missing and one sentence that says what happens next. It has no button: the page header already holds the create action in its fixed place, and a second button with the same name only gives people two things to choose between. The wording is in `ia.md` per route.
 - An empty list never renders a bare table or blank space. Do not use illustrations or humour.
 
 ## Confirmations and undo
@@ -120,6 +121,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 - Confirm in a `Dialog` (modal) before: delete (announcement, module item, thread, post), remove a student, deactivate a user, withdraw a release, release all.
 - Title is a question naming the object ("Delete the announcement 'Field trip'?"). Body says what will happen to others ("Students will no longer see it. This cannot be undone."). Buttons: Cancel (focused) and a verb ("Delete", "Remove"), never "OK". Release all states the count.
 - An action offered on a list row is offered on the item's own page too, with the same label and the same confirmation (Release and Withdraw on the Grading list and on a grade's page). A person who finds the item through either route can undo what they did.
+- A page whose state decides who can see something (a grade, released or not) says so in one sentence under its heading: who can see it now, and what the button that changes it does ("Withdraw hides the grade again"). The button is never left to be guessed from its label.
 - Not confirmed: publish, unpublish, pin, save, submit (these are reversible or non-destructive).
 - A completed action shows a short toast ("Saved", "Announcement posted"). Toasts confirm; they never carry errors or the only copy of important information. They sit at the top centre, never over a control, and do not take clicks.
 

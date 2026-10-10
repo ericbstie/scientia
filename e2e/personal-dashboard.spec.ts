@@ -56,16 +56,14 @@ test.describe("Dashboard", () => {
   test("@US-4 missing work is shown apart from upcoming work", async ({ page }) => {
     await signIn(page, "noah");
     const rows = page.getByRole("region", { name: "Missing" }).getByRole("listitem");
-    await expect(rows).toHaveCount(2);
+    await expect(rows).toHaveCount(1);
     await expect(rows.nth(0)).toContainText("Lab report 1");
     await expect(rows.nth(0)).toContainText("BIO101");
     await expect(rows.nth(0)).toContainText(fmtDue(dueAt(t0, -7)));
     await expect(rows.nth(0)).toContainText("Missing");
     await expect(rows.nth(0).getByRole("link", { name: "Submit", exact: true })).toBeVisible();
-    await expect(rows.nth(1)).toContainText("Safety acknowledgement");
-    await expect(rows.nth(1)).toContainText(fmtDue(dueAt(t0, -14)));
-    await expect(rows.nth(1)).toContainText("Closed");
-    await expect(rows.nth(1).getByRole("link", { name: "Submit", exact: true })).toHaveCount(0);
+    // Safety acknowledgement is closed: nothing to do about it here, so only Assignments and Grades list it.
+    await expect(page.getByRole("region", { name: "Missing" })).not.toContainText("Safety acknowledgement");
 
     const upcoming = page.getByRole("region", { name: "Upcoming" }).getByRole("listitem");
     await expect(upcoming.nth(0)).toContainText("Photosynthesis worksheet");
