@@ -102,9 +102,12 @@ export async function client(request: APIRequestContext, who: Who) {
 
 // axe-core runs in the page itself: the app has no frames, so @axe-core/playwright's
 // cross-frame pass (a blank page per scan) only cost time, about 0.4 s a test.
+// The scan starts from the top of the page: wherever a test's last click scrolled to, a link half
+// under the sticky top bar read as a too-small target.
 async function scan(page: Page) {
   if (page.isClosed() || !page.url().startsWith("http")) return;
   await page.waitForLoadState("networkidle").catch(() => {});
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.evaluate(axe.source);
   const violations = await page.evaluate(async (tags) => {
     const { violations } = await (window as unknown as { axe: typeof axe }).axe.run(document, { runOnly: { type: "tag", values: tags }, resultTypes: ["violations"] });
