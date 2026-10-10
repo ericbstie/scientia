@@ -2,7 +2,7 @@
 // prints a comparison with the previous run and with metrics/targets.json.
 // Anything that cannot be measured yet is recorded as null.
 import { existsSync, readFileSync, readdirSync, appendFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { gzipSync } from "node:zlib";
 
 const root = join(import.meta.dir, "..");
@@ -131,11 +131,14 @@ const firstPass = (f: string) => {
   const table = readFileSync(f, "utf8").split(/^\|\s*Scenario\s*\|\s*Result\s*\|.*$/m)[1]?.split(/\n\s*\n/)[0] ?? "";
   return [...table.matchAll(/^\|[^|\n]+\|\s*\**(Done|Partly|Failed)\b/gim)].map((x) => x[1]!.toLowerCase());
 };
-const userTests = await Promise.all(walk(p("docs/process/reviews"), "-user-test.md").map(async (f) => ({ results: firstPass(f), key: [milestone(f), await added(f)] })));
-const results = userTests.filter((u) => u.results.length >= FULL_PASS).sort((a, b) => a.key[0]! - b.key[0]! || a.key[1]! - b.key[1]!).at(-1)?.results ?? [];
+const userTests = await Promise.all(walk(p("docs/process/reviews"), "-user-test.md").map(async (f) => ({ f, results: firstPass(f), key: [milestone(f), await added(f)] })));
+const pass = userTests.filter((u) => u.results.length >= FULL_PASS).sort((a, b) => a.key[0]! - b.key[0]! || a.key[1]! - b.key[1]!).at(-1);
+const results = pass?.results ?? [];
 m["ux.blind_tasks_done_pct"] = results.length
   ? Math.round((results.filter((r) => r === "done").length / results.length) * 1000) / 10
   : null;
+// Round files quote this line rather than carrying an old number forward.
+if (pass) console.log(`ux.blind_tasks_done_pct is read from ${relative(root, pass.f)}`);
 
 // Process health
 const briefs = walk(p("docs/process/briefs"), ".md").filter((f) => !f.endsWith("TEMPLATE.md"));

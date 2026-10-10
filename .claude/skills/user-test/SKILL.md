@@ -46,6 +46,9 @@ account and a course; one scenario with `--phone`.
   Result starting with `Done`, `Partly` or `Failed`. `mise run metrics` reads it
   as `ux.blind_tasks_done_pct`; retests after fixes go in a separate table with
   other headers and do not change the number.
+- State the blind-tasks number only by quoting the line `mise run metrics` prints
+  ("ux.blind_tasks_done_pct is read from …") on current main. Never carry it over
+  from an earlier round file: rounds 7 to 12 repeated a stale "round 4 (85.7)".
 - Check each scenario's premise against `supabase/seed.ts` before running it
   (M3: Liam's "read feedback" scenario had no released grade to read).
 - Fix copy and flows, keeping e2e assertions in step (update stories if a quoted

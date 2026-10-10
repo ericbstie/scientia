@@ -100,6 +100,12 @@ function typedDate(type: string, text: string) {
   return value;
 }
 
+// Each call opens a new browser at the dashboard, so it says how the next call gets back to where this one ended.
+function backHere() {
+  const { pathname, search } = new URL(page.url());
+  return who && pathname !== "/" ? `\nThe next call starts again at the dashboard. To carry on from this page, start it with: --as ${who} --step 'goto ${pathname}${search}'` : "";
+}
+
 try {
   await page.goto(base + "/sign-in");
   if (who) {
@@ -131,10 +137,12 @@ try {
   await page.waitForTimeout(400);
   console.log(`Page title: ${await page.title()}\nAddress: ${new URL(page.url()).pathname}\n`);
   console.log(await outline());
+  console.log(backHere());
 } catch (e) {
   console.log(`That did not work: ${(e as Error).message.split(/\n\s*(?:Call log:|=+ logs =+)/)[0]}`);
   console.log(`Address: ${new URL(page.url()).pathname}\n`);
   console.log(await outline().catch(() => ""));
+  console.log(backHere());
 } finally {
   await browser.close();
 }
