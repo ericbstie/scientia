@@ -54,6 +54,7 @@ test.describe("Creating and changing assignments", () => {
     await page.getByRole("button", { name: "Save as draft" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Reading quiz");
     await expect(page.getByText("Draft", { exact: true })).toBeVisible();
+    await expect(page.getByText("Students cannot see this assignment until you publish it.")).toBeVisible();
 
     await signOut(page);
     await signIn(page, "maya");
@@ -129,6 +130,7 @@ test.describe("Creating and changing assignments", () => {
     await page.getByRole("button", { name: "Publish" }).click();
     await expect(page.getByRole("button", { name: "Unpublish" })).toBeVisible();
     await expect(page.getByText("Draft", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Students cannot see this assignment")).toHaveCount(0);
 
     await courseNav(page, "Assignments").click();
     await page.getByRole("link", { name: "Field journal" }).click();

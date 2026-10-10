@@ -206,7 +206,7 @@ Decisions that keep the route count low:
 ### R18 `/courses/:courseId/assignments`
 - **Purpose:** all published assignments of the course.
 - **Who:** student (published only, with status badges); teacher (all, with "Draft" badge).
-- **Regions:** h1 "Assignments"; New assignment (teacher); list rows soonest due first: title, due date, points, status badge (student) or Draft badge (teacher).
+- **Regions:** h1 "Assignments"; New assignment (teacher); list rows soonest due first: title (with the Draft badge straight after it, for a teacher), due date, points, status badge (student).
 - **Primary action:** New assignment (teacher); none for students.
 - **Empty state:** teacher "No assignments yet" (New assignment is in the header); student "No assignments yet."
 - **Stories:** US-8, US-27, US-28.
@@ -223,7 +223,7 @@ Decisions that keep the route count low:
 - **Purpose:** student: know what to do and hand in work, then see status and feedback. Teacher: review the definition and publish state.
 - **Who:** student of the course; teacher of the course.
 - **Student regions:** back link "Assignments"; h1 title with status badge; facts (Status, Due date, Points, Accepts, and "Late work: Not accepted after the due date" until that date passes when late work is not allowed); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (a success note "Your work is handed in." right after submitting, time, "Submitted 1 day late", an "Edited" tag once the work was handed in again, text, file link, "You can edit it until your teacher starts grading." and Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>. Ask your teacher if you need more time." with no form; Feedback (score "86 / 100" and feedback text) after release.
-- **Teacher regions:** back link "Assignments"; h1 title with Draft badge; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
+- **Teacher regions:** back link "Assignments"; h1 title with Draft badge, and under it "Students cannot see this assignment until you publish it." while it is a draft; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
 - **Primary action:** Submit (student); Publish on a draft (teacher), otherwise none.
 - **Empty state:** none.
 - **Stories:** US-3, US-4, US-8, US-9, US-10, US-11, US-13, US-14, US-17, US-28.
@@ -239,7 +239,7 @@ Decisions that keep the route count low:
 ### R22 `/courses/:courseId/grades`
 - **Purpose:** a student's released grades.
 - **Who:** student.
-- **Regions:** h1 "Grades"; table (Assignment link, Status, Score): released "86 / 100", otherwise "Not submitted", "Missing", "Closed" or "Awaiting grade", never 0; a last row "Total" ("96 / 110", "87.3%", "2 of 4 assignments graded so far") once any score is released, otherwise the sentence "Nothing graded yet. Grades appear here when your teacher releases them."
+- **Regions:** h1 "Grades"; table (Assignment link, Status, Score): released "86 / 100", otherwise "Not submitted", "Missing", "Closed" or "Awaiting grade", never 0; a last row "Total" ("96 / 110", "87.3% of graded points", "2 of 4 assignments graded so far") once any score is released, otherwise the sentence "Nothing graded yet. Grades appear here when your teacher releases them."
 - **Primary action:** none.
 - **Empty state:** "No assignments yet, so there are no grades."
 - **Stories:** US-12, US-13.

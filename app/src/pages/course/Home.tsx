@@ -137,10 +137,12 @@ function TeacherHome() {
                 {q.data.asgs.map((a) => (
                   <Row key={a.id}>
                     <div className="row-main">
-                      <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                      <div>
+                        <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                        {!a.published && <> <Badge>Draft</Badge></>}
+                      </div>
                       <div className="row-meta">Due <Due at={a.due_at} /></div>
                     </div>
-                    <div className="row-side">{!a.published && <Badge>Draft</Badge>}</div>
                   </Row>
                 ))}
               </List>

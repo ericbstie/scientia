@@ -274,7 +274,7 @@ test.describe("Grades and feedback", () => {
     const total = page.getByRole("row", { name: /^Total/ });
     await expect(total).toContainText("2 of 4 assignments graded so far");
     await expect(total).toContainText("96 / 110");
-    await expect(total).toContainText("87.3%");
+    await expect(total).toContainText("87.3% of graded points");
   });
 
   test("@US-12 grades that are not released stay hidden", async ({ page }) => {

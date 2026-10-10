@@ -53,7 +53,7 @@ export function Grades() {
                     <tr>
                       <th scope="row">Total<div className="row-meta">{scored.length} of {data.assignments.length} assignments graded so far</div></th>
                       <td />
-                      <td className="num"><strong>{num(got)} / {num(of)}</strong><div className="row-meta">{pct(got, of)}%</div></td>
+                      <td className="num"><strong>{num(got)} / {num(of)}</strong><div className="row-meta wrap">{pct(got, of)}% of graded points</div></td>
                     </tr>
                   </tfoot>
                 )}

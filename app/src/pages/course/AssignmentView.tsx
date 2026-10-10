@@ -51,6 +51,7 @@ function TeacherView({ a, reload }: { a: Assignment; reload: () => void }) {
       <PageHeader
         back={{ to: `${base}/assignments`, label: "Assignments" }}
         title={<>{a.title} {!a.published && <Badge>Draft</Badge>}</>}
+        subtitle={a.published ? undefined : "Students cannot see this assignment until you publish it."}
       />
       <Facts items={[
         ["Due date", <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>],

@@ -136,3 +136,47 @@ Checked and not findings:
   mention; the announcement count after posting; the "Draft" word after a countdown; the role
   change audit (product).
 - Premise checks: check weekdays against the site's calendar before a scenario is run.
+
+## 6. Designer's answers to the points left for the designer
+
+Written by the designer thread after the round, with the changes that carried them. The
+coordinator asked for a decision on each recurring point that never became an issue.
+
+- **The grades total's percentage and "so far": changed.** The testers' reading is fair: "87.3%"
+  alone looks like a course grade, and "so far" was the only sign that it covers part of the
+  course. The product has no course grade (no weights, no categories), so the figure now says
+  what it is a share of: "87.3% of graded points", under "96 / 110", and the label under
+  "Total" still reads "2 of 4 assignments graded so far". Points still to come are not added: a
+  third number in a row that already has two would answer a question the list above it
+  answers by showing which assignments are not graded yet. The teacher's gradebook keeps "87.3%
+  2 of 4 graded" and the CSV its plain number; both are teacher tools with their own column
+  headers.
+- **"Release all graded to students (1)" names no student: kept.** The button acts on a set, so
+  no single name can sit on it; the count in its label says how many, and the dialog it opens
+  names every student and assignment before anything is released ("These students will see their
+  scores and feedback"). The "Graded, not released" tab above shows the same set, and its rows
+  have their own Release buttons that name the student. No tester released the wrong grade: the
+  grade and release scenarios finished in rounds 11 and 12.
+- **"Draft" after a countdown: changed.** The tag sat at the end of the row, after the due
+  date and "in 60 days", so a text reader took it for part of the countdown (and on a phone it
+  fell under the date line). On the teacher's Assignments list and the course home's "Next due"
+  the tag now sits straight after the title ("Final project Draft"), the same order as the
+  assignment's own heading. A student's status stays at the end of the row, because it answers
+  a different question (where does this stand for me). The rule is in `ui-guidelines.md`
+  (Statuses). The draft's own page also says what the tag means, under the heading: "Students
+  cannot see this assignment until you publish it." This follows the rule that a page whose
+  state decides who sees something says so; it goes when the assignment is published.
+- **"Missing": kept.** There is no new evidence. Round 12's tester reads it the way rounds 9 and
+  10 did (beside "it will be marked late", and beside "Not submitted" on other items), and the
+  coordinator's answer to #58 stands: the two words are two states of one fact. "Not submitted"
+  is before the due date and "Missing" is after it, so a student sees both only because
+  different assignments are on different sides of their dates. The note above the open form
+  already says what to do ("You can still hand this in; it will be marked late."), and the
+  round 12 hand-in finished in six commands. A word is changed when a person fails a task or
+  does the wrong thing, and no tester has.
+- **Product questions, not built.** Three points ask for new behaviour, so they go to the idea
+  pipeline and are not designed here. They are in `docs/ideas/pipeline.md` as `proposed` and
+  enter gate 1 the next time the pipeline runs:
+  - I-031: an announcement that links to the assignment it is about.
+  - I-032: recent announcements on the dashboard.
+  - I-033: a record of an admin's role changes, with undo.

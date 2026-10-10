@@ -33,16 +33,15 @@ export function Assignments() {
               return (
                 <Row key={a.id}>
                   <div className="row-main">
-                    <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                    <div>
+                      <TextLink className="row-title" to={`${base}/assignments/${a.id}`}>{a.title}</TextLink>
+                      {role === "teacher" && !a.published && <> <Badge>Draft</Badge></>}
+                    </div>
                     <div className="row-meta">
                       Due <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time> · {num(a.points)} points
                     </div>
                   </div>
-                  <div className="row-side">
-                    {role === "teacher"
-                      ? (!a.published && <Badge>Draft</Badge>)
-                      : <StatusBadge status={studentStatus(a, sub?.submitted_at, released)} />}
-                  </div>
+                  {role !== "teacher" && <div className="row-side"><StatusBadge status={studentStatus(a, sub?.submitted_at, released)} /></div>}
                 </Row>
               );
             })}

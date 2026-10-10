@@ -173,7 +173,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Acceptance criteria:**
 - Given I am signed in as Maya, When I open BIO101 Grades, Then I see one row per published assignment (four rows) with released scores "10 / 10" for Safety acknowledgement and "86 / 100" for Lab report 1.
 - Given the other rows are not graded, When I read them, Then Photosynthesis worksheet and Field journal each show "Not submitted" in place of a score, never "0".
-- Given Maya's released scores, When I read the total, Then the last row of the table is "Total" with "96 / 110", "87.3%" and "2 of 4 assignments graded so far"; work that is not graded is not counted as zero.
+- Given Maya's released scores, When I read the total, Then the last row of the table is "Total" with "96 / 110", "87.3% of graded points" and "2 of 4 assignments graded so far"; work that is not graded is not counted as zero.
 - Given I am signed in as Liam, When I open BIO101 Grades, Then Lab report 1 and Photosynthesis worksheet show "Awaiting grade" and no number such as 72, Safety acknowledgement shows "Closed", and the page says "Nothing graded yet. Grades appear here when your teacher releases them."
 
 ### US-13 Read feedback on graded work

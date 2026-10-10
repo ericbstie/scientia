@@ -83,7 +83,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 
 **Acceptance criteria:**
 - Given I open BIO101 Assignments and click New assignment, When the form opens, Then it has exactly these controls: Title, Instructions, Due date and time, Points, "Students hand in by" (Uploading a file, Typing an answer), "Accept work after the due date (marked late)", Save as draft, Save and publish.
-- Given I fill in title "Reading quiz", due T+10d at 23:59, points 20, Typing an answer, and click Save as draft, When Maya opens Assignments, Then "Reading quiz" is not visible to her.
+- Given I fill in title "Reading quiz", due T+10d at 23:59, points 20, Typing an answer, and click Save as draft, When Maya opens Assignments, Then "Reading quiz" is not visible to her, and its page says "Students cannot see this assignment until you publish it."
 - Given I click Save and publish instead, When Maya opens her dashboard, Then "Reading quiz" is in Upcoming between Essay: the 1848 revolutions and Field journal, with 20 points.
 - Given I leave the title empty, set points to 0, and select neither Uploading a file nor Typing an answer, When I save, Then I see "Enter a title", "Enter points greater than 0" and "Choose at least one way to submit", each linked to its field, and no assignment is created.
 
