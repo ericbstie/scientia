@@ -11,9 +11,10 @@
 //    of every passing test the page gets an axe accessibility scan and fails if it
 //    scrolls sideways at phone width. Results feed `mise run metrics`.
 import { test as base, expect, type APIRequestContext, type Page } from "@playwright/test";
-import axe from "axe-core";
-import { appendFileSync } from "node:fs";
+import type axe from "axe-core";
+import { appendFileSync, readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { createRequire } from "node:module";
 
 export const PASSWORD = "Demo-pass-123";
 export const users = {
@@ -101,14 +102,17 @@ export async function client(request: APIRequestContext, who: Who) {
 }
 
 // axe-core runs in the page itself: the app has no frames, so @axe-core/playwright's
-// cross-frame pass (a blank page per scan) only cost time, about 0.4 s a test.
+// cross-frame pass (a blank page per scan) only cost time, about 0.4 s a test. Its minified build is
+// half the size of axe.source, which took a third of each scan to send and parse.
+const axeSource = readFileSync(createRequire(import.meta.url).resolve("axe-core/axe.min.js"), "utf8");
+
 // The scan starts from the top of the page: wherever a test's last click scrolled to, a link half
 // under the sticky top bar read as a too-small target.
 async function scan(page: Page) {
   if (page.isClosed() || !page.url().startsWith("http")) return;
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.evaluate(() => window.scrollTo(0, 0));
-  await page.evaluate(axe.source);
+  await page.evaluate(axeSource);
   const violations = await page.evaluate(async (tags) => {
     const { violations } = await (window as unknown as { axe: typeof axe }).axe.run(document, { runOnly: { type: "tag", values: tags }, resultTypes: ["violations"] });
     return violations.map((v) => ({ id: v.id, impact: v.impact ?? "minor", nodes: v.nodes.length, help: v.help, targets: v.nodes.slice(0, 3).map((n) => n.target.join(" ")) }));

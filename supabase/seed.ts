@@ -70,8 +70,9 @@ async function ensureUsers(sql: SQL): Promise<Record<Person, string>> {
   // Remove accounts created by tests or by hand so the seed state is exact.
   await sql`delete from auth.users where email not in ${sql(emails)}`;
   // Restore the remaining accounts in one statement: GoTrue would hash the password once per account.
+  // The lowest bcrypt cost: the password is published, and every e2e sign-in checks this hash.
   const existing: { id: string; email: string }[] = await sql`
-    update auth.users set encrypted_password = (select extensions.crypt(${DEMO_PASSWORD}, extensions.gen_salt('bf', 10))), banned_until = null
+    update auth.users set encrypted_password = (select extensions.crypt(${DEMO_PASSWORD}, extensions.gen_salt('bf', 4))), banned_until = null
     returning id, email`;
   const ids = {} as Record<Person, string>;
   for (const [key, p] of Object.entries(people) as [Person, (typeof people)[Person]][]) {
