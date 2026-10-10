@@ -53,18 +53,19 @@ test.describe("Dashboard", () => {
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+\/assignments\/[0-9a-f-]+$/);
   });
 
-  test("@US-4 past-due work is shown apart from upcoming work", async ({ page }) => {
+  test("@US-4 missing work is shown apart from upcoming work", async ({ page }) => {
     await signIn(page, "noah");
-    const rows = page.getByRole("region", { name: "Past due" }).getByRole("listitem");
+    const rows = page.getByRole("region", { name: "Missing" }).getByRole("listitem");
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0)).toContainText("Lab report 1");
     await expect(rows.nth(0)).toContainText("BIO101");
     await expect(rows.nth(0)).toContainText(fmtDue(dueAt(t0, -7)));
-    await expect(rows.nth(0).getByRole("link", { name: "Submit late" })).toBeVisible();
+    await expect(rows.nth(0)).toContainText("Missing");
+    await expect(rows.nth(0).getByRole("link", { name: "Submit", exact: true })).toBeVisible();
     await expect(rows.nth(1)).toContainText("Safety acknowledgement");
     await expect(rows.nth(1)).toContainText(fmtDue(dueAt(t0, -14)));
     await expect(rows.nth(1)).toContainText("Closed");
-    await expect(rows.nth(1).getByRole("link", { name: "Submit late" })).toHaveCount(0);
+    await expect(rows.nth(1).getByRole("link", { name: "Submit", exact: true })).toHaveCount(0);
 
     const upcoming = page.getByRole("region", { name: "Upcoming" }).getByRole("listitem");
     await expect(upcoming.nth(0)).toContainText("Photosynthesis worksheet");
@@ -72,13 +73,13 @@ test.describe("Dashboard", () => {
     await expect(page.getByRole("region", { name: "Upcoming" })).not.toContainText("Lab report 1");
     await expect(page.getByRole("region", { name: "Upcoming" })).not.toContainText("Safety acknowledgement");
 
-    await rows.nth(0).getByRole("link", { name: "Submit late" }).click();
+    await rows.nth(0).getByRole("link", { name: "Submit", exact: true }).click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+\/assignments\/[0-9a-f-]+$/);
   });
 
-  test("@US-4 nothing past due", async ({ page }) => {
+  test("@US-4 nothing missing", async ({ page }) => {
     await signIn(page, "maya");
-    await expect(page.getByRole("region", { name: "Past due" })).toContainText("Nothing past due");
+    await expect(page.getByRole("region", { name: "Missing" })).toContainText("Nothing missing");
   });
 
   test("@US-3 student lists their courses", async ({ page }) => {
@@ -252,6 +253,6 @@ test.describe("Phone layout", () => {
     await page.setViewportSize({ width: 320, height: 640 });
     await signIn(page, "noah");
     await noHorizontalScroll(page);
-    await expect(page.getByRole("region", { name: "Past due" })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Missing" })).toBeVisible();
   });
 });

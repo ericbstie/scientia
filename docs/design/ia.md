@@ -76,7 +76,7 @@ Decisions that keep the route count low:
 ### R2 `/` Dashboard
 - **Purpose:** answer "what is due" and open a course.
 - **Who:** student and teacher (admin is redirected).
-- **Student regions:** h1 "Dashboard"; 1. Upcoming (list rows, soonest first, drafts and past-due excluded; each row: title, course code, due date, points, status badge); 2. Past due (list rows: Lab report 1 with "Submit late" link, or Safety acknowledgement marked closed; "Nothing past due" when none); 3. Your courses (course cards: code, title).
+- **Student regions:** h1 "Dashboard"; 1. Upcoming (list rows, soonest first, drafts and missing work excluded; each row: title, course code, due date, points, status badge); 2. Missing (list rows: title, course code, due date, status badge, and a "Submit" link unless the status is Closed; "Nothing missing" when none); 3. Your courses (course cards: code, title).
 - **Teacher regions:** h1 "Dashboard"; Your courses as cards: code, title (link to R7), "N students", "N need grading" (link to `/grading?status=needs-grading`).
 - **Primary action:** none. The whole page is links; the first useful row is the first tab stop after the skip link and top bar.
 - **Empty state:** student with no courses: "You are not enrolled in any course yet. Your teacher can add you by email, or ask an administrator." Upcoming empty: "Nothing due. New assignments appear here when your teacher publishes them." Teacher with no courses: "You don't teach any course yet. An administrator creates courses and assigns teachers."
@@ -222,7 +222,7 @@ Decisions that keep the route count low:
 ### R20 `/courses/:courseId/assignments/:assignmentId`
 - **Purpose:** student: know what to do and hand in work, then see status and feedback. Teacher: review the definition and publish state.
 - **Who:** student of the course; teacher of the course.
-- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Due date, Points, Accepts, "Past due" when relevant); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", Attempt label, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>" with no form; Feedback (score "86 / 100" and feedback text) after release.
+- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Status, Due date, Points, Accepts, and "Late work: Not accepted after the due date" until that date passes when late work is not allowed); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", Attempt label, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>" with no form; Feedback (score "86 / 100" and feedback text) after release.
 - **Teacher regions:** back link "Assignments"; h1 title with Draft badge; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
 - **Primary action:** Submit (student); Publish on a draft (teacher), otherwise none.
 - **Empty state:** none.
@@ -255,7 +255,7 @@ Decisions that keep the route count low:
 ### R24 `/courses/:courseId/grading/:submissionId`
 - **Purpose:** grade one submission and move on.
 - **Who:** teacher.
-- **Regions:** back link "Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted).
+- **Regions:** back link "Grading"; h1 "Sofia Reyes: Lab report 1", state badge in the subtitle; Submission (text, file link, submitted time, Late label); Grade form (Score with "out of 100", Feedback); Save draft, Next to grade, Release (when drafted) or Withdraw (when released, with the same confirmation as the Grading list).
 - **Primary action:** Save (Release is separate).
 - **Empty state:** "Next to grade" disabled with "Nothing else needs grading" when the queue is empty.
 - **Stories:** US-29, US-30, US-31, US-32.
@@ -309,14 +309,14 @@ Shorthand: `C` = `/courses/:courseId`. R-numbers refer to the Routes section. "P
 | US-1 | R1 `/sign-in` | Open site → redirected to Sign in → Email, Password, Enter → Dashboard (or the `next` page) |
 | US-2 | R1; guard on every route | Dashboard → name menu → Sign out → Sign in; direct URL when signed out → Sign in; Noah on HIS201 → "You don't have access to this course" |
 | US-3 | R2 `/` | Dashboard → Upcoming list → row → Assignment |
-| US-4 | R2, R20 | Dashboard → Past due → "Submit late" → Assignment with form |
+| US-4 | R2, R20 | Dashboard → Missing → "Submit" → Assignment with form |
 | US-5 | R2, R7 `C`, R26 `C/people` | Dashboard → course card → Course home → People |
 | US-6 | R8 `C/modules`, R10 `C/pages/:pageId` | Dashboard → course card → Modules → page, file or link item |
 | US-7 | R11 `C/announcements`, R13 | Course nav Announcements → list → announcement |
 | US-8 | R18 `C/assignments`, R20 | Course nav Assignments → row → Assignment |
 | US-9 | R20 `C/assignments/:assignmentId` | Dashboard → Upcoming row → type or attach → Submit |
 | US-10 | R20 | Dashboard → Upcoming row → Edit submission → Submit |
-| US-11 | R20 | Dashboard → Past due "Submit late" → Submit (late), or Assignments → Closed assignment (no form) |
+| US-11 | R20 | Dashboard → Missing → "Submit" → Submit (late), or Assignments → Closed assignment (no form) |
 | US-12 | R22 `C/grades` | Course nav Grades |
 | US-13 | R20, R22; 404 state | Bell → "Grade released" notification → Assignment feedback; or Grades → row → Assignment |
 | US-14 | R3 `/calendar` | Top bar Calendar → item → Assignment |

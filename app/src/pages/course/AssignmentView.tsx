@@ -213,10 +213,11 @@ function StudentView({ a }: { a: Assignment }) {
       <Facts items={[
         ["Status", <StatusBadge status={status} />],
         ...(released?.score != null ? [["Score", <strong>{num(released.score)} / {num(a.points)}</strong>] as [string, ReactNode]] : []),
-        ["Due date", <><time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>{pastDue && !sub && <> <Badge>Past due</Badge></>}</>],
+        ["Due date", <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>],
         ["Points", `${num(a.points)} points`],
         ["How to hand in", acceptsLabel(a)],
-        ["Late work", lateWorkLabel(a.allow_late)],
+        // Only a limit is worth a line. Once the date has passed, the status and the note below say the rest.
+        ...(!a.allow_late && !pastDue ? [["Late work", lateWorkLabel(false)] as [string, ReactNode]] : []),
       ]} />
       <Section title="Instructions">
         <Paragraph className="prose">{a.description || "No instructions."}</Paragraph>

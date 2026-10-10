@@ -181,7 +181,7 @@ function NewUserForm({ onCancel, onDone }: { onCancel: () => void; onDone: (name
         <option value="teacher">Teacher</option>
         <option value="admin">Admin</option>
       </Select>
-      <PasswordField id="nu-password" label="Password" required hint="At least 8 characters. Give it to the person so they can sign in." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+      <PasswordField id="nu-password" label="Password" required hint="At least 8 characters. It works straight away and stays until it is changed under Settings. Nothing is sent: give it to the person yourself." value={password} error={errors.password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>
         <Button onClick={onCancel}>Cancel</Button>

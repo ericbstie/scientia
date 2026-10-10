@@ -71,10 +71,12 @@ test("@US-39 admin creates a user", async ({ page }) => {
   await expect(eva.getByRole("cell").nth(2)).toHaveText("Active");
 });
 
-test("@US-39 the new password is masked until shown", async ({ page }) => {
+test("@US-39 the new password is masked until shown and says what happens to it", async ({ page }) => {
   await openUsers(page);
   await page.getByRole("button", { name: "New user" }).click();
-  const password = page.getByRole("dialog", { name: "New user" }).getByLabel("Password", { exact: true });
+  const dialog = page.getByRole("dialog", { name: "New user" });
+  const password = dialog.getByLabel("Password", { exact: true });
+  await expect(dialog).toContainText("It works straight away and stays until it is changed under Settings. Nothing is sent: give it to the person yourself.");
   await password.fill("Start-pass-1");
   await expect(password).toHaveAttribute("type", "password");
   await page.getByLabel("Show password").check();

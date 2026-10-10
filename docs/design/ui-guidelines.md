@@ -68,7 +68,7 @@ shadow or font is chosen. Components and pages use the system's tokens and nothi
 
 - **Lists** (`List` or our row list) for anything a person scans and opens: assignments,
   announcements, notifications, threads, queue entries, module items, roster, Upcoming and
-  Past due. Title as the link, meta line under it, status tag and date on the right.
+  Missing. Title as the link, meta line under it, status tag and date on the right.
 - A list that shows only the first few items (the boxes on the course home) is named for what it holds ("Next due") and links to the full list ("All announcements", "All assignments") at the right of its heading.
 - **Cards** (`Card`) only for course tiles on the dashboard and for single panels that hold
   a form or a submission. Never a grid of cards for assignments or announcements. Never a
@@ -99,7 +99,9 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 | Teacher, on a submission | Needs grading (warning), Graded (not released) (accent), Released (success) |
 
 - "Graded" appears to a student only after release. Missing is never a zero.
-- Labels that are not statuses may appear next to them, and only these: Draft, Pinned, Unread, Edited, Teacher, Active, Deactivated, "Late by 1 day", "Past due". Gradebook cell text follows US-32: score, "Not released", "Released", "Late, needs grading", "Needs grading", "Missing".
+- Work that is overdue has one name per state, on every page: **Missing** (the due date has passed, nothing is handed in, and it still takes work), **Closed** (the same, and it no longer takes work), **Late** (handed in after the due date; "Late by 1 day" beside a submission on the teacher's screens, "Submitted 1 day late" on the student's page). "Past due", "Overdue" and "Submit late" are not used. The action is always "Submit", before and after the date. The Dashboard section for this work is "Missing".
+- A line about late work appears only where it limits the person. A student sees "Late work: Not accepted after the due date" until that date passes. Where late work is accepted nothing is said before the date; after it the status says Missing and the form says "The due date has passed. Your work will be marked late." The teacher sees the setting on every assignment. Late work has no cut-off or penalty to state, and the interface does not invent one.
+- Labels that are not statuses may appear next to them, and only these: Draft, Pinned, Unread, Edited, Teacher, Active, Deactivated, "Late by 1 day". Gradebook cell text follows US-32: score, "Not released", "Released", "Late, needs grading", "Needs grading", "Missing".
 
 ## Dates, numbers and times
 
@@ -117,6 +119,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 
 - Confirm in a `Dialog` (modal) before: delete (announcement, module item, thread, post), remove a student, deactivate a user, withdraw a release, release all.
 - Title is a question naming the object ("Delete the announcement 'Field trip'?"). Body says what will happen to others ("Students will no longer see it. This cannot be undone."). Buttons: Cancel (focused) and a verb ("Delete", "Remove"), never "OK". Release all states the count.
+- An action offered on a list row is offered on the item's own page too, with the same label and the same confirmation (Release and Withdraw on the Grading list and on a grade's page). A person who finds the item through either route can undo what they did.
 - Not confirmed: publish, unpublish, pin, save, submit (these are reversible or non-destructive).
 - A completed action shows a short toast ("Saved", "Announcement posted"). Toasts confirm; they never carry errors or the only copy of important information. They sit at the top centre, never over a control, and do not take clicks.
 
@@ -131,7 +134,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 ## Writing
 
 - Plain, direct, sentence case. Speak to the user as "you" ("Your teacher has started grading this work"). Short sentences, no exclamation marks, no emoji, no jargon (no "LMS", "asynchronous", "instance").
-- Name things as the stories do: Modules, Announcements, Discussions, Grading, Gradebook, People, Dashboard, Upcoming, Past due. One term per concept; do not call a course "class" or a thread "topic".
+- Name things as the stories do: Modules, Announcements, Discussions, Grading, Gradebook, People, Dashboard, Upcoming, Missing. One term per concept; do not call a course "class" or a thread "topic".
 - Link text says where it goes ("Open the grading queue"), never "here".
 - Teachers see the same words as students wherever the object is the same.
 

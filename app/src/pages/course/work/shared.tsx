@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { Paragraph } from "@digdir/designsystemet-react";
 import { db, isUuid, must } from "../../../lib/supabase";
-import { Button, Dialog, ExtLink } from "../../../ui";
+import { Button, Confirm, Dialog, ExtLink } from "../../../ui";
 
 export type Assignment = {
   id: string; course_id: string; title: string; description: string; due_at: string; points: number;
@@ -97,6 +97,15 @@ export function acceptsLabel(a: Pick<Assignment, "accepts_text" | "accepts_files
 }
 
 export const lateWorkLabel = (allowLate: boolean) => (allowLate ? "Accepted, marked late" : "Not accepted after the due date");
+
+/** The one confirmation for taking a released grade back, from the Grading list and from the grade's own page. */
+export function WithdrawConfirm({ target, busy, onCancel, onConfirm }: { target: { student: string; assignment: string } | null; busy: boolean; onCancel: () => void; onConfirm: () => void }) {
+  return (
+    <Confirm open={target !== null} title={target ? `Withdraw the grade for ${target.student} on ${target.assignment}?` : ""} confirmLabel="Withdraw" busy={busy} onCancel={onCancel} onConfirm={onConfirm}>
+      The student will no longer see the score or feedback. You can release it again later.
+    </Confirm>
+  );
+}
 
 /** Links to files in the private submissions bucket, via short-lived signed URLs. */
 export function FileLinks({ files }: { files: FileRef[] }) {

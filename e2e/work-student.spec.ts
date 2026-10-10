@@ -198,7 +198,7 @@ test.describe("Assignments and submitting", () => {
     await signIn(page, "maya");
     await openAssignment(page, "Lab report 1");
     await expect(page.getByText("86 / 100")).toBeVisible();
-    await expect(page.getByText("Past due")).toHaveCount(0); // handed in on time
+    await expect(assignmentStatus(page)).not.toContainText(/Missing|Late/); // handed in on time
     await expect(page.getByRole("button", { name: "Edit submission" })).toHaveCount(0);
     await expect(page.getByText("Your teacher has started grading this work")).toHaveCount(0);
   });
@@ -206,14 +206,29 @@ test.describe("Assignments and submitting", () => {
   test("@US-11 late work is accepted and marked Late", async ({ page }) => {
     await signIn(page, "noah");
     await openAssignment(page, "Lab report 1");
-    await expect(page.getByText("Past due")).toBeVisible();
+    await expect(assignmentStatus(page)).toContainText("Missing");
+    await expect(page.getByText("The due date has passed. Your work will be marked late.")).toBeVisible();
     await page.getByRole("textbox", { name: "Your answer" }).fill("Late but complete.");
     await page.getByRole("button", { name: "Submit" }).click();
     await expect(assignmentStatus(page)).toContainText("Late");
-    await expect(page.getByText("Past due")).toHaveCount(0);
     const when = await page.locator("main time[datetime]").last().getAttribute("datetime");
     expect(new Date(when!).getTime()).toBeGreaterThan(dueAt(-7).getTime());
     expect(Math.abs(new Date(when!).getTime() - Date.now())).toBeLessThan(2 * 60000);
+  });
+
+  test("@US-11 a line about late work appears only where it limits the student", async ({ page }) => {
+    await signIn(page, "sofia");
+    await openAssignment(page, "Photosynthesis worksheet");
+    await expect(page.getByText("Late work")).toHaveCount(0); // late work is accepted: nothing to warn about
+    await signIn(page, "ingrid");
+    await api(page, "/rest/v1/assignments?title=eq.Photosynthesis%20worksheet", { method: "PATCH", body: { allow_late: false } });
+    await signIn(page, "sofia");
+    await openAssignment(page, "Photosynthesis worksheet");
+    await expect(page.getByText("Late work")).toBeVisible();
+    await expect(page.getByText("Not accepted after the due date")).toBeVisible();
+    await signIn(page, "liam");
+    await openAssignment(page, "Safety acknowledgement");
+    await expect(page.getByText("Late work")).toHaveCount(0); // closed: the page already says so
   });
 
   test("@US-11 a late submission says how late it is", async ({ page }) => {

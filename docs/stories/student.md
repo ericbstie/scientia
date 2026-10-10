@@ -54,10 +54,10 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Evidence:** design-patterns.md#Pain points (5); pain-points.md#Pain points (1)
 
 **Acceptance criteria:**
-- Given I am signed in as Noah, When I open the dashboard, Then a "Past due" section lists Lab report 1 (BIO101, due T-7d 23:59, with a "Submit late" link) and Safety acknowledgement (BIO101, due T-14d 23:59, labelled "Closed" and with no link).
+- Given I am signed in as Noah, When I open the dashboard, Then a "Missing" section lists Lab report 1 (BIO101, due T-7d 23:59, labelled "Missing", with a "Submit" link) and Safety acknowledgement (BIO101, due T-14d 23:59, labelled "Closed" and with no link).
 - Given Noah has missing items, When I read the dashboard, Then the first item in "Upcoming" is Photosynthesis worksheet, the second is Field journal, and no missing item appears inside "Upcoming".
-- Given I am signed in as Maya, When I open the dashboard, Then the Past due section shows "Nothing past due".
-- Given I am signed in as Noah, When I click "Submit late" on Lab report 1, Then I land on that assignment's page with the submission form visible.
+- Given I am signed in as Maya, When I open the dashboard, Then the Missing section shows "Nothing missing".
+- Given I am signed in as Noah, When I click "Submit" on Lab report 1 in the Missing section, Then I land on that assignment's page with the submission form visible.
 
 ### US-5 Open a course with the standard layout
 
@@ -154,9 +154,9 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Evidence:** pain-points.md#Pain points (10); moodle.md#Pain points (13)
 
 **Acceptance criteria:**
-- Given I am signed in as Noah and Lab report 1 is past due and allows late work, When I open it, Then I see "Past due" and a submission form.
-- Given I submit the text "Late but complete." to Lab report 1 as Noah, When it saves, Then the status shows "Late" instead of "Past due" and the submission time (now) is after the due date T-7d 23:59.
-- Given I am signed in as Maya, who handed in Lab report 1 on time, When I open it after the due date, Then the due date shows without "Past due".
+- Given I am signed in as Noah and Lab report 1 has passed its due date and allows late work, When I open it, Then the status is "Missing", there is a note "The due date has passed. Your work will be marked late.", and a submission form.
+- Given I submit the text "Late but complete." to Lab report 1 as Noah, When it saves, Then the status shows "Late" instead of "Missing" and the submission time (now) is after the due date T-7d 23:59.
+- Given I am signed in as Maya, who handed in Lab report 1 on time, When I open it after the due date, Then the status is not "Missing".
 - Given I am signed in as Sofia, When I open Lab report 1, Then the status is "Late" and it says "Submitted 1 day late".
 - Given I am signed in as Liam and Safety acknowledgement is closed, When I open it, Then I see "Closed: this assignment stopped accepting work on" followed by the due date T-14d 23:59, and there is no form.
 - Given I am signed in as Liam, When I POST `{assignment_id: <Safety acknowledgement id>, student_id: <Liam's id>, body: "Too late"}` to `/rest/v1/submissions`, Then the response status is 4xx, the response message contains "closed" and not only a generic failure, and `/rest/v1/submissions` still has no row for Liam and Safety acknowledgement.

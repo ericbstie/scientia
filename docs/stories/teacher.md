@@ -142,7 +142,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 **Acceptance criteria:**
 - Given Liam's Lab report 1 is "Graded, not released", When I click Release on its row, Then the row moves to "Released" and Liam's Grades page shows "72 / 100" with the feedback "Good observations; the conclusion needs evidence from your data."
 - Given I save a draft of 78 for Sofia's Lab report 1 and a draft of 40 for Liam's Photosynthesis worksheet (so three graded-not-released submissions exist with Liam's seeded one), When I click "Release all graded (3)", Then the dialog reads "Release 3 grades? These students will see their scores and feedback:" and names each grade (Sofia Reyes, Lab report 1; Liam Hansen, Lab report 1; Liam Hansen, Photosynthesis worksheet), and after I confirm, all three rows are "Released" and the button is gone.
-- Given Maya's Lab report 1 is "Released", When I click Withdraw on its row and confirm, Then it returns to "Graded, not released" and Maya's Grades page shows "Awaiting grade" for it.
+- Given Maya's Lab report 1 is "Released", When I click Withdraw on its row and confirm, Then it returns to "Graded, not released" and Maya's Grades page shows "Awaiting grade" for it. The same Withdraw button, with the same confirmation, is on the grade's own page.
 - Given all graded work has been released (Liam's Lab report 1 released as in the first criterion), When I open the queue, Then there is no "Release all graded" button.
 
 ### US-32 See every student's grades in a gradebook
@@ -238,7 +238,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue from
 
 **Acceptance criteria:**
 - Given I open Lab report 1 as Ingrid, When I click Give more time, choose Sofia Reyes, enter T-5d and save, Then I see "Sofia Reyes has until" and the date, More time lists Sofia Reyes with that date, and her Lab report 1 row in the grading queue no longer says "Late by 1 day".
-- Given I give Noah Berg more time on Safety acknowledgement until T+3d, When Noah signs in, Then his dashboard lists Safety acknowledgement under Upcoming with the new date and not under Past due, he has the notification "Due date changed: Safety acknowledgement", and he can hand in "I have read the safety rules".
+- Given I give Noah Berg more time on Safety acknowledgement until T+3d, When Noah signs in, Then his dashboard lists Safety acknowledgement under Upcoming with the new date and not under Missing, he has the notification "Due date changed: Safety acknowledgement", and he can hand in "I have read the safety rules".
 - Given I enter a date before the usual due date, When I save, Then I see "Choose a time after the usual due date" and nothing is saved.
 - Given I click Remove next to Sofia Reyes, Then her Lab report 1 row says "Late by 1 day" again.
 - Given I am signed in as Maya, When I insert a row for myself into `/rest/v1/extensions`, Then the request is refused.

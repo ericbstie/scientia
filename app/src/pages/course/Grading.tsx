@@ -5,8 +5,8 @@ import { useCourse, useDocTitle } from "../../App";
 import { fmtDateTime, lateBy } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
-import { Badge, Button, Confirm, Dialog, Empty, ErrorNote, List, Loading, PageHeader, Row, Status, StatusBadge, TextLink, useToast } from "../../ui";
-import { buildQueue, loadTeacherData, type QueueRow } from "./work/shared";
+import { Badge, Button, Dialog, Empty, ErrorNote, List, Loading, PageHeader, Row, Status, StatusBadge, TextLink, useToast } from "../../ui";
+import { WithdrawConfirm, buildQueue, loadTeacherData, type QueueRow } from "./work/shared";
 
 import type { Filter } from "./work/shared";
 const FILTERS: { id: Filter; label: string; empty: string }[] = [
@@ -102,16 +102,7 @@ export function Grading() {
         )
       )}
 
-      <Confirm
-        open={withdraw !== null}
-        title={withdraw ? `Withdraw the grade for ${withdraw.student} on ${withdraw.assignment}?` : ""}
-        confirmLabel="Withdraw"
-        busy={busy}
-        onCancel={() => setWithdraw(null)}
-        onConfirm={() => withdraw && setReleased([withdraw], false)}
-      >
-        The student will no longer see the score or feedback. You can release it again later.
-      </Confirm>
+      <WithdrawConfirm target={withdraw} busy={busy} onCancel={() => setWithdraw(null)} onConfirm={() => withdraw && setReleased([withdraw], false)} />
 
       <Dialog open={releaseAll} onClose={() => setReleaseAll(false)} title={`Release ${drafted.length} ${drafted.length === 1 ? "grade" : "grades"}?`}>
         <Paragraph>These students will see their scores and feedback:</Paragraph>

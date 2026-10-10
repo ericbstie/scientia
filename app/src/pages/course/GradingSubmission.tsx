@@ -6,7 +6,7 @@ import { fmtDateTime, lateBy, num } from "../../lib/format";
 import { db } from "../../lib/supabase";
 import { useQuery } from "../../lib/useQuery";
 import { Badge, Button, ErrorNote, Field, Loading, NotFound, PageHeader, Panel, Section, StatusBadge, TextArea, TextLink, useToast } from "../../ui";
-import { FileLinks, buildQueue, loadTeacherData, useUnsavedGuard } from "./work/shared";
+import { FileLinks, WithdrawConfirm, buildQueue, loadTeacherData, useUnsavedGuard } from "./work/shared";
 
 export function GradingSubmission() {
   const { submissionId } = useParams();
@@ -33,6 +33,7 @@ function GradeOne({ submissionId }: { submissionId: string }) {
   const [scoreError, setScoreError] = useState<string>();
   const [fail, setFail] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   if (data && sub && saved === null) {
     const init = { score: grade?.score == null ? "" : String(grade.score), feedback: grade?.feedback ?? "", released: !!grade?.released, exists: !!grade };
@@ -80,6 +81,17 @@ function GradeOne({ submissionId }: { submissionId: string }) {
     reload();
   }
 
+  async function withdraw() {
+    setBusy(true);
+    const { error } = await db().from("grades").update({ released: false }).eq("assignment_id", sub!.assignment_id).eq("student_id", sub!.student_id);
+    setBusy(false);
+    setWithdrawing(false);
+    if (error) return setFail("Could not save. Check your connection and try again.");
+    setSaved({ ...saved!, released: false });
+    toast("Grade withdrawn");
+    reload();
+  }
+
   return (
     <div className="content wide">
       <PageHeader
@@ -119,9 +131,11 @@ function GradeOne({ submissionId }: { submissionId: string }) {
             <Button disabled={!nextId} onClick={() => nextId && guard.go(`${base}/grading/${nextId}`)}>Next to grade</Button>
             {!nextId && <span className="muted">Nothing else needs grading</span>}
             {saved.exists && !saved.released && <Button disabled={busy} onClick={() => save(null, true)}>Release</Button>}
+            {saved.released && <Button disabled={busy} onClick={() => setWithdrawing(true)}>Withdraw</Button>}
           </div>
         </form></Panel>
       </Section>
+      <WithdrawConfirm target={withdrawing ? { student: student.full_name, assignment: assignment.title } : null} busy={busy} onCancel={() => setWithdrawing(false)} onConfirm={withdraw} />
       {guard.dialog}
     </div>
   );

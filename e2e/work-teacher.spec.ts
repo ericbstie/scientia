@@ -343,6 +343,25 @@ test.describe("Grading queue, grading and releasing", () => {
     await openCourse(page, "BIO101", "/grades");
     await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("Awaiting grade");
   });
+
+  test("@US-31 withdraw a released grade from its own page", async ({ page }) => {
+    await signIn(page, "ingrid");
+    await openCourse(page, "BIO101", "/grading?status=released");
+    await row(page, "Lab report 1").getByRole("link", { name: "Maya Okafor" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Maya Okafor: Lab report 1");
+    await expect(page.getByRole("button", { name: "Release" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Withdraw" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Withdraw the grade for Maya Okafor on Lab report 1?");
+    await dialog.getByRole("button", { name: "Withdraw" }).click();
+    await expect(page.locator(".page-header .subtitle")).toContainText("Graded (not released)");
+    await expect(page.getByRole("button", { name: "Withdraw" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Release" })).toBeVisible();
+
+    await signIn(page, "maya");
+    await openCourse(page, "BIO101", "/grades");
+    await expect(page.getByRole("row", { name: /Lab report 1/ })).toContainText("Awaiting grade");
+  });
 });
 
 test.describe("More time for one student", () => {
@@ -389,7 +408,7 @@ test.describe("More time for one student", () => {
     await signIn(page, "noah");
     const upcoming = page.getByRole("region", { name: "Upcoming" });
     await expect(upcoming.getByRole("listitem").filter({ hasText: "Safety acknowledgement" })).toContainText(fmt(dueAt(3)));
-    await expect(page.getByRole("region", { name: "Past due" })).not.toContainText("Safety acknowledgement");
+    await expect(page.getByRole("region", { name: "Missing" })).not.toContainText("Safety acknowledgement");
     const notes = (await api(page, "/rest/v1/notifications?select=title")).data as { title: string }[];
     expect(notes.map((n) => n.title)).toContain("Due date changed: Safety acknowledgement");
 
