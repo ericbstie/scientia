@@ -18,7 +18,7 @@
 // stop rather than guess when several match. Date and time fields take the date as a person types it
 // ("23 Oct 2026 23:59", "23/10/2026 11:59 pm", "Fri 23 Oct, 23:59"); a missing year is this year.
 // People: maya, liam, sofia, noah, priya (students), ingrid (teacher), admin. Add --phone for a 390px screen.
-import { chromium, type Locator, type Page } from "@playwright/test";
+import { chromium, type ElementHandle, type Locator, type Page } from "@playwright/test";
 
 const args = process.argv.slice(2);
 const opt = (name: string) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
@@ -48,8 +48,9 @@ async function one(tries: Locator[], say: { many: string; none: string; pick: st
   const inLine = within ? ` in a line with "${within}"` : "";
   for (const until = Date.now() + 5000; Date.now() < until; await page.waitForTimeout(200))
     for (const tried of tries) {
-      const found: { el: Locator; text: string }[] = [];
-      for (const el of await tried.all()) {
+      // Handles, not locators: a name that changes after the match (the bell gains its unread count) must not lose the element.
+      const found: { el: ElementHandle; text: string }[] = [];
+      for (const el of await tried.elementHandles()) {
         const text = await el.evaluate(line);
         if (!within || text.toLowerCase().includes(within.toLowerCase())) found.push({ el, text });
       }
@@ -59,9 +60,11 @@ async function one(tries: Locator[], say: { many: string; none: string; pick: st
     }
   throw new Error(`${say.none}${inLine}`);
 }
-/** The one thing to click: the named role first, then any other clickable role with that name. */
+/** The one thing to click: the named role first, then any other clickable role with that name; each
+ *  role by the whole name, then a name that starts with it ("Notifications, 2 unread"), then one that holds it. */
 const clickable = (on: Page | Locator, role: string, name: string, within?: string) =>
-  one([role, ...["link", "button", "menuitem", "tab", "option", "checkbox", "radio"].filter((x) => x !== role)].flatMap((r) => [true, false].map((exact) => on.getByRole(r as "link", { name, exact }))), {
+  one([role, ...["link", "button", "menuitem", "tab", "option", "checkbox", "radio"].filter((x) => x !== role)].flatMap((r) =>
+    [{ name, exact: true }, { name: new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i") }, { name }].map((n) => on.getByRole(r as "link", n))), {
     many: `things called "${name}" can be clicked`,
     none: `nothing on screen called "${name}" can be clicked`,
     pick: `Pick one with: click ${role} "${name}" in "<other text on its line>"`,
@@ -104,6 +107,7 @@ try {
     await page.getByLabel("Password").fill("Demo-pass-123");
     await page.getByRole("button", { name: "Sign in" }).click();
     await page.waitForURL((u) => !u.pathname.startsWith("/sign-in"), { timeout: 10000 });
+    await page.waitForLoadState("networkidle").catch(() => {});
   }
   for (const [i, step] of steps.entries()) {
     let m: RegExpMatchArray | null;

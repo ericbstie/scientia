@@ -171,7 +171,7 @@ type WithRef<T> = { ref?: Ref<T> };
 function FieldFrame({ id, label, hint, error, optional, children }: FieldBase & { id: string; children: ReactNode }) {
   return (
     <DsField>
-      {optional ? <div className="label-row"><Label htmlFor={id}>{label}</Label><Tag data-color="neutral" data-size="sm">Optional</Tag></div> : <Label htmlFor={id}>{label}</Label>}
+      {optional ? <div className="label-row"><Label id={`${id}-label`} htmlFor={id}>{label}</Label><Tag data-color="neutral" data-size="sm">Optional</Tag></div> : <Label id={`${id}-label`} htmlFor={id}>{label}</Label>}
       {hint && <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>}
       {children}
       {error && <ValidationMessage id={`${id}-error`} className="error-text">{error}</ValidationMessage>}
@@ -198,7 +198,8 @@ export function Select({ label, hint, error, optional, id, children, ...rest }: 
 }
 
 /** A file picker as Designsystemet's upload area: click anywhere in it, or drop a file on it.
- *  The text inside repeats what the file input itself announces, so it is hidden from assistive tech. */
+ *  The input is named by what is shown: its label, the chosen file and the button text ("File
+ *  report.pdf Choose another file"); that text itself is hidden so it is not read twice. */
 export function FileField({ label, hint, error, optional, id, onChange, ...rest }: FieldBase & InputHTMLAttributes<HTMLInputElement>) {
   const auto = useId();
   const fid = id ?? auto;
@@ -206,9 +207,9 @@ export function FileField({ label, hint, error, optional, id, onChange, ...rest 
   return (
     <FieldFrame id={fid} label={label} hint={hint} error={error} optional={optional}>
       <FileUpload>
-        <Paragraph aria-hidden="true">{chosen ?? "Drag a file here, or"}</Paragraph>
-        <DsButton asChild variant="secondary"><span aria-hidden="true">{chosen ? "Choose another file" : "Choose file"}</span></DsButton>
-        <input id={fid} type="file" onChange={(e) => { setChosen(e.target.files?.[0]?.name); onChange?.(e); }} {...rest} />
+        <Paragraph id={`${fid}-chosen`} aria-hidden="true">{chosen ?? "Drag a file here, or"}</Paragraph>
+        <DsButton asChild variant="secondary"><span id={`${fid}-choose`} aria-hidden="true">{chosen ? "Choose another file" : "Choose file"}</span></DsButton>
+        <input id={fid} type="file" aria-labelledby={[`${fid}-label`, chosen && `${fid}-chosen`, `${fid}-choose`].filter(Boolean).join(" ")} onChange={(e) => { setChosen(e.target.files?.[0]?.name); onChange?.(e); }} {...rest} />
       </FileUpload>
     </FieldFrame>
   );

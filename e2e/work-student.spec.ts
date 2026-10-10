@@ -99,7 +99,9 @@ test.describe("Assignments and submitting", () => {
   test("@US-9 attach a file and submit", async ({ page }) => {
     await signIn(page, "maya");
     await openAssignment(page, "Essay: the 1848 revolutions", "HIS201");
-    await page.getByLabel("File").setInputFiles("e2e/files/sample.pdf");
+    // The control is named by what it shows: its label, then the chosen file, then the button text.
+    await page.getByRole("button", { name: "File Choose file", exact: true }).setInputFiles("e2e/files/sample.pdf");
+    await expect(page.getByRole("button", { name: "File sample.pdf Choose another file", exact: true })).toBeAttached();
     await page.getByRole("button", { name: "Submit" }).click();
     await expect(assignmentStatus(page)).toContainText("Submitted");
     const link = page.getByRole("link", { name: "sample.pdf" });

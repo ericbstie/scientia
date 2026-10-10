@@ -30,3 +30,8 @@ Facts about the machines agents run on that cost time to rediscover.
   `node_modules/@digdir/designsystemet-react/package.json` has `"sideEffects": false`;
   if not, delete `~/.bun/install/cache/@digdir/designsystemet-react@*_patch_hash=*` and
   run `bun install` again (a cache entry written by `bun patch` can miss the change).
+- **Stale checkout**: metrics, `look.ts` and the specs run from your own checkout, so
+  `git pull --rebase origin main` before using them. In round 9 a checkout from before
+  2026-10-09 23:38 reported `ux.blind_tasks_done_pct` from the round 4 file (85.7) while
+  main read round 9 (100). Nobody edits a path: the metric takes the newest review file
+  with a full seven-scenario first pass by itself.
