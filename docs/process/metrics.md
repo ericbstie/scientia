@@ -24,7 +24,7 @@ measured yet are recorded as `null`, never guessed.
 | `design.overrides` | `!important`, an assigned `--ds-*` token or a `.ds-*` selector in `styles.css` | Components keep the look the system and the theme give them (brand rule 1) | ↓ target 0 |
 | `design.literal_sizes` | A px/rem/em size or numeric weight in `font-size`, `line-height`, `border-radius`, `box-shadow` or `font-weight` outside `var()` | Type, shape and depth are tokens | ↓ target 0 |
 | `design.custom_css_lines` | Non-blank, non-comment lines of `app/src/styles.css` | Our own CSS stays page layout only; 330 before the redesign, 206 after | ↓ target ≤ 210 (ratchet down) |
-| `ux.blind_tasks_done_pct` | First-pass `\| Scenario \| Result \|` table in the newest `docs/process/reviews/m<n>[-<label>]-user-test.md`, highest milestone then the file added last (Done / Partly / Failed) | A newcomer can finish the core tasks; e2e only proves the stories we wrote | ↑ target 100 |
+| `ux.blind_tasks_done_pct` | First-pass `\| Scenario \| Result \|` table in the newest full pass (seven scenarios or more) among `docs/process/reviews/m<n>[-<label>]-user-test.md`, highest milestone then the file added last (Done / Partly / Failed) | A newcomer can finish the core tasks; e2e only proves the stories we wrote | ↑ target 100 |
 | `process.briefs_with_criteria_pct` | `docs/process/briefs/*.md` with an "Acceptance criteria" section | Briefs are contracts | ↑ target 100 |
 | `process.retro_changes` | Process files touched by the last retro commit | Retros lead to change | ↑ ≥ 1 |
 

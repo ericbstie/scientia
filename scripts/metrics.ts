@@ -118,17 +118,19 @@ m["design.literal_sizes"] = [...sheet.matchAll(/(?:font-size|line-height|border-
 ).length;
 m["design.custom_css_lines"] = sheet.split("\n").filter((l) => l.trim()).length;
 
-// Blind user tests: first-pass "| Scenario | Result | ... |" table of the newest
-// docs/process/reviews/m<n>[-<label>]-user-test.md: highest milestone, then the file added last
-// (a milestone can have several rounds, e.g. m4-redesign-user-test.md). Result cells start with
-// Done, Partly or Failed.
+// Blind user tests: first-pass "| Scenario | Result | ... |" table of the newest full pass among
+// docs/process/reviews/m<n>[-<label>]-user-test.md: highest milestone, then the file added last.
+// A full pass covers the seven scenarios the user-test skill lists; a round of fewer (round 7 ran
+// five) does not move the number. Result cells start with Done, Partly or Failed.
+const FULL_PASS = 7;
 const milestone = (f: string) => Number(f.match(/\/m(\d+)[^/]*-user-test\.md$/)?.[1] ?? 0);
 const added = async (f: string) => Number((await Bun.$`git -C ${root} log --diff-filter=A --format=%ct -1 -- ${f}`.nothrow().text()).trim()) || Infinity;
-const userTests = await Promise.all(walk(p("docs/process/reviews"), "-user-test.md").map(async (f) => ({ f, key: [milestone(f), await added(f)] })));
-userTests.sort((a, b) => a.key[0] - b.key[0] || a.key[1] - b.key[1]);
-const ut = userTests.length ? readFileSync(userTests.at(-1)!.f, "utf8") : "";
-const utTable = ut.split(/^\|\s*Scenario\s*\|\s*Result\s*\|.*$/m)[1]?.split(/\n\s*\n/)[0] ?? "";
-const results = [...utTable.matchAll(/^\|[^|\n]+\|\s*\**(Done|Partly|Failed)\b/gim)].map((x) => x[1].toLowerCase());
+const firstPass = (f: string) => {
+  const table = readFileSync(f, "utf8").split(/^\|\s*Scenario\s*\|\s*Result\s*\|.*$/m)[1]?.split(/\n\s*\n/)[0] ?? "";
+  return [...table.matchAll(/^\|[^|\n]+\|\s*\**(Done|Partly|Failed)\b/gim)].map((x) => x[1]!.toLowerCase());
+};
+const userTests = await Promise.all(walk(p("docs/process/reviews"), "-user-test.md").map(async (f) => ({ results: firstPass(f), key: [milestone(f), await added(f)] })));
+const results = userTests.filter((u) => u.results.length >= FULL_PASS).sort((a, b) => a.key[0]! - b.key[0]! || a.key[1]! - b.key[1]!).at(-1)?.results ?? [];
 m["ux.blind_tasks_done_pct"] = results.length
   ? Math.round((results.filter((r) => r === "done").length / results.length) * 1000) / 10
   : null;
