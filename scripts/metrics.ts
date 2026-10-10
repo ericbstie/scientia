@@ -76,7 +76,9 @@ if (a11y) {
   m["a11y.pages_scanned"] = m["a11y.serious"] = m["design.phone_overflow"] = null;
 }
 
-// Bundle size
+// Bundle size, of a fresh production build on the locked, patched dependencies (a dist/ or
+// node_modules/ left from an older checkout measured the bundle before the patch: 238 KB, not 206).
+await Bun.$`bun install --frozen-lockfile && bun run scripts/build.ts`.cwd(root).quiet();
 const js = walk(p("dist"), ".js");
 m["bundle.js_kb_gz"] = js.length
   ? Math.round(js.reduce((n, f) => n + gzipSync(readFileSync(f)).length, 0) / 102.4) / 10
