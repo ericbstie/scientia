@@ -14,9 +14,9 @@
 // `click` takes the role the outline shows (link, button, menuitem, tab...); if nothing with that role has
 // the name, it clicks whatever else on screen does. When more than one thing matches, nothing is clicked:
 // it lists them, and `click <role> "<name>" in "<text>"` picks the one whose line (list row, table row)
-// holds that text. Fields are found by their label, or else a label that contains the text. Date and
-// time fields take the date as a person types it ("23 Oct 2026 23:59", "23/10/2026 11:59 pm",
-// "Fri 23 Oct, 23:59"); a missing year is this year.
+// holds that text. Fields are found by their label, or else a label that contains the text; they too
+// stop rather than guess when several match. Date and time fields take the date as a person types it
+// ("23 Oct 2026 23:59", "23/10/2026 11:59 pm", "Fri 23 Oct, 23:59"); a missing year is this year.
 // People: maya, liam, sofia, noah, priya (students), ingrid (teacher), admin. Add --phone for a 390px screen.
 import { chromium, type Locator, type Page } from "@playwright/test";
 
@@ -40,32 +40,39 @@ const shown = (outline: string) => outline.replace(/^(\s*- textbox "[^"]*": )(\d
 const outline = async () => shown((await dialog.count())
   ? `A dialog is open. The page behind it cannot be used until it closes.\n${await dialog.ariaSnapshot()}`
   : await page.locator("body").ariaSnapshot());
-/** The one element to click: the named role first, then any other clickable role with that name, narrowed
- *  to the line holding `within`. Waits up to 5 s for it to appear; refuses to guess between several. */
-async function clickable(on: Page | Locator, role: string, name: string, within?: string) {
-  const roles = [role, ...["link", "button", "menuitem", "tab", "option", "checkbox", "radio"].filter((x) => x !== role)];
-  // The text of the element's line: its list or table row, else the section, form or dialog around it.
-  const line = (el: Element) => ((el.closest("li, tr") ?? el.closest("section, header, form, dialog, main") ?? el).textContent ?? "").replace(/\s+/g, " ").trim();
+// The text of an element's line: its list or table row, else the section, form or dialog around it.
+const line = (el: Element) => (((el.closest("li, tr") ?? el.closest("section, header, form, dialog, main") ?? el) as HTMLElement).innerText ?? "").replace(/\s+/g, " ").trim();
+/** The one element the first matching locator finds, narrowed to the line holding `within`. Waits up to
+ *  5 s for a match and refuses to guess between several. */
+async function one(tries: Locator[], say: { many: string; none: string; pick: string }, within?: string) {
+  const inLine = within ? ` in a line with "${within}"` : "";
   for (const until = Date.now() + 5000; Date.now() < until; await page.waitForTimeout(200))
-    for (const r of roles)
-      for (const exact of [true, false]) {
-        const found: { el: Locator; text: string }[] = [];
-        for (const el of await on.getByRole(r as "link", { name, exact }).all()) {
-          const text = await el.evaluate(line);
-          if (!within || text.toLowerCase().includes(within.toLowerCase())) found.push({ el, text });
-        }
-        if (found.length === 1) return found[0]!.el;
-        if (found.length > 1)
-          throw new Error(`${found.length} things called "${name}"${within ? ` in "${within}"` : ""} can be clicked, so nothing was clicked. Their lines read:\n${found.map((f, i) => `  ${i + 1}. ${f.text.slice(0, 100)}`).join("\n")}\nPick one with: click ${r} "${name}" in "<other text on its line>"`);
+    for (const tried of tries) {
+      const found: { el: Locator; text: string }[] = [];
+      for (const el of await tried.all()) {
+        const text = await el.evaluate(line);
+        if (!within || text.toLowerCase().includes(within.toLowerCase())) found.push({ el, text });
       }
-  throw new Error(`nothing on screen called "${name}"${within ? ` in a line with "${within}"` : ""} can be clicked`);
+      if (found.length === 1) return found[0]!.el;
+      if (found.length > 1)
+        throw new Error(`${found.length} ${say.many}${inLine}, so nothing was done. Their lines read:\n${found.map((f, i) => `  ${i + 1}. ${f.text.slice(0, 100)}`).join("\n")}\n${say.pick}`);
+    }
+  throw new Error(`${say.none}${inLine}`);
 }
-
-/** The field with this label, or else the first whose label contains it. */
-async function labelled(on: Page | Locator, label: string) {
-  const exact = on.getByLabel(label, { exact: true });
-  return ((await exact.count()) ? exact : on.getByLabel(label)).first();
-}
+/** The one thing to click: the named role first, then any other clickable role with that name. */
+const clickable = (on: Page | Locator, role: string, name: string, within?: string) =>
+  one([role, ...["link", "button", "menuitem", "tab", "option", "checkbox", "radio"].filter((x) => x !== role)].flatMap((r) => [true, false].map((exact) => on.getByRole(r as "link", { name, exact }))), {
+    many: `things called "${name}" can be clicked`,
+    none: `nothing on screen called "${name}" can be clicked`,
+    pick: `Pick one with: click ${role} "${name}" in "<other text on its line>"`,
+  }, within);
+/** The one field with this label, or else whose label contains it. */
+const labelled = (on: Page | Locator, label: string) =>
+  one([on.getByLabel(label, { exact: true }), on.getByLabel(label)], {
+    many: `fields are labelled "${label}"`,
+    none: `no field on screen is labelled "${label}"`,
+    pick: "Use the whole label of the one you mean.",
+  });
 
 /** The ISO value a date, time or date-time field holds, from a date as a person types it. */
 function typedDate(type: string, text: string) {
@@ -121,7 +128,7 @@ try {
   console.log(`Page title: ${await page.title()}\nAddress: ${new URL(page.url()).pathname}\n`);
   console.log(await outline());
 } catch (e) {
-  console.log(`That did not work: ${(e as Error).message.split("\n")[0]}`);
+  console.log(`That did not work: ${(e as Error).message.split(/\n\s*(?:Call log:|=+ logs =+)/)[0]}`);
   console.log(`Address: ${new URL(page.url()).pathname}\n`);
   console.log(await outline().catch(() => ""));
 } finally {
