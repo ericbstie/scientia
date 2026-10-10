@@ -155,7 +155,7 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 **Evidence:** pain-points.md#Pain points (10); moodle.md#Pain points (13)
 
 **Acceptance criteria:**
-- Given I am signed in as Noah and Lab report 1 has passed its due date and allows late work, When I open it, Then the status is "Missing", there is a note "The due date has passed. Your work will be marked late.", and a submission form.
+- Given I am signed in as Noah and Lab report 1 has passed its due date and allows late work, When I open it, Then the status is "Missing", there is a note "The due date has passed. You can still hand this in; it will be marked late.", and a submission form.
 - Given I submit the text "Late but complete." to Lab report 1 as Noah, When it saves, Then the status shows "Late" instead of "Missing" and the submission time (now) is after the due date T-7d 23:59.
 - Given I am signed in as Maya, who handed in Lab report 1 on time, When I open it after the due date, Then the status is not "Missing".
 - Given I am signed in as Sofia, When I open Lab report 1, Then the status is "Late" and it says "Submitted 1 day late".

@@ -323,7 +323,9 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
   return (
     <Panel><form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={fail} />
-      {Date.now() > new Date(a.due_at).getTime() && <Paragraph className="muted">The due date has passed. Your work will be marked late.</Paragraph>}
+      {Date.now() > new Date(a.due_at).getTime() && (
+        <Paragraph>The due date has passed. {existing ? "Submitting again will mark your work late." : "You can still hand this in; it will be marked late."}</Paragraph>
+      )}
       {a.accepts_text && (
         <TextArea
           id="sub-text" label="Your answer" rows={8} value={text} error={textError} hint={restored ? "Restored your unsent answer." : undefined}

@@ -209,7 +209,7 @@ test.describe("Assignments and submitting", () => {
     await signIn(page, "noah");
     await openAssignment(page, "Lab report 1");
     await expect(assignmentStatus(page)).toContainText("Missing");
-    await expect(page.getByText("The due date has passed. Your work will be marked late.")).toBeVisible();
+    await expect(page.getByText("The due date has passed. You can still hand this in; it will be marked late.")).toBeVisible();
     await page.getByRole("textbox", { name: "Your answer" }).fill("Late but complete.");
     await page.getByRole("button", { name: "Submit" }).click();
     await expect(assignmentStatus(page)).toContainText("Late");
