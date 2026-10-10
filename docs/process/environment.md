@@ -9,7 +9,9 @@ Facts about the machines agents run on that cost time to rediscover.
     `docker tag mirror.gcr.io/<image>:<tag> <image>:<tag>` so compose files keep
     the normal names. `scripts/pull-images.sh` does this for every image in
     `docker-compose.yml`.
-  - The Docker daemon may need starting: `dockerd > /tmp/dockerd.log 2>&1 &`.
+  - The Docker daemon may need starting: `rm -f /var/run/docker.pid; dockerd > /tmp/dockerd.log 2>&1 &`.
+    It can stop again during a session; if a plain background start does not bring it back,
+    `setsid nohup dockerd > /tmp/dockerd.log 2>&1 &` does (it outlives the shell that started it).
     After a daemon restart the stacks come back on their own, but PostgREST can start
     before the database and answer 503 until restarted (`docker restart <project>-rest-1`),
     and the slot's hot-reload dev server is gone (run `scripts/slot.sh up <n>` again).
