@@ -242,9 +242,9 @@ Demo data, time rules and test conventions are in `README.md`. Ids continue acro
 
 **Acceptance criteria:**
 - Given I am signed in as Maya, When I look at the top bar, Then the bell shows an unread count of 2.
-- Given I open the bell, When the list opens, Then it shows three notifications: "Grade released: Lab report 1" and "New announcement: Lab report 1 marking update" marked "Unread", and "New announcement: Reading list posted" without the marker; "New announcement: Lab report 1 marking update" is last.
+- Given I open the bell, When the list opens, Then it shows four notifications: "Grade released: Lab report 1" and "New announcement: Lab report 1 marking update" marked "Unread", and "New announcement: Reading list posted" and "New announcement: Welcome to BIO101" without the marker; "New announcement: Welcome to BIO101" is last.
 - Given I click "Grade released: Lab report 1", When the page loads, Then I land on the Lab report 1 assignment page and the bell count is 1.
-- Given I click "Mark all as read", When the list updates, Then the bell shows no count and all three notifications remain in the list as read.
+- Given I click "Mark all as read", When the list updates, Then the bell shows no count and all four notifications remain in the list as read.
 
 ### US-18 Choose which notifications I get
 

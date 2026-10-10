@@ -126,11 +126,10 @@ export async function seed(sql: SQL) {
 
     const ann = async (c: string, title: string, body: string, days: number, pinned = false) =>
       (await tx`insert into public.announcements (course_id, author_id, title, body, pinned, created_at) values (${c}, ${u.ingrid}, ${title}, ${body}, ${pinned}, ${ago(days)}) returning id`)[0].id as string;
-    await ann(bio.id, "Welcome to BIO101", "Welcome! Start with the syllabus in Week 1. Labs begin next week.", 21, true);
-    const labAnn = await ann(bio.id, "Lab report 1 marking update", "Lab reports are being marked this week. Released grades show up under Grades.", 3);
+    const welcome = await ann(bio.id, "Welcome to BIO101", "Welcome! Start with the syllabus in Week 1. Labs begin next week.", 21, true);
+    await ann(bio.id, "Lab report 1 marking update", "Lab reports are being marked this week. Released grades show up under Grades.", 3);
     const readAnn = await ann(his.id, "Reading list posted", "The reading list for Unit 1 is now in Modules.", 2);
-    const [welcome] = await tx`select id from public.announcements where course_id = ${bio.id} and pinned`;
-    await tx`insert into public.announcement_reads (announcement_id, user_id, read_at) values (${welcome.id}, ${u.maya}, ${ago(20)}), (${readAnn}, ${u.maya}, ${ago(1.9)})`;
+    await tx`insert into public.announcement_reads (announcement_id, user_id, read_at) values (${welcome}, ${u.maya}, ${ago(20)}), (${readAnn}, ${u.maya}, ${ago(1.9)})`;
 
     const asg = async (c: string, title: string, days: number, points: number, accepts: "text" | "file" | "both", allowLate: boolean, published: boolean, module: string | null, description: string) =>
       (await tx`insert into public.assignments (course_id, module_id, title, description, due_at, points, accepts_text, accepts_files, allow_late, published, created_at)
@@ -165,10 +164,13 @@ export async function seed(sql: SQL) {
       (${thread.id}, ${u.ingrid}, 'Yes, please include it.', ${ago(4.9)}),
       (${thread.id}, ${u.maya}, 'Thanks, I wondered too.', ${ago(4.8)})`;
 
-    await tx`insert into public.notifications (user_id, course_id, kind, title, link, read_at, created_at) values
-      (${u.maya}, ${his.id}, 'announcement', 'New announcement: Reading list posted', ${`/courses/${his.id}/announcements#${readAnn}`}, ${ago(1.9)}, ${ago(2)}),
-      (${u.maya}, ${bio.id}, 'announcement', 'New announcement: Lab report 1 marking update', ${`/courses/${bio.id}/announcements#${labAnn}`}, null, ${ago(3)}),
-      (${u.maya}, ${bio.id}, 'grade', 'Grade released: Lab report 1', ${`/courses/${bio.id}/assignments/${lab1}`}, null, ${ago(2)})`;
+    // Every announcement notified its course's students, as the app does; reading one read its notification.
+    await tx`insert into public.notifications (user_id, course_id, kind, title, link, read_at, created_at)
+      select e.user_id, a.course_id, 'announcement', 'New announcement: ' || a.title, '/courses/' || a.course_id || '/announcements#' || a.id, r.read_at, a.created_at
+      from public.announcements a join public.enrollments e on e.course_id = a.course_id and e.role = 'student'
+      left join public.announcement_reads r on r.announcement_id = a.id and r.user_id = e.user_id`;
+    await tx`insert into public.notifications (user_id, course_id, kind, title, link, created_at) values
+      (${u.maya}, ${bio.id}, 'grade', 'Grade released: Lab report 1', ${`/courses/${bio.id}/assignments/${lab1}`}, ${ago(2)})`;
 
     // Files are uploaded after commit through the storage API.
     files.push(

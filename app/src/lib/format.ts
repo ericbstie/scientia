@@ -15,14 +15,16 @@ function fmtTime(d: string | Date) {
 }
 export const fmtDateTime = (d: string | Date) => `${fmtDate(d)}, ${fmtTime(d)}`;
 
-/** "in 3 days", "2 hours ago" */
+/** Days as a calendar counts them, so they agree with the date beside them: "tomorrow", "in 2 days",
+ *  "14 days ago"; on the same day, hours or minutes: "in 5 hours". */
 export function relative(d: string | Date, now = Date.now()) {
-  const diff = new Date(d).getTime() - now;
-  const abs = Math.abs(diff);
+  const date = new Date(d), today = new Date(now);
+  const day = (x: Date) => Date.UTC(x.getFullYear(), x.getMonth(), x.getDate());
+  const days = Math.round((day(date) - day(today)) / 86400000);
   const rtf = new Intl.RelativeTimeFormat("en-GB", { numeric: "auto" });
-  const units: [Intl.RelativeTimeFormatUnit, number][] = [["day", 86400000], ["hour", 3600000], ["minute", 60000]];
-  for (const [unit, ms] of units) if (abs >= ms || unit === "minute") return rtf.format(Math.round(diff / ms), unit);
-  return "";
+  if (days) return rtf.format(days, "day");
+  const diff = date.getTime() - now;
+  return Math.abs(diff) >= 3600000 ? rtf.format(Math.round(diff / 3600000), "hour") : rtf.format(Math.round(diff / 60000), "minute");
 }
 
 export type StudentStatus = "Not submitted" | "Submitted" | "Late" | "Missing" | "Closed" | "Graded";

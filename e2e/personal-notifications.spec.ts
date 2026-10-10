@@ -17,14 +17,15 @@ test.describe("Notification list", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Notifications" })).toBeVisible();
 
     const rows = page.getByRole("listitem");
-    await expect(rows).toHaveCount(3);
+    await expect(rows).toHaveCount(4);
     const grade = rows.filter({ hasText: "Grade released: Lab report 1" });
     const marking = rows.filter({ hasText: "New announcement: Lab report 1 marking update" });
     const reading = rows.filter({ hasText: "New announcement: Reading list posted" });
     await expect(grade).toContainText("Unread");
     await expect(marking).toContainText("Unread");
     await expect(reading).not.toContainText("Unread");
-    await expect(rows.last()).toContainText("New announcement: Lab report 1 marking update");
+    await expect(rows.last()).toContainText("New announcement: Welcome to BIO101");
+    await expect(rows.last()).not.toContainText("Unread");
   });
 
   test("@US-17 opening a notification goes to its target and counts it as read", async ({ page }) => {
@@ -42,13 +43,13 @@ test.describe("Notification list", () => {
     await bell(page).click();
     await page.getByRole("button", { name: "Mark all as read" }).click();
     await expect(page.getByTestId("unread-count")).toHaveCount(0);
-    await expect(page.getByRole("listitem")).toHaveCount(3);
+    await expect(page.getByRole("listitem")).toHaveCount(4);
     await expect(page.getByText("Unread", { exact: true })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Mark all as read" })).toHaveCount(0);
   });
 
   test("@US-17 an account without notifications sees an empty state", async ({ page }) => {
-    await signIn(page, "liam");
+    await signIn(page, "priya");
     await expect(page.getByTestId("unread-count")).toHaveCount(0);
     await bell(page).click();
     await expect(page.getByText("No notifications")).toBeVisible();

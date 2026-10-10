@@ -71,7 +71,7 @@ HIS201: "Unit 1: The 1848 revolutions" (published): page "Reading list", body `1
 
 ### Announcements
 
-Author of all three is Dr. Ingrid Solberg. No read state is seeded: every announcement is Unread for every student until that student opens it.
+Author of all three is Dr. Ingrid Solberg. Maya has read Welcome to BIO101 (20 days ago) and Reading list posted (a little after it was posted); every other announcement is Unread for every student until that student opens it.
 
 | Course | Title | Body | Pinned | Posted |
 |---|---|---|---|---|
@@ -109,15 +109,16 @@ BIO101 thread "Question about the lab report" by Liam Hansen, 5 days ago: `Shoul
 
 ### Notifications
 
-Only Maya has notifications. All other accounts have none.
+Each announcement notified every student of its course when it was posted, as the app does, and the notification is read where the student has read the announcement. Maya also has one grade notification. Teachers, the admin and Priya have none.
 
-| Title | Created | State |
-|---|---|---|
-| New announcement: Reading list posted (links to the HIS201 announcement) | 2 days ago | read |
-| New announcement: Lab report 1 marking update (links to the BIO101 announcement) | 3 days ago | unread |
-| Grade released: Lab report 1 (links to the Lab report 1 page) | 2 days ago, a few milliseconds after "Reading list posted" | unread |
+| Who | Title | Created | State |
+|---|---|---|---|
+| Maya | Grade released: Lab report 1 (links to the Lab report 1 page) | 2 days ago, a few milliseconds after "Reading list posted" | unread |
+| Maya, Liam | New announcement: Reading list posted (links to the HIS201 announcement) | 2 days ago | read for Maya, unread for Liam |
+| Maya, Liam, Sofia, Noah | New announcement: Lab report 1 marking update (links to the BIO101 announcement) | 3 days ago | unread |
+| Maya, Liam, Sofia, Noah | New announcement: Welcome to BIO101 (links to the BIO101 announcement) | 21 days ago | read for Maya, unread for the others |
 
-The relative order of the two notifications created 2 days ago is not fixed by the seed, so tests must not assert it. Notification preferences are not seeded: all five kinds are on for everyone.
+So Maya has four notifications, two unread; Liam three unread; Sofia and Noah two unread. The relative order of the two notifications created 2 days ago is not fixed by the seed, so tests must not assert it. Notification preferences are not seeded: all five kinds are on for everyone.
 
 ## Conventions the stories rely on
 

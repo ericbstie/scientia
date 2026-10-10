@@ -10,11 +10,13 @@
 //   bun run scripts/look.ts --as maya --step 'click link "Introduction to Biology"' --step 'click link "Assignments"'
 //   bun run scripts/look.ts --as ingrid --step 'goto /calendar' --step 'fill "Email" with "x"' --step 'press Enter'
 //
-// Steps: goto <path> | click <role> "<name>" | fill "<label>" with "<text>" | press <key> | check "<label>" | select "<label>" option "<text>"
+// Steps: goto <path> | click <role> "<name>" [in "<text>"] | fill "<label>" with "<text>" | press <key> | check "<label>" | select "<label>" option "<text>"
 // `click` takes the role the outline shows (link, button, menuitem, tab...); if nothing with that role has
-// the name, it clicks whatever else on screen does. Fields are found by their label, or else a label
-// that contains the text. Date and time fields take the date as a person types it ("23 Oct 2026 23:59",
-// "23/10/2026 11:59 pm", "Fri 23 Oct, 23:59"); a missing year is this year.
+// the name, it clicks whatever else on screen does. When more than one thing matches, nothing is clicked:
+// it lists them, and `click <role> "<name>" in "<text>"` picks the one whose line (list row, table row)
+// holds that text. Fields are found by their label, or else a label that contains the text. Date and
+// time fields take the date as a person types it ("23 Oct 2026 23:59", "23/10/2026 11:59 pm",
+// "Fri 23 Oct, 23:59"); a missing year is this year.
 // People: maya, liam, sofia, noah, priya (students), ingrid (teacher), admin. Add --phone for a 390px screen.
 import { chromium, type Locator, type Page } from "@playwright/test";
 
@@ -38,16 +40,25 @@ const shown = (outline: string) => outline.replace(/^(\s*- textbox "[^"]*": )(\d
 const outline = async () => shown((await dialog.count())
   ? `A dialog is open. The page behind it cannot be used until it closes.\n${await dialog.ariaSnapshot()}`
   : await page.locator("body").ariaSnapshot());
-/** The element to click: the named role first, then any other clickable role with that name. Waits up to 5 s for it to appear. */
-async function clickable(on: Page | Locator, role: string, name: string) {
+/** The one element to click: the named role first, then any other clickable role with that name, narrowed
+ *  to the line holding `within`. Waits up to 5 s for it to appear; refuses to guess between several. */
+async function clickable(on: Page | Locator, role: string, name: string, within?: string) {
   const roles = [role, ...["link", "button", "menuitem", "tab", "option", "checkbox", "radio"].filter((x) => x !== role)];
+  // The text of the element's line: its list or table row, else the section, form or dialog around it.
+  const line = (el: Element) => ((el.closest("li, tr") ?? el.closest("section, header, form, dialog, main") ?? el).textContent ?? "").replace(/\s+/g, " ").trim();
   for (const until = Date.now() + 5000; Date.now() < until; await page.waitForTimeout(200))
     for (const r of roles)
       for (const exact of [true, false]) {
-        const found = on.getByRole(r as "link", { name, exact });
-        if (await found.count()) return found.first();
+        const found: { el: Locator; text: string }[] = [];
+        for (const el of await on.getByRole(r as "link", { name, exact }).all()) {
+          const text = await el.evaluate(line);
+          if (!within || text.toLowerCase().includes(within.toLowerCase())) found.push({ el, text });
+        }
+        if (found.length === 1) return found[0]!.el;
+        if (found.length > 1)
+          throw new Error(`${found.length} things called "${name}"${within ? ` in "${within}"` : ""} can be clicked, so nothing was clicked. Their lines read:\n${found.map((f, i) => `  ${i + 1}. ${f.text.slice(0, 100)}`).join("\n")}\nPick one with: click ${r} "${name}" in "<other text on its line>"`);
       }
-  throw new Error(`nothing on screen called "${name}" can be clicked`);
+  throw new Error(`nothing on screen called "${name}"${within ? ` in a line with "${within}"` : ""} can be clicked`);
 }
 
 /** The field with this label, or else the first whose label contains it. */
@@ -91,7 +102,7 @@ try {
     let m: RegExpMatchArray | null;
     const on = (await dialog.count()) ? dialog : page;
     if ((m = step.match(/^goto (\S+)/))) await page.goto(base + m[1]);
-    else if ((m = step.match(/^click (\w+) "(.+)"$/))) await (await clickable(on, m[1]!, m[2]!)).click();
+    else if ((m = step.match(/^click (\w+) "(.+?)"(?: in "(.+)")?$/))) await (await clickable(on, m[1]!, m[2]!, m[3])).click();
     else if ((m = step.match(/^fill "(.+)" with "(.*)"$/))) {
       const field = await labelled(on, m[1]!);
       const type = (await field.getAttribute("type")) ?? "";
