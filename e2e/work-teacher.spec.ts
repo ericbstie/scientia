@@ -370,8 +370,8 @@ test.describe("More time for one student", () => {
   const giveMoreTime = async (page: Page, title: string, student: string, n: number) => {
     await openCourse(page, "BIO101", "/assignments");
     await page.getByRole("link", { name: title, exact: true }).click();
-    await page.getByRole("button", { name: "Give more time" }).click();
-    const dialog = page.getByRole("dialog", { name: "Give more time" });
+    await page.getByRole("button", { name: "Give a student more time" }).click();
+    const dialog = page.getByRole("dialog", { name: "Give a student more time" });
     await dialog.getByLabel("Student").selectOption({ label: student });
     await dialog.getByLabel("New due date and time").fill(inputAt(n));
     await dialog.getByRole("button", { name: "Save" }).click();

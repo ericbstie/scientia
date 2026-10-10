@@ -93,7 +93,7 @@ Decisions that keep the route count low:
 ### R4 `/notifications`
 - **Purpose:** catch up, newest first.
 - **Who:** all roles.
-- **Regions:** h1 "Notifications"; Mark all as read button (hidden when none unread); list rows (text link to the target, time, "Unread" label on unread ones).
+- **Regions:** h1 "Notifications"; Mark all as read button (hidden when none unread); list rows (text link to the target; meta line with the course code and the time; "Unread" label on unread ones).
 - **Primary action:** open a notification.
 - **Empty state:** "You have no notifications."
 - **Stories:** US-16, US-17.
@@ -222,7 +222,7 @@ Decisions that keep the route count low:
 ### R20 `/courses/:courseId/assignments/:assignmentId`
 - **Purpose:** student: know what to do and hand in work, then see status and feedback. Teacher: review the definition and publish state.
 - **Who:** student of the course; teacher of the course.
-- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Status, Due date, Points, Accepts, and "Late work: Not accepted after the due date" until that date passes when late work is not allowed); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (time, "Submitted 1 day late", an "Edited" tag once the work was handed in again, text, file link, Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>. Ask your teacher if you need more time." with no form; Feedback (score "86 / 100" and feedback text) after release.
+- **Student regions:** back link "Assignments"; h1 title with status badge; facts (Status, Due date, Points, Accepts, and "Late work: Not accepted after the due date" until that date passes when late work is not allowed); Instructions; Your submission: the form (text area and/or file input, shown only for accepted types, Submit) or the submitted state (a success note "Your work is handed in." right after submitting, time, "Submitted 1 day late", an "Edited" tag once the work was handed in again, text, file link, "You can edit it until your teacher starts grading." and Edit submission while ungraded, "Your teacher has started grading this work" once graded); Closed message "Closed: this assignment stopped accepting work on <date>. Ask your teacher if you need more time." with no form; Feedback (score "86 / 100" and feedback text) after release.
 - **Teacher regions:** back link "Assignments"; h1 title with Draft badge; facts; Instructions; action row: Edit (to R21), Publish or Unpublish (disabled with the text "Cannot unpublish: students have submitted"), link "Open grading queue".
 - **Primary action:** Submit (student); Publish on a draft (teacher), otherwise none.
 - **Empty state:** none.

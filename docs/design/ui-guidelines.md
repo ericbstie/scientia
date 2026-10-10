@@ -87,7 +87,7 @@ shadow or font is chosen. Components and pages use the system's tokens and nothi
 - A header with two actions puts the secondary one (Export CSV, Import users) immediately left of the primary one.
 - Buttons are verbs in sentence case: "Submit", "Add student". Not "OK", "Yes", "Click here".
 - Navigation is a `Link` (a button-styled link when it needs button looks); an action that changes data is a `Button`. A disabled button always shows the reason beside it in text.
-- Forms: labels above fields, hints under, errors under. Every field is required unless its label says "Optional" beside it; "Required" is never printed. The submit button is at the bottom left, Cancel next to it. Enter submits (in a box that takes a list, Shift+Enter starts a new line and the hint says so). Forms use `noValidate` and the app's own errors, never the browser's bubbles. Dates and prices are never pre-filled with a guess the person did not see.
+- Forms: labels above fields, hints under, errors under. Every field is required unless its label says "Optional" beside it; "Required" is never printed, because most fields would carry it. A required field left empty says what to enter ("Enter a title"). The submit button is at the bottom left, Cancel next to it. Enter submits (in a box that takes a list, Shift+Enter starts a new line and the hint says so). Forms use `noValidate` and the app's own errors, never the browser's bubbles. Dates and prices are never pre-filled with a guess the person did not see.
 
 ## Status vocabulary
 
@@ -109,6 +109,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 - Relative text ("in 2 days", "7 days ago") may follow in muted text, never replace the date. Always render in `<time dateTime>`.
 - Scores are `86 / 100` and always sit beside the label "Score" (a fact on the assignment page, a column in tables); percentages one decimal (`87.3%`); no score is shown as an en dash only inside a gradebook cell, elsewhere as words ("Awaiting grade").
 - A total is the last row of the table it adds up, labelled "Total", with what it counts under the label ("2 of 4 assignments graded so far"). It is never a sentence above the table that can be read as one grade.
+- Where rows from several courses are mixed (Dashboard, Calendar, Notifications), each names its course by its code ("BIO101"), the same short name as on the course cards. The full title is on the course's own pages.
 - Points read "50 points" in text, "(50)" only in table headers and CSV.
 
 ## Empty states
@@ -123,7 +124,8 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 - An action offered on a list row is offered on the item's own page too, with the same label and the same confirmation (Release and Withdraw on the Grading list and on a grade's page). A person who finds the item through either route can undo what they did.
 - A page whose state decides who can see something (a grade, released or not) says so in one sentence under its heading: who can see it now, and what the button that changes it does ("Withdraw hides the grade again"). The button is never left to be guessed from its label.
 - Not confirmed: publish, unpublish, pin, save, submit (these are reversible or non-destructive).
-- A completed action shows a short toast ("Saved", "Announcement posted"). Toasts confirm; they never carry errors or the only copy of important information. They sit at the top centre, never over a control, and do not take clicks.
+- A hand-in is the one action not confirmed by a toast: the form it came from disappears, so the confirmation is a success note above the submitted work ("Your work is handed in."), which stays until the person leaves the page. Under the work, the page says what can still be done ("You can edit it until your teacher starts grading.").
+- Any other completed action shows a short toast ("Saved", "Announcement posted"). Toasts confirm; they never carry errors or the only copy of important information. They sit at the top centre, never over a control, and do not take clicks.
 
 ## Errors
 

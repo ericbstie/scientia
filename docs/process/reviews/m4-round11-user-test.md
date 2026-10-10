@@ -144,3 +144,25 @@ the coordinator asked.
   line of confirmation (rounds 8 to 11); the "Give more time" label; the calendar's code-only
   entries; the admin course title that is not a link.
 - Notifications: #59 names the missing course.
+
+## 6. Designer's answers to the points left for the designer
+
+Written by the designer thread after the round, with the change that carried them.
+
+- **A hand-in needs a confirmation: changed.** The hand-in had a toast ("Submitted") that
+  lasts 3.5 seconds at the top of the window, plus the status change. A tester reading the page
+  after the click sees neither reliably, and the form it came from disappears. A hand-in is now
+  confirmed in place: a success note "Your work is handed in." above the submitted work, which
+  stays until the person leaves the page, and the line "You can edit it until your teacher
+  starts grading." under the work. The toast for this one action is gone, so there is one
+  confirmation, not two. `ui-guidelines.md` (Confirmations) records the exception.
+- **Title has no "Required" marker: kept.** The rule is that a field is required unless its label
+  says "Optional"; "Required" is never printed, because most fields would carry it. A required
+  field left empty says what to enter ("Enter a title"). Every form follows the rule, so changing
+  one form would make the others the odd ones. The guideline now gives this reason.
+- **"Give more time": changed.** The button and its dialog are now "Give a student more time",
+  which says whose date moves. The section is still "More time".
+- **The calendar names a course by its code: kept, and made the rule.** Dashboard rows, the
+  calendar and (since #59) notifications name a course by its code, the same short name as on the
+  course cards. The full title is on the course's own pages. `ui-guidelines.md` (Dates, numbers
+  and times) says so.

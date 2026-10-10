@@ -79,6 +79,8 @@ test.describe("Assignments and submitting", () => {
     await page.getByRole("textbox", { name: "Your answer" }).fill("Chlorophyll absorbs light.");
     await page.getByRole("button", { name: "Submit" }).click(); // click 2
     await expect(assignmentStatus(page)).toContainText("Submitted");
+    await expect(page.getByRole("status").filter({ hasText: "Your work is handed in." })).toBeVisible();
+    await expect(page.getByText("You can edit it until your teacher starts grading.")).toBeVisible();
     await expect(page.getByText("Chlorophyll absorbs light.")).toBeVisible();
     const when = await page.locator("main time[datetime]").filter({ hasText: /\d{2}:\d{2}/ }).last().getAttribute("datetime");
     expect(Math.abs(new Date(when!).getTime() - Date.now())).toBeLessThan(2 * 60000);

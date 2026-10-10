@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useParams } from "react-router";
-import { Paragraph } from "@digdir/designsystemet-react";
+import { Alert, Paragraph } from "@digdir/designsystemet-react";
 import { useCourse, useDocTitle } from "../../App";
 import { useAuth } from "../../lib/auth";
 import { readDraft, writeDraft } from "../../lib/draft";
@@ -101,7 +101,7 @@ function MoreTime({ a }: { a: Assignment }) {
   }
 
   return (
-    <Section title="More time" action={<Button onClick={() => setGiving(true)} disabled={!data}>Give more time</Button>}>
+    <Section title="More time" action={<Button onClick={() => setGiving(true)} disabled={!data}>Give a student more time</Button>}>
       <ErrorNote error={error ?? err} />
       {data && (data.given.length === 0 ? <Paragraph className="muted">Everyone has the same due date.</Paragraph> : (
         <List>
@@ -116,7 +116,7 @@ function MoreTime({ a }: { a: Assignment }) {
           ))}
         </List>
       ))}
-      <Dialog open={giving} onClose={() => setGiving(false)} title="Give more time">
+      <Dialog open={giving} onClose={() => setGiving(false)} title="Give a student more time">
         {data && <MoreTimeForm a={a} students={data.students} onCancel={() => setGiving(false)} onDone={(msg) => { setGiving(false); toast(msg); reload(); }} />}
       </Dialog>
     </Section>
@@ -193,6 +193,7 @@ function StudentView({ a }: { a: Assignment }) {
   const base = `/courses/${course.id}`;
   const { data, error, loading, reload } = useQuery(() => loadMine(a, profile!.id), [a.id, profile?.id]);
   const [editing, setEditing] = useState(false);
+  const [handedIn, setHandedIn] = useState(false);
 
   if (loading && !data) return <div className="content"><Loading /></div>;
   if (!data) return <div className="content"><ErrorNote error={error} /></div>;
@@ -223,6 +224,7 @@ function StudentView({ a }: { a: Assignment }) {
         <Paragraph className="prose">{a.description || "No instructions."}</Paragraph>
       </Section>
       <Section title="Your submission">
+        {handedIn && sub && !editing && <Alert data-color="success" role="status">Your work is handed in.</Alert>}
         {sub && !editing ? (
           <Panel>
             <Paragraph>
@@ -233,7 +235,8 @@ function StudentView({ a }: { a: Assignment }) {
             {sub.body && <Paragraph className="prose">{sub.body}</Paragraph>}
             <FileLinks files={sub.files} />
             {graded && !released && <Paragraph className="muted">Your teacher has started grading this work</Paragraph>}
-            {canEdit && <div><Button onClick={() => setEditing(true)}>Edit submission</Button></div>}
+            {canEdit && <Paragraph className="muted">You can edit it until your teacher starts grading.</Paragraph>}
+            {canEdit && <div><Button onClick={() => { setEditing(true); setHandedIn(false); }}>Edit submission</Button></div>}
           </Panel>
         ) : closed && !sub ? (
           <Paragraph>Closed: this assignment stopped accepting work on <time dateTime={a.due_at}>{fmtDateTime(a.due_at)}</time>. Ask your teacher if you need more time.</Paragraph>
@@ -243,7 +246,7 @@ function StudentView({ a }: { a: Assignment }) {
             userId={profile!.id}
             existing={sub}
             onCancel={sub ? () => setEditing(false) : undefined}
-            onDone={() => { setEditing(false); reload(); }}
+            onDone={() => { setEditing(false); setHandedIn(true); reload(); }}
           />
         )}
       </Section>
@@ -261,7 +264,6 @@ function StudentView({ a }: { a: Assignment }) {
 // ---------------------------------------------------------------------------
 
 function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; userId: string; existing: Submission | null; onCancel?: () => void; onDone: () => void }) {
-  const toast = useToast();
   const submitted = existing?.body ?? "";
   // A draft left on this device that differs from what was handed in comes back (I-001).
   const [draft] = useState(() => { const d = readDraft(userId, a.id); return d !== null && d !== submitted ? d : null; });
@@ -308,7 +310,6 @@ function SubmitForm({ a, userId, existing, onCancel, onDone }: { a: Assignment; 
         : await db().from("submissions").insert({ assignment_id: a.id, body, files });
       if (res.error) throw res.error;
       writeDraft(userId, a.id, "");
-      toast("Submitted");
       setFile(null);
       setInputKey((k) => k + 1);
       onDone();

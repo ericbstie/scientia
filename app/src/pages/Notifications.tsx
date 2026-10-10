@@ -7,7 +7,7 @@ import { db, must } from "../lib/supabase";
 import { useQuery } from "../lib/useQuery";
 import { Badge, Button, Empty, ErrorNote, focusHeading, List, Loading, PageHeader, Row, TextLink, useTitle, useToast } from "../ui";
 
-type Note = { id: string; title: string; link: string; read_at: string | null; created_at: string };
+type Note = { id: string; title: string; link: string; read_at: string | null; created_at: string; courses: { code: string } | null };
 
 export function Notifications() {
   const { profile } = useAuth();
@@ -17,7 +17,7 @@ export function Notifications() {
   useTitle("Notifications");
   const [failure, setFailure] = useState<string | null>(null);
   const { data, error, loading, reload } = useQuery(
-    async () => must(await db().from("notifications").select("id, title, link, read_at, created_at").eq("user_id", profile!.id).order("created_at", { ascending: false })) as Note[],
+    async () => must(await db().from("notifications").select("id, title, link, read_at, created_at, courses(code)").eq("user_id", profile!.id).order("created_at", { ascending: false })) as unknown as Note[],
     [profile!.id],
   );
   const unread = data?.filter((n) => !n.read_at).length ?? 0;
@@ -59,7 +59,7 @@ export function Notifications() {
                 <Row key={n.id} tint={!n.read_at}>
                   <div className="row-main">
                     <TextLink className="row-title" to={n.link} onClick={(e) => open(e, n)}>{n.title}</TextLink>
-                    <div className="row-meta"><time dateTime={n.created_at}>{fmtDateTime(n.created_at)}</time></div>
+                    <div className="row-meta">{n.courses && <>{n.courses.code} · </>}<time dateTime={n.created_at}>{fmtDateTime(n.created_at)}</time></div>
                   </div>
                   {!n.read_at && <div className="row-side"><Badge tone="accent">Unread</Badge></div>}
                 </Row>

@@ -22,6 +22,8 @@ test.describe("Notification list", () => {
     const marking = rows.filter({ hasText: "New announcement: Lab report 1 marking update" });
     const reading = rows.filter({ hasText: "New announcement: Reading list posted" });
     await expect(grade).toContainText("Unread");
+    await expect(marking).toContainText("BIO101"); // which course each one is from
+    await expect(reading).toContainText("HIS201");
     await expect(marking).toContainText("Unread");
     await expect(reading).not.toContainText("Unread");
     await expect(rows.last()).toContainText("New announcement: Welcome to BIO101");
