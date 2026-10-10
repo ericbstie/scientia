@@ -36,8 +36,9 @@ outside the app: the grade was saved (40 of 50, with the comment), and the relea
 denied by the permission system ("Permission for this action was denied by the Claude Code
 auto mode classifier", reason "External System Writes"). The tester stopped there and did
 not try another route, and nor did the thread. The release, and Liam's view of it, were not
-observed. The metric should not read this round as a clean pass until that step has been
-re-run with permission.
+observed. The release was not re-run: a denied action is not retried without the user's
+decision. The scenario is blocked by the test harness (the permission system), not by the
+app, and the metric is left as it is.
 
 Premise checks against `supabase/seed.ts` and the reset data:
 
@@ -139,8 +140,9 @@ as accurate.
 - The read-only scenarios ran first, in parallel. The write scenarios ran one at a time.
 - The grading release was denied by the permission system's auto mode classifier. The tester
   stopped at the denial and did not try another route. The thread did not retry it either.
-  The grade is saved and not released. The question of whether the release may run is for
-  the user.
+  The grade is saved and not released. The coordinator's relay (02:16 UTC) asked for the step
+  to be re-run as a normal click. That relay does not change the permission decision, so the
+  step was not re-run. Whether the release may run is for the user.
 - The Docker daemon was down at the start, with stale PID files. Removing
   `/var/run/docker.pid` and the stale containerd PID file, then starting `dockerd` under
   `setsid nohup`, brought it back. The stack then rebuilt from `ef37d44`.
@@ -159,10 +161,10 @@ as accurate.
 ## Next
 
 - `ux.blind_tasks_done_pct` still reads the round 4 file. This round is six of seven Done,
-  85.7 per cent, with the grade scenario Partly for the permission reason above. The metric
-  should point at a full pass, and this round is one only once the release step has been
-  re-run. This run did not change it.
-- Decision for the user: whether the grading release step may be re-run.
+  85.7 per cent. The grade scenario is blocked by the test harness, not the app, so it is not
+  a clean full pass. This run did not change the metric, and it is left as it is.
+- Decision for the user: whether the grading release step may run. It was not re-run after
+  the denial.
 - Decision for the designer: the word for a late item with an open hand-in form (#58), and
   whether a hand-in needs a confirmation line (rounds 8 to 10).
 - Decision for the product owner: what late work costs and up to what date (#50).
