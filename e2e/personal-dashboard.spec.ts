@@ -211,6 +211,9 @@ test.describe("Phone layout", () => {
     await page.getByRole("link", { name: "Introduction to Biology" }).click();
     await expect(page).toHaveURL(/\/courses\/[0-9a-f-]+$/);
     await noHorizontalScroll(page);
+    // The course pages sit behind a button that says it is the course menu.
+    await page.getByRole("button", { name: "Course menu" }).click();
+    await expect(page.getByRole("navigation", { name: "Course" }).getByRole("link", { name: "Modules" })).toBeVisible();
     await page.goto("/");
     await page.getByRole("link", { name: "Photosynthesis worksheet" }).click();
     await expect(page).toHaveURL(/\/assignments\//);

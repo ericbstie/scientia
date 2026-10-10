@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from "./lib/auth";
 import { clearDrafts } from "./lib/draft";
 import { db, isUuid } from "./lib/supabase";
 import { Button, Dropdown, SkipLink, Tag } from "@digdir/designsystemet-react";
-import { BellIcon, ChevronDownIcon } from "@navikt/aksel-icons";
+import { BellIcon, ChevronDownIcon, MenuHamburgerIcon } from "@navikt/aksel-icons";
 import { BrandMark, Loading, NoAccess, NotFound, ToastProvider, useTitle } from "./ui";
 import { SignIn } from "./pages/SignIn";
 
@@ -213,7 +213,7 @@ function CourseLayout() {
   const menuButton = useRef<HTMLButtonElement>(null);
   const { pathname } = useLocation();
   useEffect(() => setMenuOpen(false), [pathname]);
-  // Escape closes the open course menu and returns focus to the Course pages button.
+  // Escape closes the open course menu and returns focus to the Course menu button.
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -272,7 +272,7 @@ function CourseLayout() {
               <span>{state.course.title}</span>
             </Link>
             <Button type="button" ref={menuButton} variant="secondary" className="course-menu" aria-expanded={menuOpen} aria-controls="course-nav-items" onClick={() => setMenuOpen(!menuOpen)}>
-              Course pages
+              <MenuHamburgerIcon aria-hidden="true" />Course menu
             </Button>
           </div>
           <ul id="course-nav-items">

@@ -69,6 +69,7 @@ shadow or font is chosen. Components and pages use the system's tokens and nothi
 - **Lists** (`List` or our row list) for anything a person scans and opens: assignments,
   announcements, notifications, threads, queue entries, module items, roster, Upcoming and
   Past due. Title as the link, meta line under it, status tag and date on the right.
+- A list that shows only the first few items (the boxes on the course home) is named for what it holds ("Next due") and links to the full list ("All announcements", "All assignments") at the right of its heading.
 - **Cards** (`Card`) only for course tiles on the dashboard and for single panels that hold
   a form or a submission. Never a grid of cards for assignments or announcements. Never a
   card inside a card.
@@ -148,7 +149,7 @@ Status tags (`Tag`, colour via `data-color`) use exactly these words and no othe
 - A dialog opened from a dialog; a dialog used for a form with a textarea.
 - A toast as the only place an error appears.
 - Hover-only controls, tooltips holding required information, placeholder text as a label, auto-playing motion.
-- Hidden navigation: the course navigation and top bar are always visible (collapsed behind a labelled "Course pages" button below 820 px only).
+- Hidden navigation: the course navigation and top bar are always visible (collapsed behind a "Course menu" button, with a menu icon, below 820 px only).
 - Settings, filters, columns or fields beyond the stories.
 - Text smaller than the system's smallest body size, targets smaller than 24 by 24 CSS px (aim for 44 px on touch), removing the focus outline.
 - Overriding a component: its colour, size, radius, shadow or type, `!important`, selectors on its own classes. Change the page or the theme input instead (brand.md).

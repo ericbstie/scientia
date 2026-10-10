@@ -68,7 +68,7 @@ function StudentHome() {
               </List>
             </Section>
           )}
-          <Section title="Next due">
+          <Section title="Next due" action={<TextLink to={`${base}/assignments`}>All assignments</TextLink>}>
             {q.data.next.length === 0 ? (
               <Empty title="Nothing due in this course" />
             ) : (
@@ -113,7 +113,7 @@ function TeacherHome() {
           <Card data-color="accent" data-variant="tinted" className="section">
             <Paragraph><TextLink to={`${base}/grading`}><span className="figure">{q.data.needs}</span> need grading</TextLink></Paragraph>
           </Card>
-          <Section title="Announcements" action={<ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink>}>
+          <Section title="Announcements" action={<div className="actions"><TextLink to={`${base}/announcements`}>All announcements</TextLink><ButtonLink to={`${base}/announcements/new`}>New announcement</ButtonLink></div>}>
             {q.data.anns.length === 0 ? (
               <Empty title="No announcements yet">Post one to tell your students what is happening.</Empty>
             ) : (
@@ -129,7 +129,7 @@ function TeacherHome() {
               </List>
             )}
           </Section>
-          <Section title="Assignments" action={<ButtonLink to={`${base}/assignments/new`}>New assignment</ButtonLink>}>
+          <Section title="Next due" action={<div className="actions"><TextLink to={`${base}/assignments`}>All assignments</TextLink><ButtonLink to={`${base}/assignments/new`}>New assignment</ButtonLink></div>}>
             {q.data.asgs.length === 0 ? (
               <Empty title="Nothing due in this course" />
             ) : (

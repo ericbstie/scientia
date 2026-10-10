@@ -214,6 +214,7 @@ function ResetForm({ user, onCancel, onDone }: { user: Row; onCancel: () => void
   return (
     <form className="form" onSubmit={submit} noValidate>
       <ErrorNote error={formError} />
+      <Paragraph>The new password works straight away and stays until it is changed under Settings. Nothing is sent: give it to {user.full_name} yourself.</Paragraph>
       <PasswordField id="rp-password" label="New password" required hint="At least 8 characters." value={password} error={error} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
       <div className="actions">
         <Button type="submit" variant="primary" disabled={busy}>{busy ? "Saving…" : "Save"}</Button>

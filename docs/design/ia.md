@@ -326,7 +326,7 @@ Shorthand: `C` = `/courses/:courseId`. R-numbers refer to the Routes section. "P
 | US-18 | R6 `/settings/notifications` | Name menu → Settings → Notifications |
 | US-19 | R5 `/settings/profile` | Name menu → Settings (opens Profile) |
 | US-20 | App shell on all routes | Tab → "Skip to main content" → main (see Keyboard & screen reader) |
-| US-21 | App shell on all routes | Same paths with the "Course pages" button for the course navigation (see Responsive) |
+| US-21 | App shell on all routes | Same paths with the "Course menu" button for the course navigation (see Responsive) |
 | US-22 | R2 (teacher), R23 `C/grading`, R7 | Dashboard → "2 need grading" → Grading queue; or course title → Course home |
 | US-23 | R8 `C/modules` | Dashboard → course card → Modules → Add module, Publish, Unpublish |
 | US-24 | R8, R9 `C/modules/:moduleId/pages/new`, R10 | Modules → module → Add page / Add file / Add link → Save; Delete → confirm |
@@ -380,7 +380,7 @@ How each count is reached:
 Breakpoint: 820 px (matches `styles.css`). Also checked at 390 px and 320 px. No page may scroll horizontally.
 
 - **Top bar** keeps every label (Dashboard, Calendar, Notifications with count, name menu; Users and Courses for admins) and wraps to a second row instead of dropping items.
-- **Course navigation** leaves the left column. A "Course pages" button beside the course title expands the same seven or eight items inline (a disclosure, not a modal). Menu has `aria-expanded` and `aria-controls`; Escape closes it and returns focus to Menu. (Changed in M3 from a slide-in panel: an inline disclosure needs no focus trap and keeps the page context visible.)
+- **Course navigation** leaves the left column. A "Course menu" button beside the course title expands the same seven or eight items inline (a disclosure, not a modal). Menu has `aria-expanded` and `aria-controls`; Escape closes it and returns focus to Menu. (Changed in M3 from a slide-in panel: an inline disclosure needs no focus trap and keeps the page context visible.)
 - **Layout:** `.main` padding drops to 16 px; `.split` is already one column below 1080 px; page-header actions wrap under the title; list rows allow the side text (`row-side`) to wrap under the title.
 - **Targets:** buttons, links in lists and form controls are at least 44 px tall (24 px is the floor of US-20).
 - **Calendar:** month grid becomes a day-by-day list of days that have items.
@@ -410,7 +410,7 @@ Breakpoint: 820 px (matches `styles.css`). Also checked at 390 px and 320 px. No
 
 **Dialogs:** native `<dialog>` via the `Dialog` primitive. On open, focus goes to the first field; for a confirm dialog without fields, to Cancel (never the destructive button). Tab is contained; Escape or Cancel closes. On close, focus returns to the control that opened it; if that control no longer exists, apply the delete rule above. One dialog at a time; a dialog never opens another.
 
-**Menus:** the name menu and "Course pages" button are disclosure buttons with `aria-expanded`; Escape closes and returns focus to the button; items are plain links and buttons in tab order.
+**Menus:** the name menu and "Course menu" button are disclosure buttons with `aria-expanded`; Escape closes and returns focus to the button; items are plain links and buttons in tab order.
 
 **Status and colour:** every status is text in a badge; colour only reinforces it. Required and invalid fields are conveyed in text, not colour. Focus outline is the 2 px `--focus` ring, never removed.
 

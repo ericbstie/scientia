@@ -26,6 +26,7 @@ test.describe("Course layout and people", () => {
     await expect(due.getByRole("listitem").nth(0)).toContainText("Photosynthesis worksheet");
     await expect(due.getByRole("listitem").nth(0)).toContainText("Not submitted");
     await expect(due.getByRole("listitem").nth(1)).toContainText("Field journal");
+    await expect(due.getByRole("link", { name: "All assignments" })).toHaveAttribute("href", /\/assignments$/);
 
     await page.goto(his);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Modern European History");
@@ -103,6 +104,17 @@ test.describe("Course layout and people", () => {
     await page.goto(`${await coursePath(page, "HIS201")}/people`);
     const his = page.getByRole("region", { name: "2 students" }).getByRole("listitem");
     await expect(his).toHaveText([/Liam Hansen/, /Maya Okafor/]);
+  });
+
+  test("@US-5 Ingrid's course home shows the next due work and links to the full lists", async ({ page }) => {
+    await signIn(page, "ingrid");
+    await page.goto(await coursePath(page, "BIO101"));
+    const due = page.getByRole("region", { name: "Next due" });
+    await expect(due.getByRole("listitem")).toHaveCount(3);
+    await expect(page.getByRole("region", { name: "Announcements" }).getByRole("link", { name: "All announcements" })).toHaveAttribute("href", /\/announcements$/);
+    await due.getByRole("link", { name: "All assignments" }).click();
+    await expect(page).toHaveURL(/\/assignments$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Assignments");
   });
 
   test("@US-35 Ingrid adds a student by email, with clear errors", async ({ page }) => {

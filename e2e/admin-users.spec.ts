@@ -223,6 +223,7 @@ test("@US-41 admin resets a password", async ({ page, browser }) => {
 
   await liam.getByRole("button", { name: /Reset password/ }).click();
   dialog = page.getByRole("dialog", { name: /Reset password/ });
+  await expect(dialog).toContainText("The new password works straight away and stays until it is changed under Settings. Nothing is sent: give it to Liam Hansen yourself.");
   await dialog.getByLabel("New password").fill("Reset-pass-9");
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(page.getByRole("status")).toContainText("Password reset for Liam Hansen");
